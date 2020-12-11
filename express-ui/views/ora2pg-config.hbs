@@ -44,9 +44,11 @@
     <ul>
       <li><input type="submit" value="Save" /></li>
       <li><a href="/ora2pg/{{project.name}}/exec" target="_new">Execute</a></li>
+      {{!-- <li><button onclick="execForm('/ora2pg/{{project.name}}/exec')">Execute</button></li> --}}
     </ul>
-
 </form>
+
+<div id="outputDiv"></div>
 
 <script>
 var acc = document.getElementsByClassName("accordion");

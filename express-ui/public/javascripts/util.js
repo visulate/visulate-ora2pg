@@ -22,3 +22,11 @@ function showAdvanced(){
         advanced[i].style.display = displayProperty;
     }
 }
+
+function execForm(url){
+    const source = new EventSource(url);
+
+    source.onmessage = function(event) {
+      document.getElementById("outputDIV").innerHTML += event.data + "<br>";
+    };
+  }
