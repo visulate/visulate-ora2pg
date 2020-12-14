@@ -14,8 +14,8 @@
             <span>
             {{#if this.flag}}
             <select id="{{@key}}" name="{{@key}}" {{#if this.suppress}}disabled{{/if}}>
-                <option value="0" {{#unless this.value}}selected{{/unless}}>Disabled</option>
-                <option value="1" {{#if this.value}}selected{{/if}}>Enabled</option>
+                <option value="0" {{#ifEquals 0 this.value}}selected{{/ifEquals}}>Disabled</option>
+                <option value="1" {{#ifEquals 1 this.value}}selected{{/ifEquals}}>Enabled</option>
             </select>
             {{else}}
             {{#if this.enum}}
