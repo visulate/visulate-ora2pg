@@ -1,6 +1,13 @@
-<h1>Create Project</h1>
-<form method="POST" action="/ora2pg">
-<label for="project">Project</label>
-<input type="text" id="project" name="project" />
-<input type="submit"/>
-</form>
+<div id="app">
+  <app-container></app-container>
+</div>
+<!-- Import App -->
+<script src="/js/main.js"></script>
+<!-- Import Components -->
+<script src="/js/components/appContainer.js"></script>
+<script src="/js/components/projects.js"></script>
+<script src="/js/components/configuration.js"></script>
+<!-- Mount App -->
+<script>
+  app.mount('#app')
+</script>
