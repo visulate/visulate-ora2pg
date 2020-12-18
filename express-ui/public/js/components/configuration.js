@@ -18,16 +18,16 @@ app.component('configuration', {
           </div>
         </span>
         <span>
-          <select v-if="item.flag" v-model="item.value" :disabled="!item.suppress">
+          <select v-if="item.flag" v-model="item.value" :disabled="!item.include">
             <option value="0" >Disabled</option>
             <option value="1" >Enabled</option>
           </select>
-          <select v-else-if="item.enum"  v-model="item.value" :disabled="!item.suppress">
+          <select v-else-if="item.enum"  v-model="item.value" :disabled="!item.include">
             <option  v-for="validValue in item.enum" :value="validValue" >{{validValue}}</option>
           </select>
-          <textarea v-else-if="item.value.length > 60" v-model="item.value" :disabled="!item.suppress"></textarea>
-          <input v-else type="text" v-model="item.value" :disabled="!item.suppress" />
-          <input class="checkbox" type="checkbox" v-model="item.suppress" />
+          <textarea v-else-if="item.value.length > 60" v-model="item.value" :disabled="!item.include"></textarea>
+          <input v-else type="text" v-model="item.value" :disabled="!item.include" />
+          <input class="checkbox" type="checkbox" v-model="item.include" />
         </span>
       </li>
     </ul>
