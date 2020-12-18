@@ -1,36 +1,48 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs');
+var path = require('path');
 const appRoot = process.cwd();
 const child_process = require('child_process');
 const handlebars = require('handlebars');
+const projectDirectory = `${appRoot}/project`;
 
 const getConfigObject = function (project) {
-  const config = fs.readFileSync(`${appRoot}/project/${project}/ora2pg-conf.json`)
+  const config = fs.readFileSync(`${projectDirectory}/${project}/ora2pg-conf.json`)
   return JSON.parse(config);
 }
 
 const saveConfigJson = function (project, configObject) {
   const configStr = JSON.stringify(configObject);
-  fs.writeFileSync(`${appRoot}/project/${project}/ora2pg-conf.json`, configStr);
+  fs.writeFileSync(`${projectDirectory}/${project}/ora2pg-conf.json`, configStr);
 }
 
 const saveConfigFile = function (project, configObject) {
   const tpl = fs.readFileSync(`${appRoot}/views/ora2pg-config-file.hbs`, "utf8");
   const compiledTemplate = handlebars.compile(tpl);
   const configFile = compiledTemplate({ config: configObject });
-  fs.writeFileSync(`${appRoot}/project/${project}/ora2pg.conf`, configFile);
+  fs.writeFileSync(`${projectDirectory}/${project}/ora2pg.conf`, configFile);
 }
 
 const createProjectDirectory = function (project) {
-  fs.mkdirSync(`${appRoot}/project/${project}`, { recursive: true }, (err) => {
+  fs.mkdirSync(`${projectDirectory}/${project}`, { recursive: true }, (err) => {
     if (err && err.code != 'EEXIST') throw err;
     return;
   });
 }
 
+const listProjectDirectories = function () {
+  return fs.readdirSync(`${projectDirectory}`)
+  .filter(f => fs.statSync(path.join(`${projectDirectory}/`, f)).isDirectory());
+}
+
 router.get('/', (req, res) => {
   res.render('index');
+});
+
+router.get('/projects', (req, res) => {
+  const projects = listProjectDirectories();
+  res.json({projects: projects});
 });
 
 router.post('/', async (req, res) => {
@@ -44,12 +56,16 @@ router.post('/', async (req, res) => {
     });
 });
 
-router.get('/:project', function (req, res) {
+
+
+router.get('/project/:project', function (req, res) {
   const project = req.params.project;
   const configJson = getConfigObject(project);
-  res.render('ora2pg-config', { config: configJson, project: { name: project } });
-
+  res.json({config: configJson});
+//  res.render('ora2pg-config', { config: configJson, project: { name: project } });
 });
+
+
 
 router.post('/:project', function (req, res) {
   const project = req.params.project;

@@ -5,6 +5,7 @@ body {
 
 a {
   color: #00B7FF;
+  cursor: pointer;
 }
 form {
   /* Center the form on the page */
@@ -154,7 +155,7 @@ button {
 
 .panel {
   padding: 0 18px;
-  display: none;
+  display: block;
   background-color: white;
 }
 .accordion:after {
@@ -167,4 +168,9 @@ button {
 
 .active:after {
   content: "\2796"; /* Unicode character for "minus" sign (-) */
+}
+
+.app-container {
+  display: flex;
+  flex-direction: row
 }
