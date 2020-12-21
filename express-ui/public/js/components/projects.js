@@ -1,18 +1,18 @@
 app.component('projects', {
   name: 'projects',
   template:
-    `<div>
-    <h3>Project</h3>
-    <ul>
-    <li v-for="(project, index) in projectList">
-      <a @click="setCurrentProject(index)" :class="{ active: project === currentProject }">{{ project }}</a>
-    </li>
-    </ul>
-    </div>`,
+    /*html*/
+    `
+    <nav class="mdl-navigation">
+      <a v-for="(project, index) in projectList"
+        @click="setCurrentProject(index)"
+        class="mdl-navigation__link"
+        :class="{ selected: project === currentProject }">{{ project }}</a>
+    </nav>`,
   data() {
     return {
       projectList: [],
-      currentProject: null
+      currentProject: null,
     }
   },
   created() {

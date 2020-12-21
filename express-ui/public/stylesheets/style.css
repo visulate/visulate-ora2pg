@@ -1,6 +1,61 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+.mdl-textfield__input:disabled {
+  font-weight: lighter;
+  color:#ccc;
+}
+
+div.mdl-textfield {
+  padding: 0;
+}
+
+.mdl-card {
+  margin: 40px;
+}
+
+/* select starting stylings ------------------------------*/
+.select {
+  font-family:
+    'Roboto','Helvetica','Arial',sans-serif;
+	position: relative;
+	width: 350px;
+}
+
+.select-text {
+	position: relative;
+	font-family: inherit;
+	background-color: transparent;
+	width: 350px;
+	padding: 10px 10px 10px 0;
+	font-size: 18px;
+	border-radius: 0;
+	border: none;
+	border-bottom: 1px solid rgba(0,0,0, 0.12);
+}
+
+/* Remove focus */
+.select-text:focus {
+	outline: none;
+	border-bottom: 1px solid rgba(0,0,0, 0);
+}
+
+	/* Use custom arrow */
+.select .select-text {
+	appearance: none;
+	-webkit-appearance:none
+}
+
+.select:after {
+	position: absolute;
+	top: 18px;
+	right: 10px;
+	/* Styling the down arrow */
+	width: 0;
+	height: 0;
+	padding: 0;
+	content: '';
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-top: 6px solid rgba(0, 0, 0, 0.753);
+	pointer-events: none;
 }
 
 a {
@@ -8,13 +63,9 @@ a {
   cursor: pointer;
 }
 form {
-  /* Center the form on the page */
-  margin: 0 auto;
-  width: 900px;
   /* Form outline */
   padding: 1em;
-  border: 1px solid #CCC;
-  border-radius: 1em;
+
 }
 
 ul {
@@ -31,7 +82,12 @@ label {
   /* Uniform size & alignment */
   display: inline-block;
   width: 250px;
-  text-align: right;
+  font-size: smaller;
+  font-weight: bolder;
+}
+
+label.disabled {
+  font-weight: lighter;
 }
 
 input,
@@ -73,6 +129,16 @@ button {
   margin-left: .5em;
 }
 
+iframe {
+  width: 100%;
+  height: 768px;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
+
 .checkbox {
   width: 20px;
 }
@@ -80,14 +146,13 @@ button {
 .tooltip {
   display:inline-block;
   position:relative;
-  border-bottom:1px dotted #666;
   text-align:left;
 }
 
 .tooltip .tip {
   min-width:400px;
   top:-20px;
-  left:50%;
+  left:150px;
   transform:translate(-50%, -100%);
   padding:10px 20px;
   color:#444444;
@@ -140,8 +205,7 @@ button {
   background-color: #eee;
   color: #444;
   cursor: pointer;
-  padding: 18px;
-  width: 90%;
+  padding: 8px;
   border: none;
   text-align: left;
   outline: none;
@@ -149,13 +213,15 @@ button {
   transition: 0.4s;
 }
 
+.selected {
+  background-color: #ccc;
+}
+
 .active, .accordion:hover {
   background-color: #ccc;
 }
 
 .panel {
-  padding: 0 18px;
-  display: block;
   background-color: white;
 }
 .accordion:after {

@@ -4,39 +4,55 @@ app.component('configuration', {
     /*html*/
     `
     <div>
-    <h3>{{ project }} Configuration</h3>
-    <form @submit.prevent="onSubmit" v-show="Object.keys(this.configData).length > 0">
+    <form v-show="Object.keys(this.configData).length > 0">
+    <span style="float: right">
     <a v-show="showAdvanced" @click="setAdvanced(false)">Hide advanced settings</a>
     <a v-show="!showAdvanced" @click="setAdvanced(true)">Show advanced settings</a>
+    </span>
+
     <div v-for="(properties, section) in configData">
-    <h3 class="accordion" @click="toggleAccordion(section)" v-show="properties.class == 'basic' || showAdvanced">{{ section }} - {{ properties.title }}</h3>
-    <ul class="panel" :ref="section">
-      <li v-for="(item, key) in properties.values" v-show="item.class == 'basic' || showAdvanced"><span class="tooltip">
-          <label :for="key">{{ key }}</label>
-          <div class="tip">
-            <h5>{{ key }}</h5>{{ item.description }}
+    <h3 class="accordion active" :ref="section+'-h3'"
+        @click="toggleAccordion(section)"
+        v-show="properties.class == 'basic' || showAdvanced">
+        {{ section }} - {{ properties.title }}
+    </h3>
+    <ul class="panel" :ref="section" style="display: block">
+      <li v-for="(item, key) in properties.values" v-show="item.class == 'basic' || showAdvanced">
+        <div class="mdl-textfield" style="width: 500px;">
+          <label :for="key" :class="{ disabled: !item.include}">{{ key }}
+            <span class="tooltip">
+              <i :id="key+'-tt'" class="icon material-icons" style="font-size: 14px;">help</i>
+              <span class="tip" :data-mdl-for="key+'-tt'">{{ item.description }}</span>
+            </span>
+          </label>
+
+          <div v-if="item.flag" class="select">
+            <select :id="key"  v-model="item.value" :disabled="!item.include" class="select-text">
+              <option value="0" >Disabled</option>
+              <option value="1" >Enabled</option>
+            </select>
+            <span class="select-highlight"></span>
+            <span class="select-bar"></span>
           </div>
-        </span>
-        <span>
-          <select v-if="item.flag" v-model="item.value" :disabled="!item.include">
-            <option value="0" >Disabled</option>
-            <option value="1" >Enabled</option>
-          </select>
-          <select v-else-if="item.enum"  v-model="item.value" :disabled="!item.include">
-            <option  v-for="validValue in item.enum" :value="validValue" >{{validValue}}</option>
-          </select>
-          <textarea v-else-if="item.value.length > 60" v-model="item.value" :disabled="!item.include"></textarea>
-          <input v-else type="text" v-model="item.value" :disabled="!item.include" />
-          <input class="checkbox" type="checkbox" v-model="item.include" />
-        </span>
+
+          <div v-else-if="item.enum" class="select">
+            <select :id="key"  v-model="item.value" :disabled="!item.include" class="select-text">
+              <option  v-for="validValue in item.enum" :value="validValue" >{{validValue}}</option>
+            </select>
+            <span class="select-highlight"></span>
+            <span class="select-bar"></span>
+          </div>
+
+          <textarea :id="key" v-else-if="item.value.length > 60" v-model="item.value" :disabled="!item.include"  class="mdl-textfield__input"></textarea>
+          <input :id="key" v-else type="text" v-model="item.value" :disabled="!item.include" class="mdl-textfield__input"/>
+
+          <span style="float: right">
+            <input class="checkbox" type="checkbox" v-model="item.include" />
+          </span>
+        </div>
       </li>
     </ul>
     </div>
-
-    <h3>Actions</h3>
-    <ul>
-      <li><input type="submit" value="Save" /></li>
-    </ul>
 
     </form>
     </div>
@@ -59,15 +75,20 @@ app.component('configuration', {
       this.configData = {...this.config};
     },
     methods: {
-      onSubmit() {
+      saveConfig() {
         this.$emit('save-config', {project: this.project, config: JSON.stringify(this.configData)});
+      },
+      runConfig() {
+        this.$emit('run-config', {project: this.project, config: JSON.stringify(this.configData)});
       },
       setAdvanced(val) {
         this.showAdvanced = val
       },
       toggleAccordion(section){
+        let h3 = this.$refs[section+'-h3']
+        h3.classList.toggle('active');
         let panel = this.$refs[section];
-        if (panel.style.display === "block") {
+        if (panel.style.display == "block") {
           panel.style.display = "none";
         } else {
           panel.style.display = "block";
