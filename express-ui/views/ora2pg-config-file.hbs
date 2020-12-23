@@ -6,6 +6,6 @@
 {{#each this.values}}
 
 {{!-- # {{this.description}} --}}
-{{#if this.suppress}}#{{/if}}{{@key}} {{{this.value}}}
+{{#unless this.include}}#{{/unless}}{{@key}} {{{this.value}}}
 {{/each}}
 {{/each}}

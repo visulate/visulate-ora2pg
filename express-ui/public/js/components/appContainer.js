@@ -24,7 +24,7 @@ app.component('app-container', {
 
       <div class="mdl-layout__drawer">
       <span class="mdl-layout__title">Project</span>
-        <projects @set-project="setProject"></projects>
+        <projects @set-project="setProject" ref="projectsComponent"></projects>
         <div style="display: flex; justify-content: flex-end;">
           <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab"
                   style="margin: 0 20px 0 0;"
@@ -41,7 +41,6 @@ app.component('app-container', {
           @cancel-create-project="hideProjectForm"></createProject>
 
         <runOra2pg v-if="showRun" :project="project"></runOra2pg>
-
 
         <configuration ref="configComponent"
           :project="project" :config="config"
@@ -82,11 +81,21 @@ app.component('app-container', {
           break;
       }
     },
-    saveConfig(config) {
-      console.log(config);
+    async saveConfig(configObj) {
+      const project = configObj.project;
+      const configJson = JSON.parse(configObj.config);
+      const postBody = JSON.stringify(configJson)
+      const rawResponse = await fetch(`/ora2pg/${project}`, {
+            method: 'post',
+            headers: {
+              'Accept': 'application/json, text/plain, */*',
+              'Content-Type': 'application/json'
+            },
+            body: postBody
+          });
+      const response = await rawResponse;
     },
     runConfig(config) {
-      console.log('RUN' + config);
       this.showRun = true;
     },
     showProjectForm(){
@@ -95,9 +104,25 @@ app.component('app-container', {
     hideProjectForm(){
       this.showProjectCard = false;
     },
-    createProject(project) {
+    async createProject(project) {
+      const projectName = project.project;
       this.showProjectCard = false;
-      console.log(project);
+      const rawResponse = await fetch('/ora2pg', {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json, text/plain, */*',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(project)
+      });
+      const response = await rawResponse;
+      if (response.status === 201) {
+        this.$refs.projectsComponent.getProjects();
+        this.$refs.projectsComponent.setCurrentProjectName(projectName);
+        await this.setProject(projectName);
+      }
+
+      console.log(response);
     }
   }
 
