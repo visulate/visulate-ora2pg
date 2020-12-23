@@ -36,6 +36,17 @@ const listProjectDirectories = function () {
   .filter(f => fs.statSync(path.join(`${projectDirectory}/`, f)).isDirectory());
 }
 
+const createConfigFile = (project) => {
+  const config = getConfigObject(project);
+  saveConfigFile(project, config);
+}
+
+const deleteConfigFile = (project) => {
+  fs.unlink(`${projectDirectory}/${project}/ora2pg.conf`, (err) => {
+    if (err) throw err;
+  });
+}
+
 router.get('/', (req, res) => {
   res.render('index');
 });
@@ -52,8 +63,10 @@ router.post('/', async (req, res) => {
   fs.copyFile(`${appRoot}/resources/ora2pg-conf.json`,
     `${appRoot}/project/${project}/ora2pg-conf.json`, (err) => {
       if (err) { console.log(err); }
-      else { res.redirect(`/ora2pg/${project}`) }
+
     });
+
+  res.status(201).send('Created');
 });
 
 
@@ -62,42 +75,29 @@ router.get('/project/:project', function (req, res) {
   const project = req.params.project;
   const configJson = getConfigObject(project);
   res.json({config: configJson});
-//  res.render('ora2pg-config', { config: configJson, project: { name: project } });
 });
 
 
 
 router.post('/:project', function (req, res) {
   const project = req.params.project;
-  let configObject = getConfigObject(project);
-  const formValues = req.body;
-  Object.entries(configObject).forEach(([section, values]) => {
-    Object.keys(values.values).forEach((parameter) => {
-      if (formValues[parameter]) {
-        configObject[section].values[parameter].value = formValues[parameter];
-        configObject[section].values[parameter].suppress = false;
-      } else {
-        configObject[section].values[parameter].suppress = true;
-      }
-    });
-  });
-
+  const configObject = req.body;
   saveConfigJson(project, configObject);
-  saveConfigFile(project, configObject);
-
-  res.redirect(`/ora2pg/${project}`)
-
+  res.status(201).send('Created');
 });
 
 router.get('/:project/exec', async function (req, res) {
   const project = req.params.project;
   res.writeHead(200, {
-    "Content-Type": "text/event-stream",
+    "Content-Type": "text/event-stream; charset=utf-8",
     "Cache-control": "no-cache",
     "Connection": "keep-alive"
   });
   res.connection.setTimeout(0);
-  res.write("Starting ora2pg\n\n");
+  res.write("data:Creating config file\n\n");
+  createConfigFile(project);
+
+  res.write("data:Starting ora2pg\n\n");
 
   var ora2pg = child_process.spawn('ora2pg', ['-c', `${appRoot}/project/${project}/ora2pg.conf`], { cwd: `${appRoot}/project/${project}` });
   var str = "";
@@ -110,18 +110,22 @@ router.get('/:project/exec', async function (req, res) {
       if (i == lines.length - 1) {
         str = lines[i];
       } else {
-        res.write(lines[i] + "\n\n");
+        res.write("data:"+lines[i] + "\n\n");
       }
     }
   });
 
   ora2pg.on('close', function () {
-    res.write('ora2pg complete')
+    res.write('data:ora2pg complete\n\n');
+    res.write("data:Removing config file\n\n");
+    deleteConfigFile(project);
+
+    console.log('ora2pg complete');
     res.end(str);
   });
 
   ora2pg.stderr.on('data', function (data) {
-    res.write(data);
+    res.write("data:"+data+"\n\n");
   });
 
 });

@@ -47,7 +47,7 @@
                 "include": true
             },
             "DEBUG": {
-                "value": 0,
+                "value": 1,
                 "flag": true,
                 "description": "Trace output to stderr",
                 "include": true
