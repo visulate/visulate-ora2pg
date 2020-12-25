@@ -31,9 +31,13 @@ const createProjectDirectory = function (project) {
   });
 }
 
-const listProjectDirectories = function () {
-  return fs.readdirSync(`${projectDirectory}`)
-  .filter(f => fs.statSync(path.join(`${projectDirectory}/`, f)).isDirectory());
+const listProjectDirectories = async function () {
+  const dirContents = await fs.promises.readdir(`${projectDirectory}`);
+  return dirContents.filter(f => fs.statSync(path.join(`${projectDirectory}/`, f)).isDirectory());
+}
+
+const listProjectFiles = async (project) => {
+  return await fs.promises.readdir(`${projectDirectory}/${project}`);
 }
 
 const createConfigFile = (project) => {
@@ -47,15 +51,24 @@ const deleteConfigFile = (project) => {
   });
 }
 
+
+
 router.get('/', (req, res) => {
   res.render('index');
 });
 
-router.get('/projects', (req, res) => {
-  const projects = listProjectDirectories();
+/**
+ * List projects
+ */
+
+router.get('/projects', async (req, res) => {
+  const projects = await listProjectDirectories();
   res.json({projects: projects});
 });
 
+/**
+ * Create a project directory and copy the default config file to it
+ */
 router.post('/', async (req, res) => {
   const formValues = req.body;
   const project = formValues['project'];
@@ -63,22 +76,23 @@ router.post('/', async (req, res) => {
   fs.copyFile(`${appRoot}/resources/ora2pg-conf.json`,
     `${appRoot}/project/${project}/ora2pg-conf.json`, (err) => {
       if (err) { console.log(err); }
-
     });
-
   res.status(201).send('Created');
 });
 
-
-
-router.get('/project/:project', function (req, res) {
+/**
+ * Retrieve project details
+ */
+router.get('/project/:project', async (req, res) => {
   const project = req.params.project;
   const configJson = getConfigObject(project);
-  res.json({config: configJson});
+  const projectFiles = await listProjectFiles(project);
+  res.json({config: configJson, files: projectFiles});
 });
 
-
-
+/**
+ * Save/update the config json file
+ */
 router.post('/:project', function (req, res) {
   const project = req.params.project;
   const configObject = req.body;
@@ -86,6 +100,25 @@ router.post('/:project', function (req, res) {
   res.status(201).send('Created');
 });
 
+/**
+ * Delete project directory and all of its files
+ */
+router.delete('/:project', async (req, res) => {
+  const project = req.params.project;
+  try {
+    await fs.promises.rmdir(`${projectDirectory}/${project}`, { recursive: true });
+    res.status(204).send('Deleted');
+  } catch (err) {
+    console.log(err);
+    res.status(400).send(err);
+  }
+
+});
+
+
+/**
+ * Run ora2pg
+ */
 router.get('/:project/exec', async function (req, res) {
   const project = req.params.project;
   res.writeHead(200, {
@@ -119,8 +152,6 @@ router.get('/:project/exec', async function (req, res) {
     res.write('data:ora2pg complete\n\n');
     res.write("data:Removing config file\n\n");
     deleteConfigFile(project);
-
-    console.log('ora2pg complete');
     res.end(str);
   });
 
