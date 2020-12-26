@@ -20,7 +20,6 @@ app.component('runOra2pg', {
       let es = new EventSource(`/ora2pg/${this.project}/exec/`);
 
       es.addEventListener('message', event => {
-        console.log(event.data);
         this.outputText += `${event.data}\n`;
       }, false);
 

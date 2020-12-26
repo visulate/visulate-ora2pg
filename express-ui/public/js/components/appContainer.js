@@ -9,16 +9,7 @@ app.component('app-container', {
           <span class="mdl-layout__title">Visulate Ora2Pg<span v-if="project"> - {{project}}</span></span>
 
           <div class="mdl-layout-spacer"></div>
-          <span  v-show="project && !showProjectCard && !showRun">
-            <button class="mdl-button mdl-js-button mdl-button--raised" style="color: #fff;"
-                    @click.prevent="configAction('SAVE')">Save</button>
-            <button  class="mdl-button mdl-js-button mdl-button--raised" style="color: #fff;"
-                    @click.prevent="configAction('RUN')">Run</button>
-          </span>
-          <span  v-show="showRun">
-            <button class="mdl-button mdl-js-button mdl-button--raised" style="color: #fff;"
-                    @click.prevent="configAction('CLOSE')">Close</button>
-          </span>
+
         </div>
       </header>
 
@@ -34,7 +25,39 @@ app.component('app-container', {
           </button>
         </div>
       </div>
+
+
       <main class="mdl-layout__content">
+        <div  v-show="project && !showProjectCard && !showRun && !showDetails" class="action-menu">
+          <b>Parameters</b>
+          <span>
+            <button class="mdl-button mdl-js-button mdl-button"
+                  @click.prevent="configAction('SAVE')">Save</button>
+            <button  class="mdl-button mdl-js-button mdl-button"
+                  @click.prevent="configAction('RUN')">Run</button>
+            <button  class="mdl-button mdl-js-button mdl-button"
+                  @click.prevent="configAction('REVIEW')">Review</button>
+          </span>
+        </div>
+
+        <div v-show="showRun" class="action-menu">
+          <b>Output</b>
+          <span>
+            <button class="mdl-button mdl-js-button mdl-button"
+                  @click.prevent="configAction('CLOSE')">Close</button>
+          </span>
+        </div>
+
+        <div v-show="showDetails" class="action-menu">
+          <b>Project Files</b>
+          <span>
+            <button class="mdl-button mdl-js-button mdl-button"
+                  @click.prevent="configAction('DELETE')">Delete</button>
+            <button class="mdl-button mdl-js-button mdl-button"
+                  @click.prevent="configAction('CLOSE')">Close</button>
+          </span>
+        </div>
+
         <createProject
           v-show="showProjectCard"
           @create-project="createProject"
@@ -42,12 +65,23 @@ app.component('app-container', {
 
         <runOra2pg v-if="showRun" :project="project"></runOra2pg>
 
+        <projectDetails ref="projectDetailsComponent"
+          v-show="showDetails"
+          :fileList="projectFiles"
+          :project="project"
+          @delete-project="deleteProject"></projectDetails>
+
         <configuration ref="configComponent"
           :project="project" :config="config"
           @save-config="saveConfig"
           @run-config="runConfig"
-          v-show="!showProjectCard && !showRun"></configuration>
+          v-show="!showProjectCard && !showRun && !showDetails"></configuration>
       </main>
+
+      <div aria-live="assertive" aria-atomic="true" aria-relevant="text" class="mdl-snackbar mdl-js-snackbar">
+          <div class="mdl-snackbar__text"></div>
+          <button type="button" class="mdl-snackbar__action"></button>
+      </div>
     </div>
     `,
   data() {
@@ -55,7 +89,9 @@ app.component('app-container', {
       project: null,
       showProjectCard: true,
       showRun: false,
-      config: {}
+      showDetails: false,
+      config: {},
+      projectFiles: []
     }
   },
   methods: {
@@ -64,7 +100,16 @@ app.component('app-container', {
       const res = await fetch(`/ora2pg/project/${project}`);
       const jsonResponse = await res.json();
       this.config = jsonResponse.config;
+      this.projectFiles = jsonResponse.files;
       this.hideProjectForm();
+    },
+    showMessage(messageText){
+      const notification = document.querySelector('.mdl-js-snackbar');
+      notification.MaterialSnackbar.showSnackbar(
+        {
+          message: messageText
+        }
+      );
     },
     configAction(action){
       switch(action) {
@@ -74,8 +119,15 @@ app.component('app-container', {
         case 'SAVE':
           this.$refs.configComponent.saveConfig();
           break;
+        case 'DELETE':
+          this.$refs.projectDetailsComponent.deleteProject();
+          break;
         case 'CLOSE':
           this.showRun = false;
+          this.showDetails = false;
+          break;
+        case 'REVIEW':
+          this.showDetails = true;
           break;
         default:
           break;
@@ -94,12 +146,29 @@ app.component('app-container', {
             body: postBody
           });
       const response = await rawResponse;
+      const messageText = (response.status == 201)? 'Saved': `Save failed with ${response.status} HTTP repsonse`;
+      this.showMessage(messageText);
     },
-    runConfig(config) {
+    runConfig() {
       this.showRun = true;
+    },
+    async deleteProject(projObject){
+      const project = projObject.project;
+      if (confirm(`This will delete project '${project}' and all of its files.`)){
+        const rawResponse = await fetch(`/ora2pg/${project}`, {
+          method: 'delete'});
+        const response = await rawResponse;
+        const messageText = (response.status == 204)? `${project} deleted`: `Delete failed with ${response.status} HTTP repsonse`;
+        this.showMessage(messageText);
+
+        this.$refs.projectsComponent.getProjects();
+        this.$refs.projectsComponent.setCurrentProjectName();
+        this.showProjectForm();
+      }
     },
     showProjectForm(){
       this.showProjectCard = true;
+      this.showDetails = false;
     },
     hideProjectForm(){
       this.showProjectCard = false;
@@ -122,7 +191,6 @@ app.component('app-container', {
         await this.setProject(projectName);
       }
 
-      console.log(response);
     }
   }
 
