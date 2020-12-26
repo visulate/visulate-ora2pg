@@ -161,5 +161,16 @@ router.get('/:project/exec', async function (req, res) {
 
 });
 
+/**
+ * Download file
+ */
+
+router.get('/:project/download/:file', (req, res) => {
+  const project = req.params.project;
+  const file = req.params.file;
+  const fileToDownload = `${appRoot}/project/${project}/${file}`;
+  res.download(fileToDownload);
+});
+
 
 module.exports = router;

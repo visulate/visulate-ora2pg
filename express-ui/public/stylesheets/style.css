@@ -19,6 +19,9 @@ div.mdl-textfield {
   border-bottom: 1px solid rgba(0,0,0,.12);
 }
 
+.link {
+  color: #3f51b5
+}
 
 
 /* select starting stylings ------------------------------*/
