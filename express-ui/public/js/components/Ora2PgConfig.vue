@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-app.component('configuration', {
-    name: 'configuration',
+app.component('ora2pg-config', {
+    name: 'Ora2PgConfig',
     template:
     /*html*/
     `

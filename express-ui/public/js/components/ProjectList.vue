@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-app.component('projects', {
-  name: 'projects',
+app.component('project-list', {
+  name: 'ProjectList',
   template:
     /*html*/
     `

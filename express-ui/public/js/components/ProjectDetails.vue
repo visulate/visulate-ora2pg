@@ -13,34 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-app.component('runOra2pg', {
-  name: 'runOra2pg',
+app.component('project-details', {
+  name: 'ProjectDetails',
   props: {
     project: {
       type: String
+    },
+    fileList: {
+      type: Array
     }
   },
-  template: /*html*/
-    `<pre><code>{{outputText}}</code></pre>`,
-  data() {
-    return {
-      outputText: ''
-    }
-  },
-  created() {
-    this.setupStream();
-  },
+  template:
+    /*html*/
+    `
+      <ul class='mdl-list'>
+        <li v-for="file in fileList" class="mdl-list__item">
+        <a :href="'/ora2pg/'+project+'/download/'+file" class="link">{{ file }}</a>
+        </li>
+      </ul>
+      `,
   methods: {
-    setupStream(){
-      let es = new EventSource(`/ora2pg/${this.project}/exec/`);
-
-      es.addEventListener('message', event => {
-        this.outputText += `${event.data}\n`;
-      }, false);
-
-      es.addEventListener('error', event => {
-        es.close();
-      }, false);
+    deleteProject() {
+      this.$emit('delete-project', {project: this.project});
     }
   }
+
 });

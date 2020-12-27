@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 app.component('app-container', {
-  name: 'app-container',
+  name: 'AppContainer',
   template:
     /*html*/
     `
@@ -30,12 +30,12 @@ app.component('app-container', {
 
       <div class="mdl-layout__drawer">
       <span class="mdl-layout__title">Project</span>
-        <projects @set-project="setProject" ref="projectsComponent"></projects>
+        <project-list @set-project="setProject" ref="projectsComponent"></project-list>
         <div style="display: flex; justify-content: flex-end;">
           <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab"
                   style="margin: 0 20px 0 0;"
-                  @click="showProjectForm"
-                  v-show="!showProjectCard">
+                  @click="showHomePage"
+                  v-show="!showHome">
             <i class="material-icons">add</i>
           </button>
         </div>
@@ -43,7 +43,7 @@ app.component('app-container', {
 
 
       <main class="mdl-layout__content">
-        <div  v-show="project && !showProjectCard && !showRun && !showDetails" class="action-menu">
+        <div  v-show="project && !showHome && !showRun && !showDetails" class="action-menu">
           <b>Parameters</b>
           <span>
             <button class="mdl-button mdl-js-button mdl-button"
@@ -73,24 +73,24 @@ app.component('app-container', {
           </span>
         </div>
 
-        <createProject
-          v-show="showProjectCard"
+        <home-page
+          v-show="showHome"
           @create-project="createProject"
-          @cancel-create-project="hideProjectForm"></createProject>
+          @cancel-create-project="hideHomePage"></home-page>
 
-        <runOra2pg v-if="showRun" :project="project"></runOra2pg>
+        <run-ora2pg v-if="showRun" :project="project"></run-ora2pg>
 
-        <projectDetails ref="projectDetailsComponent"
+        <project-details ref="projectDetailsComponent"
           v-show="showDetails"
           :fileList="projectFiles"
           :project="project"
-          @delete-project="deleteProject"></projectDetails>
+          @delete-project="deleteProject"></project-details>
 
-        <configuration ref="configComponent"
+        <ora2pg-config ref="configComponent"
           :project="project" :config="config"
           @save-config="saveConfig"
           @run-config="runConfig"
-          v-show="!showProjectCard && !showRun && !showDetails"></configuration>
+          v-show="!showHome && !showRun && !showDetails"></ora2pg-config>
       </main>
 
       <div aria-live="assertive" aria-atomic="true" aria-relevant="text" class="mdl-snackbar mdl-js-snackbar">
@@ -102,7 +102,7 @@ app.component('app-container', {
   data() {
     return {
       project: null,
-      showProjectCard: true,
+      showHome: true,
       showRun: false,
       showDetails: false,
       config: {},
@@ -116,7 +116,7 @@ app.component('app-container', {
       const jsonResponse = await res.json();
       this.config = jsonResponse.config;
       this.projectFiles = jsonResponse.files;
-      this.hideProjectForm();
+      this.hideHomePage();
     },
     showMessage(messageText){
       const notification = document.querySelector('.mdl-js-snackbar');
@@ -178,19 +178,19 @@ app.component('app-container', {
 
         this.$refs.projectsComponent.getProjects();
         this.$refs.projectsComponent.setCurrentProjectName();
-        this.showProjectForm();
+        this.showHomePage();
       }
     },
-    showProjectForm(){
-      this.showProjectCard = true;
+    showHomePage(){
+      this.showHome = true;
       this.showDetails = false;
     },
-    hideProjectForm(){
-      this.showProjectCard = false;
+    hideHomePage(){
+      this.showHome = false;
     },
     async createProject(project) {
       const projectName = project.project;
-      this.showProjectCard = false;
+      this.showHome = false;
       const rawResponse = await fetch('/ora2pg', {
         method: 'post',
         headers: {

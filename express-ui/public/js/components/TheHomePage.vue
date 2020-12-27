@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-app.component('createProject', {
-  name: 'createProject',
+app.component('home-page', {
+  name: 'TheHomePage',
   template: /*html*/
   `
   <div style="display: flex;">
