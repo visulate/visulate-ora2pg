@@ -59,6 +59,9 @@ app.component('configuration', {
           </div>
 
           <textarea :id="key" v-else-if="item.value.length > 60" v-model="item.value" :disabled="!item.include"  class="mdl-textfield__input"></textarea>
+
+          <input :id="key" v-else-if="item.type==='password'" type="password" v-model="item.value" :disabled="!item.include" class="mdl-textfield__input"/>
+
           <input :id="key" v-else type="text" v-model="item.value" :disabled="!item.include" class="mdl-textfield__input"/>
 
           <span style="float: right">
