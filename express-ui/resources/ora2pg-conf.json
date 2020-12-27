@@ -155,13 +155,13 @@
                 "include": true
             },
             "ALLOW": {
-                "value": "TEST_TABLE",
+                "value": "PREFIX_.*",
                 "description": "Objects to export. By default Ora2Pg exports all objects. Value must be a list of object names, a space separated regex or % wildcard for use with the LIKE operator",
                 "include": false,
                 "class": "basic"
             },
             "EXCLUDE": {
-                "value": "OTHER_TABLES",
+                "value": "OTHER_.*",
                 "description": "Objects to exclude from export process. By default none. Value must be a list of object names, a space separated regex or % wildcard for use with the LIKE operator",
                 "include": false,
                 "class": "basic"
@@ -482,8 +482,7 @@
             "OUTPUT_DIR": {
                 "value": "/var/tmp",
                 "description": "Base directory where all dumped files must be written",
-                "include": false,
-                "class": "basic"
+                "include": false
             },
             "BZIP2": {
                 "value": "BZIP2",
