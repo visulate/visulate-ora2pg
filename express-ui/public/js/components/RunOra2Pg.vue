@@ -13,15 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * Execute ora2pg using the current project parameters and display the result.
+ * Issues an API call on startup and listens for the server side events it
+ * emits
+ *
+ */
 app.component('run-ora2pg', {
   name: 'RunOra2Pg',
+  emits: ['close-component'],
   props: {
     project: {
       type: String
     }
   },
   template: /*html*/
-    `<pre><code>{{outputText}}</code></pre>`,
+    `
+    <div>
+      <div class="action-menu">
+        <b>Output</b>
+        <span>
+          <button class="mdl-button mdl-js-button mdl-button"
+                @click.prevent="closeComponent()">Close</button>
+        </span>
+      </div>
+      <pre><code>{{outputText}}</code></pre>
+    </div>
+    `,
   data() {
     return {
       outputText: ''
@@ -41,6 +59,9 @@ app.component('run-ora2pg', {
       es.addEventListener('error', event => {
         es.close();
       }, false);
+    },
+    closeComponent() {
+      this.$emit('close-component');
     }
   }
 });
