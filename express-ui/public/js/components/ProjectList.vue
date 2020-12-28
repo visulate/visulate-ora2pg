@@ -15,11 +15,12 @@
  */
 app.component('project-list', {
   name: 'ProjectList',
+  emits: ['set-project'],
   template:
     /*html*/
     `
     <nav class="mdl-navigation">
-      <a v-for="(project, index) in projectList"
+      <a v-for="(project, index) in projectList" :key="project"
         @click="setCurrentProject(index)"
         class="mdl-navigation__link"
         :class="{ selected: project === currentProject }">{{ project }}</a>
@@ -47,5 +48,4 @@ app.component('project-list', {
       this.currentProject = projectName;
     }
   }
-
 });

@@ -15,6 +15,7 @@
  */
 app.component('project-details', {
   name: 'ProjectDetails',
+  emits: ['delete-project', 'close-component'],
   props: {
     project: {
       type: String
@@ -26,15 +27,29 @@ app.component('project-details', {
   template:
     /*html*/
     `
-      <ul class='mdl-list'>
-        <li v-for="file in fileList" class="mdl-list__item">
-        <a :href="'/ora2pg/'+project+'/download/'+file" class="link">{{ file }}</a>
-        </li>
-      </ul>
+      <div>
+        <div class="action-menu">
+          <b>Project Files</b>
+          <span>
+            <button class="mdl-button mdl-js-button mdl-button"
+                  @click.prevent="deleteProject()">Delete</button>
+            <button class="mdl-button mdl-js-button mdl-button"
+                  @click.prevent="closeComponent()">Close</button>
+          </span>
+        </div>
+        <ul class='mdl-list'>
+          <li v-for="file in fileList" class="mdl-list__item" :key="file">
+          <a :href="'/ora2pg/'+project+'/download/'+file" class="link">{{ file }}</a>
+          </li>
+        </ul>
+      </div>
       `,
   methods: {
     deleteProject() {
       this.$emit('delete-project', {project: this.project});
+    },
+    closeComponent() {
+      this.$emit('close-component');
     }
   }
 
