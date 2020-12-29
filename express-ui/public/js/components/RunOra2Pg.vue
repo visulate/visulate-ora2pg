@@ -30,10 +30,13 @@ app.component('run-ora2pg', {
   template: /*html*/
     `
     <div>
+<!-- MDL Progress Bar with Indeterminate Progress -->
+
       <div class="action-menu">
         <b>Output</b>
         <span>
-          <button class="mdl-button mdl-js-button mdl-button"
+          <div class="spinner" v-show="ora2pgRunning"></div>
+          <button class="mdl-button mdl-js-button mdl-button" v-show="!ora2pgRunning"
                 @click.prevent="closeComponent()">Close</button>
         </span>
       </div>
@@ -42,7 +45,8 @@ app.component('run-ora2pg', {
     `,
   data() {
     return {
-      outputText: ''
+      outputText: '',
+      ora2pgRunning: false
     }
   },
   created() {
@@ -54,6 +58,11 @@ app.component('run-ora2pg', {
 
       es.addEventListener('message', event => {
         this.outputText += `${event.data}\n`;
+      }, false);
+
+      es.addEventListener('ora2pg', event => {
+        const eventData = JSON.parse(event.data);
+        this.ora2pgRunning = (eventData.status==='running')?true: false;
       }, false);
 
       es.addEventListener('error', event => {

@@ -28,8 +28,10 @@ app.component('ora2pg-config', {
         <b>Parameters</b>
         <span>
           <button class="mdl-button mdl-js-button mdl-button"
+                v-show="showSaveButton"
                 @click.prevent="saveConfig()">Save</button>
           <button  class="mdl-button mdl-js-button mdl-button"
+                v-show="showSaveButton"
                 @click.prevent="runConfig()">Run</button>
           <button  class="mdl-button mdl-js-button mdl-button"
                 @click.prevent="showFiles()">Review</button>
@@ -109,7 +111,8 @@ app.component('ora2pg-config', {
     data() {
       return {
         configData: {},
-        showAdvanced: false
+        showAdvanced: false,
+        showSaveButton: true
       }
     },
     beforeUpdate() {
@@ -127,6 +130,9 @@ app.component('ora2pg-config', {
       },
       setAdvanced(val) {
         this.showAdvanced = val
+      },
+      formUpdated(newV, oldV){
+        this.showSaveButton = Object.is(newV, oldV);
       },
       toggleAccordion(section){
         let h3 = this.$refs[section+'-h3']

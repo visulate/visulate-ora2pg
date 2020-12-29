@@ -158,8 +158,11 @@ app.component('app-container', {
       this.showMessage(messageText);
     },
     // Execute ora2pg using the current project configuration
-    runConfig() {
-      this.showRun = true;
+    async runConfig(configObj) {
+      await this.saveConfig(configObj);
+      setTimeout(() => {this.showRun = true;}, 200)
+
+
     },
     // Delete a project
     async deleteProject(projObject){
