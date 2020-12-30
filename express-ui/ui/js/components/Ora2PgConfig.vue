@@ -109,7 +109,7 @@ app.component('ora2pg-config', {
     data() {
       return {
         configData: {},
-        showAdvanced: false,
+        showAdvanced: false
       }
     },
     beforeUpdate() {
