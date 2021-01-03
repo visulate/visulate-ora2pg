@@ -115,6 +115,20 @@ app.component('ora2pg-config', {
     beforeUpdate() {
       this.configData = {...this.config};
     },
+    // populate the OUTPUT filename with a default value when the EXPORT type changes
+    computed: {
+      runType() {
+        if (this.configData && this.configData.EXPORT){
+          return this.configData.EXPORT.values.TYPE.value.toLowerCase();
+        }
+      }
+    },
+    watch: {
+      runType: (newValue) => {
+          this.OUTPUT.value = `${newValue}.sql`;
+          this.OUTPUT.dispatchEvent(new CustomEvent('input'));
+      }
+    },
     methods: {
       saveConfig() {
         this.$emit('save-config', {project: this.project, config: JSON.stringify(this.configData)});
