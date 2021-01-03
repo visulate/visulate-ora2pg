@@ -1,5 +1,5 @@
 /*!
- * Copyright 2020 Visulate LLC. All Rights Reserved.
+ * Copyright 2020, 2021 Visulate LLC. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ app.component('app-container', {
           <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab"
                   style="margin: 0 20px 0 0;"
                   @click="showHomePage"
-                  v-show="!showHome">
+                  v-show="!showHome && !showRun">
             <i class="material-icons">add</i>
           </button>
         </div>
@@ -104,7 +104,10 @@ app.component('app-container', {
       this.showHome = false;
     },
     // Show project files page
-    showDetailsPage(){
+    async showDetailsPage(){
+      const res = await fetch(`/ora2pg/project/${this.project}`);
+      const jsonResponse = await res.json();
+      this.projectFiles = jsonResponse.files;
       this.showDetails = true;
     },
     // Close run results and project files page
@@ -115,7 +118,6 @@ app.component('app-container', {
     // Create a new project
     async createProject(project) {
       const projectName = project.project;
-      this.showHome = false;
       const rawResponse = await fetch('/ora2pg', {
         method: 'post',
         headers: {
@@ -126,13 +128,23 @@ app.component('app-container', {
       });
       const response = await rawResponse;
       if (response.status === 201) {
+        this.showHome = false;
         this.$refs.projectsComponent.getProjects();
         this.$refs.projectsComponent.setCurrentProjectName(projectName);
         await this.setProject(projectName);
+      } else if (response.status === 409) {
+        this.showMessage('Supply a unique project name');
       }
     },
     // Set the current project
     async setProject(project) {
+      if (this.showRun){
+        this.showMessage('Project selection disabled while Ora2Pg run page is open');
+        return;
+      }
+      if (this.project === project) {
+        return;
+      }
       this.project = project
       const res = await fetch(`/ora2pg/project/${project}`);
       const jsonResponse = await res.json();

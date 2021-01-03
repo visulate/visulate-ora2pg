@@ -41,7 +41,9 @@ app.component('project-list', {
       this.projectList = jsonResponse.projects;
     },
     setCurrentProject(index) {
-      this.currentProject = this.projectList[index];
+      if (!this.$parent.showRun) {
+        this.currentProject = this.projectList[index];
+      }
       this.$emit('set-project', this.currentProject);
     },
     setCurrentProjectName(projectName) {

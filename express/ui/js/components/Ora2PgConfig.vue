@@ -26,7 +26,7 @@ app.component('ora2pg-config', {
     <div>
       <div  v-show="project" class="action-menu">
         <b>Parameters</b>
-        <span>
+        <span v-show="project">
           <button class="mdl-button mdl-js-button mdl-button"
                 @click.prevent="saveConfig()">Save</button>
           <button  class="mdl-button mdl-js-button mdl-button"
