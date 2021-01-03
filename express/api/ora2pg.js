@@ -34,9 +34,13 @@ router.get('/projects', async (req, res) => {
 router.post('/', async (req, res) => {
   const formValues = req.body;
   const project = formValues['project'];
+  if (await fileUtils.fileExists(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json`)) {
+    res.status(409).send(`Project ${project} already exists`);
+    return;
+  }
   await fileUtils.createProjectDirectory(project);
   fs.copyFile(`${appConfig.resourceDirectory}/ora2pg-conf.json`,
-    `${appConfig.projectDirectory}/${project}/ora2pg-conf.json`, (err) => {
+    `${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json`, (err) => {
       if (err) { console.log(err); }
     });
   res.status(201).send('Created');

@@ -34,10 +34,13 @@ app.component('home-page', {
           <h2 class="mdl-card__title-text">Create a new project</h2>
         </div>
         <div class="mdl-card__supporting-text">
-          <input @keydown.space.prevent type="text" v-model="project" class="mdl-textfield__input" placeholder="project_name"/>
+          <input @keypress="validChar($event)"
+                 @keyup.enter="onSubmit"
+                 v-model="project"
+                 class="mdl-textfield__input"
+                 placeholder="project_name" />
           <p v-show="errorMessage" class="error">{{errorMessage}}</p>
           Enter a project name then press CREATE
-
         </div>
 
         <div class="mdl-card__actions mdl-card--border">
@@ -59,6 +62,11 @@ app.component('home-page', {
     }
   },
   methods: {
+    validChar(e) {
+      let char = String.fromCharCode(e.keyCode);
+      if (/^[a-zA-Z0-9_]+$/.test(char)) return true;
+      else e.preventDefault();
+    },
     onSubmit() {
       this.errorMessage = null;
       if (!this.project) {

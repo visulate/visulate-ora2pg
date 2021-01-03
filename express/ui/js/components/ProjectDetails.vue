@@ -42,6 +42,7 @@ app.component('project-details', {
           <a :href="'/ora2pg/'+project+'/download/'+file" class="link">{{ file }}</a>
           </li>
         </ul>
+        <p style="padding-left: 10px;">{{ fileCount }} files</p>
       </div>
       `,
   methods: {
@@ -50,6 +51,11 @@ app.component('project-details', {
     },
     closeComponent() {
       this.$emit('close-component');
+    }
+  },
+  computed: {
+    fileCount() {
+      return this.fileList.length;
     }
   }
 

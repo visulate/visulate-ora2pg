@@ -25,7 +25,7 @@ const appConfig = require('../resources/http-config');
  */
 async function getConfigObject(project) {
   try {
-    const config = await fs.promises.readFile(`${appConfig.projectDirectory}/${project}/ora2pg-conf.json`)
+    const config = await fs.promises.readFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json`)
     return JSON.parse(config);
   } catch (e) {
     console.error(e);
@@ -42,7 +42,7 @@ module.exports.getConfigObject = getConfigObject;
 async function saveConfigJson(project, configObject) {
   try {
     const configStr = JSON.stringify(configObject);
-    await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/ora2pg-conf.json`, configStr);
+    await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json`, configStr);
   } catch (e) {
     console.error(e);
   }
@@ -60,7 +60,7 @@ async function saveConfigFile(project, configObject) {
     const tpl = await fs.promises.readFile(`${appConfig.resourceDirectory}/ora2pg-config-file.hbs`, "utf8");
     const compiledTemplate = handlebars.compile(tpl);
     const configFile = compiledTemplate({ config: configObject });
-    await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/ora2pg.conf`, configFile);
+    await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`, configFile);
   } catch (e) {
     console.error(e);
   }
@@ -74,7 +74,7 @@ module.exports.saveConfigFile = saveConfigFile;
  */
 async function createConfigFile(project) {
   try {
-    if (await fileExists(`${appConfig.projectDirectory}/${project}/ora2pg.conf`)) {
+    if (await fileExists(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`)) {
       return('CONFLICT');
     } else {
       const config = await getConfigObject(project);
@@ -92,7 +92,7 @@ module.exports.createConfigFile = createConfigFile;
  * @param {*} project
  */
 function deleteConfigFile(project) {
-  fs.unlink(`${appConfig.projectDirectory}/${project}/ora2pg.conf`, (err) => {
+  fs.unlink(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`, (err) => {
     if (err) console.error(err);
   });
 }
@@ -115,7 +115,7 @@ module.exports.fileExists = fileExists;
  * @param {*} project
  */
 async function createProjectDirectory(project) {
-  await fs.promises.mkdir(`${appConfig.projectDirectory}/${project}`, { recursive: true }, (err) => {
+  await fs.promises.mkdir(`${appConfig.projectDirectory}/${project}/config`, { recursive: true }, (err) => {
     if (err && err.code != 'EEXIST') console.error(err);
     return;
   });
@@ -142,7 +142,8 @@ module.exports.listProjectDirectories = listProjectDirectories;
  */
 async function listProjectFiles(project) {
   try {
-    return await fs.promises.readdir(`${appConfig.projectDirectory}/${project}`);
+    const dirContents = await fs.promises.readdir(`${appConfig.projectDirectory}/${project}`);
+    return dirContents.filter(f => fs.statSync(path.join(`${appConfig.projectDirectory}/${project}/`, f)).isFile());
   } catch (e) {
     console.error(e);
   }

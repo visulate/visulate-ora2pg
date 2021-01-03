@@ -56,7 +56,7 @@ async function execOra2Pg(res, project) {
 
 
   const ora2pg = spawn('ora2pg',
-    ['-c', `${appConfig.projectDirectory}/${project}/ora2pg.conf`],
+    ['-c', `${appConfig.projectDirectory}/${project}/config/ora2pg.conf`],
     { cwd: `${appConfig.projectDirectory}/${project}` });
 
   let str = "";
