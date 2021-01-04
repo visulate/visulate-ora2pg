@@ -24,7 +24,8 @@ app.component('project-list', {
         @click="setCurrentProject(index)"
         class="mdl-navigation__link"
         :class="{ selected: project === currentProject }">{{ project }}</a>
-    </nav>`,
+    </nav>
+    `,
   data() {
     return {
       projectList: [],
@@ -33,6 +34,16 @@ app.component('project-list', {
   },
   created() {
     this.getProjects();
+  },
+  beforeUpdate() {
+    if (this.projectCount === 0) {
+      this.$emit('create-project', {project: 'default'});
+    }
+  },
+  computed: {
+    projectCount() {
+      return this.projectList.length;
+    }
   },
   methods: {
     async getProjects() {

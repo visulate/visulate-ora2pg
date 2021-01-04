@@ -17,7 +17,7 @@
                 "include": false
             },
             "ORACLE_HOME": {
-                "value": "/usr/lib/oracle/19.6/client",
+                "value": "/usr/lib/oracle/21/client64",
                 "description": "Full path to the Oracle home directory",
                 "include": true
             },
@@ -143,7 +143,7 @@
         "values": {
             "TYPE": {
                 "value": "TABLE",
-                "enum": ["TABLE", "PACKAGE", "INSERT", "COPY", "VIEW", "GRANT", "SEQUENCE", "TRIGGER",  "FUNCTION", "PROCEDURE", "TABLESPACE", "PARTITION", "FDW", "MVIEW", "QUERY", "KETTLE"],
+                "enum": ["TABLE", "VIEW", "GRANT", "SEQUENCE", "TABLESPACE", "TRIGGER", "FUNCTION","PROCEDURE", "PACKAGE", "INSERT", "COPY", "PARTITION", "TYPE", "FDW", "MVIEW", "QUERY", "KETTLE", "DBLINK", "SYNONYM", "DIRECTORY", "LOAD", "TEST", "TEST_VIEW", "SHOW_VERSION", "SHOW_SCHEMA", "SHOW_TABLE", "SHOW_COLUMN", "SHOW_REPORT"],
                 "description": "Type of export. Value can be one the following: TABLE (export tables, constraints & indexes), PACKAGE, INSERT (export data from table as INSERT statement), COPY (export data from table as COPY statement), VIEW, GRANT, SEQUENCE, TRIGGER,  FUNCTION, PROCEDURE, TABLESPACE (PostgreSQL >= 8 only), TYPE (user defined Oracle types), PARTITION (export range or list partition (PostgreSQL >= v8.4)), FDW (export table as foreign data wrapper tables), MVIEW (export materialized view as snapshot refresh view), QUERY (convert Oracle SQL queries from a file.), KETTLE (generate XML ktr template files to be used by Kettle)",
                 "include": true,
                 "class": "basic"
@@ -456,22 +456,19 @@
         "values": {
             "PG_DSN": {
                 "value": "dbi:Pg:dbname=test_db;host=localhost;port=5432",
-                "description": "Send export directly to a PostgreSQL database. This will disable file output.",
-                "include": false,
-                "class": "basic"
+                "description": "Send export directly to a PostgreSQL database (data exports only). This will disable file output.",
+                "include": false
             },
             "PG_USER": {
                 "value": "test",
                 "description": "PostgresSQL username",
-                "include": false,
-                "class": "basic"
+                "include": false
             },
             "PG_PWD": {
                 "value": "test",
                 "type": "password",
                 "description": "PostgresSQL password",
-                "include": false,
-                "class": "basic"
+                "include": false
             },
             "OUTPUT": {
                 "value": "output.sql",
@@ -480,7 +477,7 @@
                 "class": "basic"
             },
             "OUTPUT_DIR": {
-                "value": "/var/tmp",
+                "value": "/project",
                 "description": "Base directory where all dumped files must be written",
                 "include": false
             },
