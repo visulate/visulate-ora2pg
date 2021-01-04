@@ -29,7 +29,10 @@ app.component('app-container', {
       <!-- Project list -->
       <div class="mdl-layout__drawer">
       <span class="mdl-layout__title">Project</span>
-        <project-list @set-project="setProject" ref="projectsComponent"></project-list>
+        <project-list
+          @set-project="setProject"
+          @create-project="createProject"
+          ref="projectsComponent"></project-list>
         <div style="display: flex; justify-content: flex-end;">
           <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab"
                   style="margin: 0 20px 0 0;"
@@ -183,6 +186,7 @@ app.component('app-container', {
         const response = await rawResponse;
         const messageText = (response.status == 204)? `${project} deleted`: `Delete failed with ${response.status} HTTP repsonse`;
         this.showMessage(messageText);
+        this.project = null;
 
         this.$refs.projectsComponent.getProjects();
         this.$refs.projectsComponent.setCurrentProjectName();
