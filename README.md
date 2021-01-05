@@ -21,7 +21,7 @@ Output files are written to a Docker volume which can be bound to the host files
 
 Build the docker image or pull the latest version from [Docker Hub](https://hub.docker.com/r/visulate/visulate-ora2pg).
 
-Create a directory on your local host to hold the output from Ora2Pg:
+Create a directory on your host computer to hold the output from Ora2Pg:
 
 ```
 mkdir ora2pg-projects
