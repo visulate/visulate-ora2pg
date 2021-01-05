@@ -1,4 +1,4 @@
-# Visulate Ora2PG
+# Visulate Ora2Pg
 A docker image and single page web application for Ora2Pg
 
 ## Overview
