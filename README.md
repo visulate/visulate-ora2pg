@@ -1,5 +1,5 @@
 # Visulate Ora2PG
-A Docker container and single page web application for Ora2Pg
+A docker image and single page web application for Ora2Pg
 
 ## Overview
 
