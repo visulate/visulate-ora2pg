@@ -45,7 +45,9 @@ docker build -t visulate-ora2pg:latest .
 
 This builds an image that includes Ora2Pg and the UI.
 
-The UI is implemented using a combination of Node/Express API and a Vue UI. The API handles interaction with the Ora2Pg CLI. The Vue UI handles presentation to the user. The UI and API communicate using a JSON representation of the ora2pg.conf file. The JSON document stores the ora2pg.conf data and metadata in a structured format suitable for use in the UI. For example, it records valid values for a parameter in an array where the  ora2pg.conf file documents these using comments. A handlebars template is used to convert the JSON document to a ora2pg.conf file at runtime.
+The UI is implemented using a combination of Node/Express API and a Vue UI. The API handles interaction with the Ora2Pg CLI. The Vue UI handles presentation to the user. 
+
+The UI and API communicate using a JSON representation of the ora2pg.conf file. The JSON document stores the ora2pg.conf data and metadata in a structured format suitable for use in the UI. For example, it records valid values for a parameter in an array where the  ora2pg.conf file documents these using comments. A handlebars template is used to convert the JSON document to a ora2pg.conf file at runtime.
 
 The Vue UI is served from Express as static files. The entry point for this is the `express/ui/index.html` file. It initiates a Vue 3 application using components defined in the `express/ui/js/components` directory. The Vue UI makes REST API calls to the API. These are handled by the `express/api/ora2pg.js` router.
 
