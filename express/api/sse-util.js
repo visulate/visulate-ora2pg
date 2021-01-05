@@ -1,5 +1,5 @@
 /*!
- * Copyright 2020 Visulate LLC. All Rights Reserved.
+ * Copyright 2020, 2021 Visulate LLC. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,12 @@ function sendConflictMessage(res) {
   res.end();
 }
 
-
 async function execOra2Pg(res, project) {
   const configFileStatus = await fileUtils.createConfigFile(project);
   if (configFileStatus === 'CONFLICT') {
     sendConflictMessage(res);
     return;
   }
-
   res.writeHead(200, {
     "Content-Type": "text/event-stream; charset=utf-8",
     "Cache-control": "no-cache",
