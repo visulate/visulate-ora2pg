@@ -30,7 +30,7 @@ mkdir ora2pg-projects
 Run Visulate-Ora2Pg with a port and volume binding - example:
 
 ```
-docker run -d -p 3000:3000 -v "$(pwd)/ora2pg-projects":/project visulate/visulate-ora2pg:1.0.0
+docker run -d -p 3000:3000 -v "$(pwd)/ora2pg-projects":/project visulate/visulate-ora2pg:latest
 ```
 
 Open your browser at http://localhost:3000 and follow the onscreen instructions
