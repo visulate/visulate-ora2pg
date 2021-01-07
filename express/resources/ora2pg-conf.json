@@ -17,7 +17,7 @@
                 "include": false
             },
             "ORACLE_HOME": {
-                "value": "/usr/lib/oracle/21/client64",
+                "value": "/usr/lib/oracle/12.2/client64",
                 "description": "Full path to the Oracle home directory",
                 "include": true
             },
