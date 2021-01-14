@@ -17,11 +17,13 @@ const { spawn } = require('child_process');
 const fileUtils = require('./file-utils');
 const appConfig = require('../resources/http-config');
 
+
 function sendConflictMessage(res) {
   res.writeHead(200, {
     "Content-Type": "text/event-stream; charset=utf-8",
     "Cache-control": "no-cache",
-    "Connection": "keep-alive"
+    "Connection": "keep-alive",
+    "Warning": "199 - ora2pg is running"
   });
   res.connection.setTimeout(0);
   res.write("event: ora2pg\n");
@@ -35,11 +37,17 @@ function sendConflictMessage(res) {
 }
 
 async function execOra2Pg(res, project) {
+  // Create temporary ora2pg.conf file
   const configFileStatus = await fileUtils.createConfigFile(project);
+  // Validate file creation
   if (configFileStatus === 'CONFLICT') {
     sendConflictMessage(res);
     return;
+  } else if (configFileStatus === 'NOT-FOUND') {
+    res.status(404).send('Not Found');
   }
+
+  // Initiate SSE stream
   res.writeHead(200, {
     "Content-Type": "text/event-stream; charset=utf-8",
     "Cache-control": "no-cache",
@@ -52,13 +60,14 @@ async function execOra2Pg(res, project) {
   res.write("data:Created config file\n\n");
   res.write("data:Starting ora2pg\n\n");
 
-
+  // Run ora2pg
   const ora2pg = spawn('ora2pg',
     ['-c', `${appConfig.projectDirectory}/${project}/config/ora2pg.conf`],
     { cwd: `${appConfig.projectDirectory}/${project}` });
 
   let str = "";
 
+  // Stream ora2pg output
   ora2pg.stdout.on('data', function (data) {
     str += data.toString();
     //Flush str buffer
@@ -72,18 +81,18 @@ async function execOra2Pg(res, project) {
     }
   });
 
-  ora2pg.on('close', function () {
+  ora2pg.stderr.on('data', function (data) {
+    res.write("data:" + data + "\n\n");
+  });
 
+  // Cleanup
+  ora2pg.on('close', function () {
     res.write('data:ora2pg complete\n\n');
     res.write("data:Removing config file\n\n");
     fileUtils.deleteConfigFile(project);
     res.write("event: ora2pg\n");
     res.write('data: {"status": "stopped"}\n\n');
     res.end(str);
-  });
-
-  ora2pg.stderr.on('data', function (data) {
-    res.write("data:" + data + "\n\n");
   });
 
 }
