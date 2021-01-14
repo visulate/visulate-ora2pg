@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "devstart": "nodemon ./bin/www"
+    "test": "mocha --reporter spec"
   },
   "dependencies": {
     "debug": "~2.6.9",
@@ -13,6 +13,9 @@
     "vue": "^3.0.4"
   },
   "devDependencies": {
-    "nodemon": "^2.0.6"
+    "chai": "^4.2.0",
+    "chai-files": "^1.4.0",
+    "chai-http": "^4.3.0",
+    "mocha": "^8.2.1"
   }
 }

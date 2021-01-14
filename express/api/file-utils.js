@@ -19,17 +19,30 @@ const handlebars = require('handlebars');
 const appConfig = require('../resources/http-config');
 
 /**
+ * Validate the top level keys in the ora2pg-conf.json object
+ * @param {Object} configObject
+ */
+function validKeys(configObject) {
+  const validKeys = ["COMMON", "INPUT", "SCHEMA", "ENCODING", "EXPORT", "FULL_TEXT_SEARCH", "DATA_DIFF",
+    "CONSTRAINT", "TRIGGERS_AND_SEQUENCES", "OBJECT_MODIFICATION", "OUTPUT", "TYPE","GRANT", "DATA",
+    "PERFORMANCE", "PLSQL", "ASSESSMENT", "POSTGRESQL", "SPATIAL", "FDW", "MYSQL"];
+  const configObjectKeys = Object.keys(configObject);
+  let i = validKeys.length;
+  while (i--) {
+    if (validKeys[i] !== configObjectKeys[i]) return false;
+  }
+  return true;
+}
+module.exports.validKeys = validKeys;
+
+/**
  * Read the ora2pg-conf.json file and return as an object
  *
  * @param {*} project
  */
 async function getConfigObject(project) {
-  try {
-    const config = await fs.promises.readFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json`)
-    return JSON.parse(config);
-  } catch (e) {
-    console.error(e);
-  }
+  const config = await fs.promises.readFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json`)
+  return JSON.parse(config);
 }
 module.exports.getConfigObject = getConfigObject;
 
@@ -40,12 +53,8 @@ module.exports.getConfigObject = getConfigObject;
  * @param {*} configObject
  */
 async function saveConfigJson(project, configObject) {
-  try {
-    const configStr = JSON.stringify(configObject);
-    await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json`, configStr);
-  } catch (e) {
-    console.error(e);
-  }
+  const configStr = JSON.stringify(configObject);
+  await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json`, configStr);
 }
 module.exports.saveConfigJson = saveConfigJson;
 
@@ -56,14 +65,10 @@ module.exports.saveConfigJson = saveConfigJson;
  * @param {*} configObject
  */
 async function saveConfigFile(project, configObject) {
-  try {
-    const tpl = await fs.promises.readFile(`${appConfig.resourceDirectory}/ora2pg-config-file.hbs`, "utf8");
-    const compiledTemplate = handlebars.compile(tpl);
-    const configFile = compiledTemplate({ config: configObject });
-    await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`, configFile);
-  } catch (e) {
-    console.error(e);
-  }
+  const tpl = await fs.promises.readFile(`${appConfig.resourceDirectory}/ora2pg-config-file.hbs`, "utf8");
+  const compiledTemplate = handlebars.compile(tpl);
+  const configFile = compiledTemplate({ config: configObject });
+  await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`, configFile);
 }
 module.exports.saveConfigFile = saveConfigFile;
 
@@ -73,16 +78,14 @@ module.exports.saveConfigFile = saveConfigFile;
  * @param {*} project
  */
 async function createConfigFile(project) {
-  try {
-    if (await fileExists(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`)) {
-      return('CONFLICT');
-    } else {
-      const config = await getConfigObject(project);
-      await saveConfigFile(project, config);
-      return('CREATED');
-    }
-  } catch (e) {
-    console.error(e);
+  if (! await fileExists(`${appConfig.projectDirectory}/${project}/config/`)) {
+    return ('NOT-FOUND')
+  } else if (await fileExists(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`)) {
+    return ('CONFLICT');
+  } else {
+    const config = await getConfigObject(project);
+    await saveConfigFile(project, config);
+    return ('CREATED');
   }
 }
 module.exports.createConfigFile = createConfigFile;
@@ -126,12 +129,9 @@ module.exports.createProjectDirectory = createProjectDirectory;
  * List the project directories
  */
 async function listProjectDirectories() {
-  try {
-    const dirContents = await fs.promises.readdir(`${appConfig.projectDirectory}`);
-    return dirContents.filter(f => fs.statSync(path.join(`${appConfig.projectDirectory}/`, f)).isDirectory());
-  } catch (e) {
-    console.error(e);
-  }
+
+  const dirContents = await fs.promises.readdir(`${appConfig.projectDirectory}`);
+  return dirContents.filter(f => fs.statSync(path.join(`${appConfig.projectDirectory}/`, f)).isDirectory());
 }
 module.exports.listProjectDirectories = listProjectDirectories;
 
@@ -141,11 +141,7 @@ module.exports.listProjectDirectories = listProjectDirectories;
  * @param {*} project
  */
 async function listProjectFiles(project) {
-  try {
-    const dirContents = await fs.promises.readdir(`${appConfig.projectDirectory}/${project}`);
-    return dirContents.filter(f => fs.statSync(path.join(`${appConfig.projectDirectory}/${project}/`, f)).isFile());
-  } catch (e) {
-    console.error(e);
-  }
+  const dirContents = await fs.promises.readdir(`${appConfig.projectDirectory}/${project}`);
+  return dirContents.filter(f => fs.statSync(path.join(`${appConfig.projectDirectory}/${project}/`, f)).isFile());
 }
 module.exports.listProjectFiles = listProjectFiles;
