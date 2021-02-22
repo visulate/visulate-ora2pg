@@ -471,7 +471,7 @@
                 "include": false
             },
             "OUTPUT": {
-                "value": "output.sql",
+                "value": "table.sql",
                 "description": "By default all output is dump to STDOUT if not send directly to postgresql database (see above). Give a filename to save export to it. If you want a Gzip'd compressed file just add the extension .gz to the filename (you need perl module Compress::Zlib from CPAN). Add extension .bz2 to use Bzip2 compression",
                 "include": true,
                 "class": "basic"

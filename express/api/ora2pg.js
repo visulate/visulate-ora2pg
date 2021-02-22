@@ -43,15 +43,12 @@ router.post('/', async (req, res) => {
     res.status(400).send('Project name must be alphanumeric');
     return;
   }
-  if (await fileUtils.fileExists(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json`)) {
+  if (await fileUtils.fileExists(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json.enc`)) {
     res.status(409).send(`Project ${project} already exists`);
     return;
   }
   await fileUtils.createProjectDirectory(project);
-  fs.copyFile(`${appConfig.resourceDirectory}/ora2pg-conf.json`,
-    `${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json`, (err) => {
-      if (err) { console.log(err); }
-    });
+  await fileUtils.seedProjectConfigFile(project);
   res.status(201).send('Created');
 });
 
@@ -82,9 +79,10 @@ router.post('/:project', async (req, res) => {
   const configObject = req.body;
   if (! fileUtils.validKeys(configObject)){
     res.status(400).send('Invalid configuration object');
+  } else {
+    await fileUtils.saveConfigJson(project, configObject);
+    res.status(201).send('Created');
   }
-  await fileUtils.saveConfigJson(project, configObject);
-  res.status(201).send('Created');
 });
 
 /**
@@ -111,7 +109,7 @@ router.delete('/:project', async (req, res) => {
  */
 router.get('/:project/exec', async (req, res) => {
   const project = req.params.project;
-  if (! await fileUtils.fileExists(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json`)) {
+  if (! await fileUtils.fileExists(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json.enc`)) {
     res.status(404).send('Config file not found');
     return;
   }

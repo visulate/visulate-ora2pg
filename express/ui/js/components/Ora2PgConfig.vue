@@ -24,7 +24,10 @@ app.component('ora2pg-config', {
     /*html*/
     `
     <div>
-      <div  v-show="project" class="action-menu">
+      <div v-show="project && Object.keys(this.configData).length === 0">
+      <p>{{project}} project is encrypted</p>
+      </div>
+      <div v-show="project && Object.keys(this.configData).length > 0" class="action-menu">
         <b>Parameters</b>
         <span v-show="project">
           <button class="mdl-button mdl-js-button mdl-button"
@@ -125,8 +128,10 @@ app.component('ora2pg-config', {
     },
     watch: {
       runType: (newValue) => {
+        if (this.OUTPUT) {
           this.OUTPUT.value = `${newValue}.sql`;
           this.OUTPUT.dispatchEvent(new CustomEvent('input'));
+        }
       }
     },
     methods: {

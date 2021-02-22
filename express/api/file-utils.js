@@ -18,6 +18,38 @@ var path = require('path');
 const handlebars = require('handlebars');
 const appConfig = require('../resources/http-config');
 
+// ora2pg-conf.json is file to prevent saving Oracle and Postgres
+// database credentials in clear text using code based on this post:
+// https://medium.com/@anned20/encrypting-files-with-nodejs-a54a0736a50a
+const crypto = require('crypto');
+const encryptionAlgorithm = 'aes-256-ctr';
+let encryptionKey = appConfig.configFileEncryptionKey;
+encryptionKey = crypto.createHash('sha256').update(encryptionKey).digest('base64').substr(0, 32);
+
+/**
+ * Encrypt a character string buffer
+ * @param {buffer} buffer
+ */
+function encrypt(buffer) {
+  const initializationVector = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv(encryptionAlgorithm, encryptionKey, initializationVector);
+  return Buffer.concat([initializationVector, cipher.update(buffer), cipher.final()]);
+}
+module.exports.encrypt = encrypt;
+
+/**
+ * Decrypt an aes-256-ctr encrypted file
+ * @param {*} encrypted
+ */
+function decrypt(encrypted) {
+  // initializationVector is the first 16 bytes
+  const initializationVector = encrypted.slice(0, 16);
+  encryptedContent = encrypted.slice(16);
+  const decipher = crypto.createDecipheriv(encryptionAlgorithm, encryptionKey, initializationVector);
+  return Buffer.concat([decipher.update(encryptedContent), decipher.final()]);
+}
+module.exports.decrypt = decrypt;
+
 /**
  * Validate the top level keys in the ora2pg-conf.json object
  * @param {Object} configObject
@@ -38,31 +70,42 @@ module.exports.validKeys = validKeys;
 /**
  * Read the ora2pg-conf.json file and return as an object
  *
- * @param {*} project
+ * @param {string} project
  */
 async function getConfigObject(project) {
-  const config = await fs.promises.readFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json`)
-  return JSON.parse(config);
+  if (! await fileExists(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json.enc`)) {
+    await seedProjectConfigFile(project);
+  }
+  const encryptedConfig = await fs.promises.readFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json.enc`);
+  const config = decrypt(encryptedConfig);
+  try {
+    const configObject = JSON.parse(config);
+    if (configObject && typeof configObject === "object") {
+      return configObject;
+    }
+  } catch (e) {}
+  return false;
 }
 module.exports.getConfigObject = getConfigObject;
 
 /**
  * Write the ora2pg-conf.json file in the project directory
  *
- * @param {*} project
- * @param {*} configObject
+ * @param {string} project
+ * @param {object} configObject
  */
 async function saveConfigJson(project, configObject) {
-  const configStr = JSON.stringify(configObject);
-  await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json`, configStr);
+  const configStrBuffer = Buffer.from(JSON.stringify(configObject));
+  const encryptedConfig = encrypt(configStrBuffer);
+  await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json.enc`, encryptedConfig);
 }
 module.exports.saveConfigJson = saveConfigJson;
 
 /**
  * Write the configObject as an ora2pg.conf file in the project directory
  *
- * @param {*} project
- * @param {*} configObject
+ * @param {string} project
+ * @param {object} configObject
  */
 async function saveConfigFile(project, configObject) {
   const tpl = await fs.promises.readFile(`${appConfig.resourceDirectory}/ora2pg-config-file.hbs`, "utf8");
@@ -73,9 +116,10 @@ async function saveConfigFile(project, configObject) {
 module.exports.saveConfigFile = saveConfigFile;
 
 /**
- * Create an ora2pg-conf file. Wrapper function for saveConfigFile
+ * Create an ora2pg-conf file.
+ * Wrapper function for saveConfigFile to prevent 2 sessions running at the same time.
  *
- * @param {*} project
+ * @param {string} project
  */
 async function createConfigFile(project) {
   if (! await fileExists(`${appConfig.projectDirectory}/${project}/config/`)) {
@@ -92,7 +136,7 @@ module.exports.createConfigFile = createConfigFile;
 
 /**
  * Delete the project's ora2pg.conf file
- * @param {*} project
+ * @param {string} project
  */
 function deleteConfigFile(project) {
   fs.unlink(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`, (err) => {
@@ -103,7 +147,7 @@ module.exports.deleteConfigFile = deleteConfigFile;
 
 /**
  * Returns true if file exists else false
- * @param {*} file
+ * @param {string} file
  */
 async function fileExists(file) {
   return fs.promises.access(file, fs.constants.F_OK)
@@ -115,21 +159,28 @@ module.exports.fileExists = fileExists;
 /**
  * Create a project directory
  *
- * @param {*} project
+ * @param {string} project
  */
 async function createProjectDirectory(project) {
   await fs.promises.mkdir(`${appConfig.projectDirectory}/${project}/config`, { recursive: true }, (err) => {
     if (err && err.code != 'EEXIST') console.error(err);
-    return;
+    return ;
   });
 }
 module.exports.createProjectDirectory = createProjectDirectory;
+
+async function seedProjectConfigFile(project) {
+  const config = await fs.promises.readFile(`${appConfig.resourceDirectory}/ora2pg-conf.json`);
+  await saveConfigJson(project, JSON.parse(config));
+  return;
+}
+module.exports.seedProjectConfigFile = seedProjectConfigFile;
+
 
 /**
  * List the project directories
  */
 async function listProjectDirectories() {
-
   const dirContents = await fs.promises.readdir(`${appConfig.projectDirectory}`);
   return dirContents.filter(f => fs.statSync(path.join(`${appConfig.projectDirectory}/`, f)).isDirectory());
 }
@@ -138,7 +189,7 @@ module.exports.listProjectDirectories = listProjectDirectories;
 /**
  * Read the files in a project directory
  *
- * @param {*} project
+ * @param {string} project
  */
 async function listProjectFiles(project) {
   const dirContents = await fs.promises.readdir(`${appConfig.projectDirectory}/${project}`);
