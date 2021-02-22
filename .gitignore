@@ -66,3 +66,6 @@ dev-files/
 docs/Gemfile.lock
 docs/_site/
 .vscode/
+
+# encrypted json files
+*ora2pg-conf.json.enc

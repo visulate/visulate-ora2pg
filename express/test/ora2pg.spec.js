@@ -10,10 +10,17 @@ const expect = chai.expect;
 const file = chaiFiles.file;
 const dir = chaiFiles.dir;
 const fs = require('fs');
+const fileUtils = require('../api/file-utils');
 
 const testConfigObject = require('./project/default/config/ora2pg-conf.json');
 
 describe("Create project tests", () => {
+
+  before(async () => {
+    const config = await fs.promises.readFile(`${process.env.PROJECT_DIRECTORY}/default/config/ora2pg-conf.json`);
+    await fileUtils.saveConfigJson('default', JSON.parse(config));
+  });
+
   after(async () => {
     // Verify undefined project directory was not created
     expect(dir(`${process.env.PROJECT_DIRECTORY}/undefined`)).to.not.exist;
@@ -76,7 +83,7 @@ describe("Create project tests", () => {
         res.text.should.equal('Created');
         expect(dir(`${process.env.PROJECT_DIRECTORY}/create_test_project`)).to.exist;
         expect(dir(`${process.env.PROJECT_DIRECTORY}/create_test_project/config`)).to.exist;
-        expect(file(`${process.env.PROJECT_DIRECTORY}/create_test_project/config/ora2pg-conf.json`)).to.exist;
+        expect(file(`${process.env.PROJECT_DIRECTORY}/create_test_project/config/ora2pg-conf.json.enc`)).to.exist;
         done();
       });
   });
@@ -139,7 +146,7 @@ describe("Update and Delete project tests", () => {
         res.text.should.equal('Created');
         expect(dir(`${process.env.PROJECT_DIRECTORY}/update_test_project`)).to.exist;
         expect(dir(`${process.env.PROJECT_DIRECTORY}/update_test_project/config`)).to.exist;
-        expect(file(`${process.env.PROJECT_DIRECTORY}/update_test_project/config/ora2pg-conf.json`)).to.exist;
+        expect(file(`${process.env.PROJECT_DIRECTORY}/update_test_project/config/ora2pg-conf.json.enc`)).to.exist;
       });
   });
 
@@ -259,7 +266,7 @@ describe("Update and Delete project tests", () => {
       expect(res).to.have.status(204);
       expect(dir(`${process.env.PROJECT_DIRECTORY}/update_test_project`)).to.not.exist;
       expect(dir(`${process.env.PROJECT_DIRECTORY}/update_test_project/config`)).to.not.exist;
-      expect(file(`${process.env.PROJECT_DIRECTORY}/update_test_project/config/ora2pg-conf.json`)).to.not.exist;
+      expect(file(`${process.env.PROJECT_DIRECTORY}/update_test_project/config/ora2pg-conf.json.enc`)).to.not.exist;
 
       done();
     });

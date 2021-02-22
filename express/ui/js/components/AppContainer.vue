@@ -81,6 +81,7 @@ app.component('app-container', {
     return {
       project: null,
       showHome: true,
+      showForm: false,
       showRun: false,
       showDetails: false,
       config: {},
@@ -99,6 +100,7 @@ app.component('app-container', {
     },
     // Show the home/create project page
     showHomePage(){
+      this.project = null;
       this.showHome = true;
       this.showDetails = false;
     },
