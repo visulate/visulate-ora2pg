@@ -58,7 +58,7 @@ export default {
   methods: {
     validChar(e) {
       let char = String.fromCharCode(e.keyCode);
-      if (/^[a-zA-Z0-9_]+$/.test(char)) return true;
+      if (/^[a-zA-Z0-9_\b]+$/.test(char)) return true;
       else e.preventDefault();
     },
     onSubmit() {
@@ -68,9 +68,11 @@ export default {
         return;
       }
       this.$emit('create-project', {project: this.project});
+      this.project = null;
     },
     onCancel() {
       this.$emit('cancel-create-project');
+      this.project = null;
     },
   }
 
