@@ -19,7 +19,7 @@
         </div>
         <div class="mdl-card__supporting-text">
           <input
-            @keypress="validChar($event)"
+            @keydown="validChar($event)"
             @keyup.enter="onSubmit"
             v-model="project"
             class="mdl-textfield__input"
@@ -30,16 +30,14 @@
         </div>
 
         <div class="mdl-card__actions mdl-card--border">
-          <a
+          <a id="hp-create"
             class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
-            @click.prevent="onSubmit"
-          >
+            @click.prevent="onSubmit" >
             Create
           </a>
-          <a
+          <a id="hp-cancel"
             class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
-            @click.prevent="onCancel"
-          >
+            @click.prevent="onCancel" >
             Cancel
           </a>
         </div>
@@ -49,7 +47,8 @@
 </template>
 <script>
 export default {
-  name: 'TheHomePage',
+  name: 'HomePage',
+  emits: ['create-project', 'cancel-create-project'],
   data() {
     return {
       project: null,

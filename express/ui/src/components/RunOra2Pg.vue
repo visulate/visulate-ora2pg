@@ -57,7 +57,7 @@ export default {
 
       es.addEventListener(
         "error",
-        (event) => {
+        () => {
           es.close();
         },
         false
