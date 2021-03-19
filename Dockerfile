@@ -5,6 +5,7 @@ FROM georgmoser/ora2pg:21.0 as ora2pg
 FROM node:current-alpine as vue-ui
 COPY /express/ui /ui
 WORKDIR /ui
+RUN npm install
 RUN npm run build
 
 
