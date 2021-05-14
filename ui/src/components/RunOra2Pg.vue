@@ -36,7 +36,7 @@ export default {
   },
   methods: {
     setupStream() {
-      let es = new EventSource(`/ora2pg/${this.project}/exec/`);
+      let es = new EventSource(`/ora2pg/project/${this.project}/exec/`);
 
       es.addEventListener(
         "message",

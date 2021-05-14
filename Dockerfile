@@ -3,7 +3,7 @@ FROM georgmoser/ora2pg:21.0 as ora2pg
 
 # Build the Vue UI
 FROM node:current-alpine as vue-ui
-COPY /express/ui /ui
+COPY /ui /ui
 WORKDIR /ui
 RUN npm install
 RUN npm run build
@@ -26,9 +26,8 @@ VOLUME /project
 COPY /express /express
 
 # Remove vue-ui source
-WORKDIR /express/ui
-RUN rm -rf *
-COPY --from=vue-ui /ui/dist ./dist
+RUN mkdir /express/ui
+COPY --from=vue-ui /ui/dist /express/ui/dist
 
 # Install and run
 WORKDIR /express

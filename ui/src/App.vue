@@ -136,7 +136,7 @@ export default {
     // Create a new project
     async createProject(project) {
       const projectName = project.project;
-      const rawResponse = await fetch("/ora2pg", {
+      const rawResponse = await fetch(`/ora2pg`, {
         method: "post",
         headers: {
           Accept: "application/json, text/plain, */*",
@@ -177,7 +177,7 @@ export default {
       const project = configObj.project;
       const configJson = JSON.parse(configObj.config);
       const postBody = JSON.stringify(configJson);
-      const rawResponse = await fetch(`/ora2pg/${project}`, {
+      const rawResponse = await fetch(`/ora2pg/project/${project}`, {
         method: "post",
         headers: {
           Accept: "application/json, text/plain, */*",
@@ -203,7 +203,7 @@ export default {
       if (
         confirm(`This will delete project '${project}' and all of its files.`)
       ) {
-        const rawResponse = await fetch(`/ora2pg/${project}`, {
+        const rawResponse = await fetch(`/ora2pg/project/${project}`, {
           method: "delete",
         });
         const response = await rawResponse;
