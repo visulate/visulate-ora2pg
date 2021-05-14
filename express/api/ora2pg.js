@@ -74,7 +74,7 @@ router.get('/project/:project', async (req, res) => {
 /**
  * Save/update the config json file
  */
-router.post('/:project', async (req, res) => {
+router.post('/project/:project', async (req, res) => {
   const project = req.params.project;
   const configObject = req.body;
   if (! fileUtils.validKeys(configObject)){
@@ -88,7 +88,7 @@ router.post('/:project', async (req, res) => {
 /**
  * Delete project directory and all of its files
  */
-router.delete('/:project', async (req, res) => {
+router.delete('/project/:project', async (req, res) => {
   const project = req.params.project;
   if (! await fileUtils.fileExists(`${appConfig.projectDirectory}/${project}`)) {
     res.status(404).send('Project not found');
@@ -107,7 +107,7 @@ router.delete('/:project', async (req, res) => {
 /**
  * Run ora2pg
  */
-router.get('/:project/exec', async (req, res) => {
+router.get('/project/:project/exec', async (req, res) => {
   const project = req.params.project;
   if (! await fileUtils.fileExists(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json.enc`)) {
     res.status(404).send('Config file not found');
@@ -125,7 +125,7 @@ router.get('/:project/exec', async (req, res) => {
 /**
  * Download file
  */
-router.get('/:project/download/:file', async (req, res) => {
+router.get('/project/:project/download/:file', async (req, res) => {
   const project = req.params.project;
   const file = req.params.file;
   if (await fileUtils.fileExists(`${appConfig.projectDirectory}/${project}/${file}`)) {

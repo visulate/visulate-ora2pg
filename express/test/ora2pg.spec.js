@@ -161,7 +161,7 @@ describe("Update and Delete project tests", () => {
   it("Successful execution generates file output and removes temporary config file", (done) => {
     // default project config converts a package body file
     chai.request(app)
-      .get('/ora2pg/default/exec')
+      .get('/ora2pg/project/default/exec')
       .end((err, res) => {
         expect(res).to.have.status(200);
         res.headers.connection.should.equal('keep-alive');
@@ -177,7 +177,7 @@ describe("Update and Delete project tests", () => {
   it("Execute should not start if ora2pg is already running", (done) => {
     fs.writeFileSync(`${process.env.PROJECT_DIRECTORY}/update_test_project/config/ora2pg.conf`, 'dummy file');
     chai.request(app)
-      .get('/ora2pg/update_test_project/exec')
+      .get('/ora2pg/project/update_test_project/exec')
       .end((err, res) => {
         expect(res).to.have.status(200);
         res.headers.connection.should.equal('keep-alive');
@@ -191,7 +191,7 @@ describe("Update and Delete project tests", () => {
 
   it("Executing empty project fails with 404", (done) => {
     chai.request(app)
-      .get('/ora2pg/empty/exec')
+      .get('/ora2pg/project/empty/exec')
       .end((err, res) => {
         expect(res).to.have.status(404);
         done();
@@ -200,7 +200,7 @@ describe("Update and Delete project tests", () => {
 
   it("Executing project with no configuration file fails with 404", (done) => {
     chai.request(app)
-      .get('/ora2pg/missing_config_file/exec')
+      .get('/ora2pg/project/missing_config_file/exec')
       .end((err, res) => {
         expect(res).to.have.status(404);
         done();
@@ -209,7 +209,7 @@ describe("Update and Delete project tests", () => {
 
   it("POST non JSON file should fail with 400", (done) => {
     chai.request(app)
-      .post('/ora2pg/update_test_project')
+      .post('/ora2pg/project/update_test_project')
       .send('adrfafdadf ddddd')
       .end((err, res) => {
         expect(res).to.have.status(400);
@@ -220,7 +220,7 @@ describe("Update and Delete project tests", () => {
 
   it("POST valid JSON file return 201", (done) =>  {
     chai.request(app)
-      .post('/ora2pg/update_test_project')
+      .post('/ora2pg/project/update_test_project')
       .send(testConfigObject)
       .end((err, res) => {
         expect(res).to.have.status(201);
@@ -230,7 +230,7 @@ describe("Update and Delete project tests", () => {
 
   it("Download invalid (missing) file should fail with 404", (done) => {
     chai.request(app)
-      .get('/ora2pg/update_test_project/download/missing.file')
+      .get('/ora2pg/project/update_test_project/download/missing.file')
       .end((err, res) => {
         expect(res).to.have.status(404);
         res.text.should.equal('File not found');
@@ -241,7 +241,7 @@ describe("Update and Delete project tests", () => {
   it("Download valid file should fail work", (done) => {
     fs.writeFileSync(`${process.env.PROJECT_DIRECTORY}/update_test_project/dummy.sql`, 'dummy file');
     chai.request(app)
-      .get('/ora2pg/update_test_project/download/dummy.sql')
+      .get('/ora2pg/project/update_test_project/download/dummy.sql')
       .end((err, res) => {
         expect(res).to.have.status(200);
         res.headers['content-disposition'].should.equal('attachment; filename="dummy.sql"');
@@ -251,7 +251,7 @@ describe("Update and Delete project tests", () => {
 
   it("Delete invalid project should fail with 404", (done) => {
     chai.request(app)
-    .delete('/ora2pg/invalid_project')
+    .delete('/ora2pg/project/invalid_project')
     .end((err, res) => {
       expect(res).to.have.status(404);
       res.text.should.equal('Project not found');
@@ -261,7 +261,7 @@ describe("Update and Delete project tests", () => {
 
   it("Delete valid project should succeed", (done) => {
     chai.request(app)
-    .delete('/ora2pg/update_test_project')
+    .delete('/ora2pg/project/update_test_project')
     .end((err, res) => {
       expect(res).to.have.status(204);
       expect(dir(`${process.env.PROJECT_DIRECTORY}/update_test_project`)).to.not.exist;

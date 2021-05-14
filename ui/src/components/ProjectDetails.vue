@@ -19,7 +19,7 @@
     </div>
     <ul class="mdl-list">
       <li v-for="file in fileList" class="mdl-list__item" :key="file">
-        <a :href="'/ora2pg/' + project + '/download/' + file" class="link">{{
+        <a :href="'/ora2pg/project/' + project + '/download/' + file" class="link">{{
           file
         }}</a>
       </li>
