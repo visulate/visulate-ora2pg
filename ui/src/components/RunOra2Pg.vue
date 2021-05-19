@@ -36,7 +36,7 @@ export default {
   },
   methods: {
     setupStream() {
-      let es = new EventSource(`/ora2pg/project/${this.project}/exec/`);
+      let es = new EventSource(`${process.env.VUE_APP_API_BASE}/ora2pg/project/${this.project}/exec?key=${process.env.VUE_APP_ENDPOINTS_KEY}`);
 
       es.addEventListener(
         "message",

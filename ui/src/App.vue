@@ -82,6 +82,7 @@ import ProjectDetails from './components/ProjectDetails';
 import ProjectList from './components/ProjectList';
 import RunOra2pg from './components/RunOra2Pg';
 import HomePage from './components/HomePage';
+import httpClient from './assets/httpClient';
 
 export default {
   name: "AppContainer",
@@ -123,7 +124,7 @@ export default {
     },
     // Show project files page
     async showDetailsPage() {
-      const res = await fetch(`/ora2pg/project/${this.project}`);
+      const res = await httpClient(`/ora2pg/project/${this.project}`);
       const jsonResponse = await res.json();
       this.projectFiles = jsonResponse.files;
       this.showDetails = true;
@@ -136,7 +137,7 @@ export default {
     // Create a new project
     async createProject(project) {
       const projectName = project.project;
-      const rawResponse = await fetch(`/ora2pg`, {
+      const rawResponse = await httpClient(`/ora2pg`, {
         method: "post",
         headers: {
           Accept: "application/json, text/plain, */*",
@@ -166,7 +167,7 @@ export default {
         return;
       }
       this.project = project;
-      const res = await fetch(`/ora2pg/project/${project}`);
+      const res = await httpClient(`/ora2pg/project/${project}`);
       const jsonResponse = await res.json();
       this.config = jsonResponse.config;
       this.projectFiles = jsonResponse.files;
@@ -177,7 +178,7 @@ export default {
       const project = configObj.project;
       const configJson = JSON.parse(configObj.config);
       const postBody = JSON.stringify(configJson);
-      const rawResponse = await fetch(`/ora2pg/project/${project}`, {
+      const rawResponse = await httpClient(`/ora2pg/project/${project}`, {
         method: "post",
         headers: {
           Accept: "application/json, text/plain, */*",
@@ -203,7 +204,7 @@ export default {
       if (
         confirm(`This will delete project '${project}' and all of its files.`)
       ) {
-        const rawResponse = await fetch(`/ora2pg/project/${project}`, {
+        const rawResponse = await httpClient(`/ora2pg/project/${project}`, {
           method: "delete",
         });
         const response = await rawResponse;

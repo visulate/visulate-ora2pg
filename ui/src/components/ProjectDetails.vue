@@ -19,7 +19,7 @@
     </div>
     <ul class="mdl-list">
       <li v-for="file in fileList" class="mdl-list__item" :key="file">
-        <a :href="'/ora2pg/project/' + project + '/download/' + file" class="link">{{
+        <a :href="`${api_base}/ora2pg/project/${project}/download/${file}?key=${endpoints_key}`" class="link">{{
           file
         }}</a>
       </li>
@@ -28,8 +28,16 @@
   </div>
 </template>
 <script>
+//${process.env.VUE_APP_API_BASE}
+//?key=${process.env.VUE_APP_ENDPOINTS_KEY}
 export default {
   name: 'ProjectDetails',
+  data() {
+    return {
+      api_base: process.env.VUE_APP_API_BASE,
+      endpoints_key: process.env.VUE_APP_ENDPOINTS_KEY
+    }
+  },
   emits: ['delete-project', 'close-component'],
   props: {
     project: {
