@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   description: "UI and API for running Ora2Pg"
-  version: "1.1.1"
+  version: "1.1.2"
   title: "Visulate Ora2Pg"
   contact:
     name: Peter Goldthorp
@@ -9,33 +9,25 @@ info:
   license:
     name: "Apache 2.0"
     url: "https://github.com/visulate/visulate-ora2pg/blob/main/LICENSE"
-basePath: "/v2"
+host: "ora2pg.endpoints.visulate-iap-endpoints.cloud.goog"
+x-google-endpoints:
+- name: "ora2pg.endpoints.visulate-iap-endpoints.cloud.goog"
+  target: "35.231.22.231"
+
 tags:
-- name: "UI"
-  description: "Render a single page application"
 - name: "API"
   description: "Configure and run Ora2Pg"
 schemes:
 - "https"
 - "http"
 paths:
-  /:
-    get:
-      tags:
-      - "UI"
-      summary: "Open the application user interface"
-      description: "Single page Vue CLI application served as a static route."
-      produces:
-      - "application/html"
-      responses:
-        "200":
-          description: "HTML + JavaScript to render UI in a browser"
   /ora2pg:
     post:
       tags:
       - "API"
       summary: "Create project"
       description: "Create a project directory and copy the default config file to it"
+      operationId: "create_project"
       parameters:
       - in: "body"
         name: "body"
@@ -48,25 +40,27 @@ paths:
           description: "Project created"
         "400":
           description: "Invalid project value"
-        "409": 
+        "409":
           description: "Duplicate project"
   /ora2pg/projects:
     get:
       tags:
       - "API"
       summary: "List projects"
+      operationId: "list_projects"
       responses:
-        "200": 
+        "200":
           description: "Success"
           schema:
             $ref: "#/definitions/ProjectList"
-            
+
   /ora2pg/project/{project}:
     post:
       tags:
       - "API"
       summary: "Save or update config file"
       description: "Saves an encrypted copy of the config json file in the project directory"
+      operationId: "save_project"
       consumes:
       - "application/json"
       parameters:
@@ -89,6 +83,7 @@ paths:
       - "API"
       summary: "Retrieve project details"
       description: "Retrieve current config and list of generated output files"
+      operationId: "retrieve_project_details"
       parameters:
       - in: "path"
         name: "project"
@@ -109,6 +104,7 @@ paths:
       - "API"
       summary: "Delete project directory and all of its files"
       description: "Perform a recursive delete on the project directory"
+      operationId: "delete_project"
       parameters:
       - in: "path"
         name: "project"
@@ -122,13 +118,14 @@ paths:
           description: "Project directory does not exist"
         "400":
           description: "An error occurred"
-          
+
   /ora2pg/project/{project}/exec:
     get:
       tags:
       - "API"
       summary: "Execute Ora2Pg"
       description: "Runs Ora2Pg and returns its output as a server side event stream"
+      operationId: "execute_ora2pg"
       parameters:
       - in: "path"
         name: "project"
@@ -137,20 +134,26 @@ paths:
         type: "string"
       produces:
       - "text/event-stream"
+      # Override default timeout for Cloud Endpoints ESPv2
+      x-google-backend:
+        deadline: 3600.0
       responses:
         "200":
           description: "Ora2Pg output"
+          schema:
+            $ref: "#/definitions/ServerSideEventStream"
         "400":
           description: "Application error"
         "404":
           description: "Config file not found"
-        
+
   /ora2pg/project/{project}/download/{file}:
     get:
       tags:
       - "API"
-      summary: "Execute Ora2Pg"
-      description: "Runs Ora2Pg and returns its output as a server side event stream"
+      summary: "Download file"
+      description: "Download file as an attachment"
+      operationId: "download_file"
       parameters:
       - in: "path"
         name: "project"
@@ -161,16 +164,47 @@ paths:
         name: "file"
         description: "file to download"
         required: true
-        type: "string"        
+        type: "string"
       responses:
         "200":
           description: "File download as attachment"
           schema:
             type: "file"
         "404":
-          description: "File not found"        
-        
+          description: "File not found"
+# This section requires all requests to any path to require an API key.
+security:
+- api_key: []
+securityDefinitions:
+  # This section configures basic authentication with an API key.
+  api_key:
+    type: "apiKey"
+    name: "key"
+    in: "query"
+
+
 definitions:
+  ServerSideEventStream:
+    type: "object"
+    x-events:
+      added:
+        type: "object"
+        properties:
+          message:
+            type: "string"
+          createdAt:
+            type: "string"
+            format: "date-time"
+      updated:
+        type: "object"
+        properties:
+          previous:
+            type: "string"
+          newValue:
+            type: "string"
+          updatedAt:
+            type: "string"
+            format: "date-time"
   Project:
     type: "object"
     properties:
@@ -230,13 +264,13 @@ definitions:
                 type: "string"
               IMPORT:
                 $ref: "#/definitions/Ora2pgConfigVal"
-  
+
       INPUT:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -257,13 +291,13 @@ definitions:
                 $ref: "#/definitions/Ora2pgConfigVal"
               ORA_INITIAL_COMMAND:
                 $ref: "#/definitions/Ora2pgConfigVal"
-                
+
       SCHEMA:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -286,13 +320,13 @@ definitions:
                 $ref: "#/definitions/Ora2pgConfigVal"
               NO_FUNCTION_METADATA:
                 $ref: "#/definitions/Ora2pgConfigVal"
-                
+
       ENCODING:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -303,13 +337,13 @@ definitions:
                 $ref: "#/definitions/Ora2pgConfigVal"
               CLIENT_ENCODING:
                 $ref: "#/definitions/Ora2pgConfigVal"
-                
+
       EXPORT:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -331,20 +365,20 @@ definitions:
               EXTERNAL_TO_FDW:
                 $ref: "#/definitions/Ora2pgConfigVal"
               TRUNCATE_TABLE:
-                $ref: "#/definitions/Ora2pgConfigVal"                
+                $ref: "#/definitions/Ora2pgConfigVal"
               USE_TABLESPACE:
                 $ref: "#/definitions/Ora2pgConfigVal"
               REORDERING_COLUMNS:
                 $ref: "#/definitions/Ora2pgConfigVal"
               REPLACE_QUERY:
                 $ref: "#/definitions/Ora2pgConfigVal"
-            
+
       FULL_TEXT_SEARCH:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -359,13 +393,13 @@ definitions:
                 $ref: "#/definitions/Ora2pgConfigVal"
               USE_LOWER_UNACCENT:
                 $ref: "#/definitions/Ora2pgConfigVal"
-                
+
       DATA_DIFF:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -387,14 +421,14 @@ definitions:
               DATADIFF_AFTER:
                 $ref: "#/definitions/Ora2pgConfigVal"
               DATADIFF_AFTER_ALL:
-                $ref: "#/definitions/Ora2pgConfigVal"                
+                $ref: "#/definitions/Ora2pgConfigVal"
 
       CONSTRAINT:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -419,7 +453,7 @@ definitions:
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -434,7 +468,7 @@ definitions:
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -467,13 +501,13 @@ definitions:
                 $ref: "#/definitions/Ora2pgConfigVal"
               DISABLE_UNLOGGED:
                 $ref: "#/definitions/Ora2pgConfigVal"
-                
+
       OUTPUT:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -505,18 +539,18 @@ definitions:
               STOP_ON_ERROR:
                 $ref: "#/definitions/Ora2pgConfigVal"
               COPY_FREEZE:
-                $ref: "#/definitions/Ora2pgConfigVal"                
+                $ref: "#/definitions/Ora2pgConfigVal"
               CREATE_OR_REPLACE:
                 $ref: "#/definitions/Ora2pgConfigVal"
               PG_INIT_COMMAND:
-                $ref: "#/definitions/Ora2pgConfigVal"        
-                
+                $ref: "#/definitions/Ora2pgConfigVal"
+
       TYPE:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -541,13 +575,13 @@ definitions:
                 $ref: "#/definitions/Ora2pgConfigVal"
               TO_NUMBER_CONVERSION:
                 $ref: "#/definitions/Ora2pgConfigVal"
-                    
+
       GRANT:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -558,13 +592,13 @@ definitions:
                 $ref: "#/definitions/Ora2pgConfigVal"
               FORCE_SECURITY_INVOKER:
                 $ref: "#/definitions/Ora2pgConfigVal"
-                
+
       DATA:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -596,22 +630,22 @@ definitions:
               TRIM_CHAR:
                 $ref: "#/definitions/Ora2pgConfigVal"
               INTERNAL_DATE_MAX:
-                $ref: "#/definitions/Ora2pgConfigVal"                
+                $ref: "#/definitions/Ora2pgConfigVal"
               FUNCTION_CHECK:
                 $ref: "#/definitions/Ora2pgConfigVal"
               NO_BLOB_EXPORT:
-                $ref: "#/definitions/Ora2pgConfigVal"  
+                $ref: "#/definitions/Ora2pgConfigVal"
               DATA_EXPORT_ORDER:
                 $ref: "#/definitions/Ora2pgConfigVal"
               PSQL_RELATIVE_PATH:
-                $ref: "#/definitions/Ora2pgConfigVal"                  
-                
+                $ref: "#/definitions/Ora2pgConfigVal"
+
       PERFORMANCE:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -632,13 +666,13 @@ definitions:
                 $ref: "#/definitions/Ora2pgConfigVal"
               SYNCHRONOUS_COMMIT:
                 $ref: "#/definitions/Ora2pgConfigVal"
-                
+
       PLSQL:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -667,13 +701,13 @@ definitions:
                 $ref: "#/definitions/Ora2pgConfigVal"
               AUTONOMOUS_TRANSACTION:
                 $ref: "#/definitions/Ora2pgConfigVal"
-              
+
       ASSESSMENT:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -692,13 +726,13 @@ definitions:
                 $ref: "#/definitions/Ora2pgConfigVal"
               UUID_FUNCTION:
                 $ref: "#/definitions/Ora2pgConfigVal"
-              
+
       POSTGRESQL:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -713,13 +747,13 @@ definitions:
                 $ref: "#/definitions/Ora2pgConfigVal"
               PG_SUPPORTS_SUBSTR:
                 $ref: "#/definitions/Ora2pgConfigVal"
-              
+
       SPATIAL:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
@@ -738,20 +772,20 @@ definitions:
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"
             properties:
               FDW_SERVER:
                 $ref: "#/definitions/Ora2pgConfigVal"
-             
+
       MYSQL:
         type: "object"
         properties:
           title:
             type: "string"
-          class: 
+          class:
             type: "string"
           values:
             type: "object"

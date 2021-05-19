@@ -11,6 +11,8 @@
   </nav>
 </template>
 <script>
+import httpClient from '../assets/httpClient';
+
 export default {
   name: 'ProjectList',
   emits: ['set-project'],
@@ -35,7 +37,7 @@ export default {
   },
   methods: {
     async getProjects() {
-      const res = await fetch('/ora2pg/projects');
+      const res = await httpClient('/ora2pg/projects');
       const jsonResponse = await res.json();
       this.projectList = jsonResponse.projects;
     },
