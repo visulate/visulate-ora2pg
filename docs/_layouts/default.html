@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: "en-US" }}">
+  <head>{% for section in site.data.menu.sections %}{% for item in section.items %}{% if item.href == page.url %}
+    <title>{{ item.title }} Visulate Ora2Pg</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="{{ item.description }}"/>{% endif %}{% endfor %}{% endfor %}
+    <meta charset="UTF-8">
+    {% if site.google_analytics %}
+      <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_analytics }}"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ site.google_analytics }}');
+      </script>
+    {% endif %}
+    <link rel="stylesheet" href="{{ '/assets/css/main.css?v=' | append: site.github.build_revision | relative_url }}">
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="main">
+        <div class="inner">
+             <!-- Header -->
+             <header id="header">
+              <a href="/index.html" class="logo"><strong>Visulate Ora2Pg</strong></a>
+              <p class="contact"><a href="mailto:support@visulate.com">support@visulate.com</a><br/><a href="tel:321-421-0129">321 421 0129</a></p>
+            </header>
+            {{ content }}
+        </div>
+      </div>
+      <div id="sidebar">
+        <div class="inner">
+          <nav id="menu">
+            <ul>
+            {% for section in site.data.menu.sections %}
+              <h5>{{ section.name }}</h5>
+                {% for item in section.items %}
+                  <li><a href="{{ item.href }}" {% if item.href == page.url %}class="active"{% endif %}  >{{ item.title }}</a></li>
+                {% endfor %}
+              {% endfor %}
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+		<!-- Scripts -->
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/browser.min.js"></script>
+    <script src="/assets/js/breakpoints.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/assets/js/main.js"></script>
+  </body>
+</html>
