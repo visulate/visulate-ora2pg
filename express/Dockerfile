@@ -14,7 +14,7 @@ RUN mkdir /project
 VOLUME /project
 
 # Install express code
-COPY /express /express
+COPY . /express
 
 # Install and run
 WORKDIR /express

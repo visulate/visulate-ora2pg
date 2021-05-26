@@ -1,6 +1,6 @@
 # Build the Vue UI
-FROM node:current-alpine as build-stage
-COPY /ui /app
+FROM node as build-stage
+COPY . /app
 WORKDIR /app
 RUN npm install
 RUN npm run build
@@ -9,4 +9,4 @@ RUN npm run build
 FROM nginx as production-stage
 RUN mkdir /app
 COPY --from=build-stage /app/dist /app
-COPY ui.nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/nginx.conf

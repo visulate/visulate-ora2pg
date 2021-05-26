@@ -13,6 +13,7 @@ host: "ora2pg.endpoints.visulate-iap-endpoints.cloud.goog"
 x-google-endpoints:
 - name: "ora2pg.endpoints.visulate-iap-endpoints.cloud.goog"
   target: "35.231.22.231"
+  allowCors: True
 
 tags:
 - name: "API"
@@ -175,13 +176,22 @@ paths:
 # This section requires all requests to any path to require an API key.
 security:
 - api_key: []
+- project_oauth2: []
 securityDefinitions:
   # This section configures basic authentication with an API key.
   api_key:
     type: "apiKey"
     name: "key"
     in: "query"
-
+  # oauth2 implicit flow
+  project_oauth2:
+    authorizationUrl: ""
+    flow: "implicit"
+    type: "oauth2"
+    x-google-issuer: "accounts.google.com"
+    x-google-jwks_uri: "https://www.googleapis.com/oauth2/v1/certs"
+    # oauth2 client_id
+    x-google-audiences: "298820748354-qfl9ih4oh92ndvgui3e9kqobgruqha03.apps.googleusercontent.com"
 
 definitions:
   ServerSideEventStream:
