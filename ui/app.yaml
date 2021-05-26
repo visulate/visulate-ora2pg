@@ -1,0 +1,6 @@
+runtime: custom
+env: flex
+service: ora2pg
+env_variables:
+  VUE_APP_API_BASE: "{{BASE_URL}}"
+  VUE_APP_ENDPOINTS_KEY: "{{API_KEY}}"
