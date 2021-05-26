@@ -9,11 +9,12 @@ info:
   license:
     name: "Apache 2.0"
     url: "https://github.com/visulate/visulate-ora2pg/blob/main/LICENSE"
-host: "ora2pg.endpoints.visulate-iap-endpoints.cloud.goog"
+host: "{{CLOUD-ENDPOINTS-SERVICE_NAME}}"
 x-google-endpoints:
-- name: "ora2pg.endpoints.visulate-iap-endpoints.cloud.goog"
-  target: "35.231.22.231"
-  allowCors: True
+- name: "{{CLOUD-ENDPOINTS-SERVICE_NAME}}"
+  target: "{{VM-INSTANCE-IP-ADDRESS}}"
+  # Comment/Uncomment as required
+  # allowCors: True
 
 tags:
 - name: "API"
@@ -191,7 +192,7 @@ securityDefinitions:
     x-google-issuer: "accounts.google.com"
     x-google-jwks_uri: "https://www.googleapis.com/oauth2/v1/certs"
     # oauth2 client_id
-    x-google-audiences: "298820748354-qfl9ih4oh92ndvgui3e9kqobgruqha03.apps.googleusercontent.com"
+    x-google-audiences: "{{CLIENT_ID}}"
 
 definitions:
   ServerSideEventStream:
