@@ -37,7 +37,11 @@ export default {
   },
   methods: {
     async getProjects() {
-      const res = await httpClient('/ora2pg/projects');
+      const res = await httpClient('/ora2pg/projects', {
+         headers: {
+           "Authorization": `Bearer ${this.$parent.id_token}`
+         }
+      });
       const jsonResponse = await res.json();
       this.projectList = jsonResponse.projects;
     },

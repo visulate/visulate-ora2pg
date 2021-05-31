@@ -6,13 +6,19 @@
         <span class="mdl-layout__title"
           >Visulate Ora2Pg<span v-if="project"> - {{ project }}</span></span
         >
+        <div class="mdl-layout-spacer"></div>
+        <google-auth
+          @sign-in="signIn"
+          @sign-out="signOut"
+        ></google-auth>
       </div>
     </header>
 
     <!-- Project list -->
-    <div class="mdl-layout__drawer">
+    <div class="mdl-layout__drawer" v-if="userSignedIn">
       <span class="mdl-layout__title">Project</span>
       <project-list
+
         @set-project="setProject"
         @create-project="createProject"
         ref="projectsComponent"
@@ -30,7 +36,7 @@
     </div>
 
     <!-- Main body -->
-    <main class="mdl-layout__content">
+    <main class="mdl-layout__content" v-if="userSignedIn">
       <home-page
         v-show="showHome"
         @create-project="createProject"
@@ -83,6 +89,7 @@ import ProjectList from './components/ProjectList';
 import RunOra2pg from './components/RunOra2Pg';
 import HomePage from './components/HomePage';
 import httpClient from './assets/httpClient';
+import GoogleAuth from './components/GoogleAuth';
 
 export default {
   name: "AppContainer",
@@ -91,7 +98,8 @@ export default {
     ProjectDetails,
     ProjectList,
     RunOra2pg,
-    HomePage
+    HomePage,
+    GoogleAuth
   },
   data() {
     return {
@@ -100,8 +108,11 @@ export default {
       showForm: false,
       showRun: false,
       showDetails: false,
+      userSignedIn: false,
       config: {},
       projectFiles: [],
+      user: '',
+      id_token: ''
     };
   },
   methods: {
@@ -111,6 +122,16 @@ export default {
       notification.MaterialSnackbar.showSnackbar({
         message: messageText,
       });
+    },
+    signIn(session) {
+      this.user = session.user;
+      this.id_token = session.id_token;
+      this.userSignedIn = true;
+    },
+    signOut() {
+      this.user = '';
+      this.id_token = '';
+      this.userSignedIn = false;
     },
     // Show the home/create project page
     showHomePage() {
@@ -124,7 +145,11 @@ export default {
     },
     // Show project files page
     async showDetailsPage() {
-      const res = await httpClient(`/ora2pg/project/${this.project}`);
+      const res = await httpClient(`/ora2pg/project/${this.project}`, {
+        headers: {
+          Authorization: `Bearer ${this.id_token}`
+        }
+      });
       const jsonResponse = await res.json();
       this.projectFiles = jsonResponse.files;
       this.showDetails = true;
@@ -140,6 +165,7 @@ export default {
       const rawResponse = await httpClient(`/ora2pg`, {
         method: "post",
         headers: {
+          Authorization: `Bearer ${this.id_token}`,
           Accept: "application/json, text/plain, */*",
           "Content-Type": "application/json",
         },
@@ -167,7 +193,11 @@ export default {
         return;
       }
       this.project = project;
-      const res = await httpClient(`/ora2pg/project/${project}`);
+      const res = await httpClient(`/ora2pg/project/${project}`, {
+        headers: {
+          Authorization: `Bearer ${this.id_token}`
+        }
+      });
       const jsonResponse = await res.json();
       this.config = jsonResponse.config;
       this.projectFiles = jsonResponse.files;
@@ -181,6 +211,7 @@ export default {
       const rawResponse = await httpClient(`/ora2pg/project/${project}`, {
         method: "post",
         headers: {
+          Authorization: `Bearer ${this.id_token}`,
           Accept: "application/json, text/plain, */*",
           "Content-Type": "application/json",
         },
@@ -206,6 +237,9 @@ export default {
       ) {
         const rawResponse = await httpClient(`/ora2pg/project/${project}`, {
           method: "delete",
+          headers: {
+            Authorization: `Bearer ${this.id_token}`
+          }
         });
         const response = await rawResponse;
         const messageText =

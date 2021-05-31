@@ -28,8 +28,6 @@
   </div>
 </template>
 <script>
-//${process.env.VUE_APP_API_BASE}
-//?key=${process.env.VUE_APP_ENDPOINTS_KEY}
 export default {
   name: 'ProjectDetails',
   data() {
