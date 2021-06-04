@@ -107,8 +107,7 @@ export default {
       userSignedIn: false,
       config: {},
       projectFiles: [],
-      user: "",
-      id_token: "",
+      user: ""
     };
   },
   methods: {
@@ -117,7 +116,7 @@ export default {
     // fails so call to showSnackbar method appears in an if statement.
     showMessage(messageText) {
       const notification = document.querySelector(".mdl-js-snackbar");
-      if (notification) {
+      if (notification && notification.MaterialSnackbar) {
         notification.MaterialSnackbar.showSnackbar({
           message: messageText,
         });
@@ -127,13 +126,11 @@ export default {
     },
     signIn(session) {
       this.user = session.user;
-      this.id_token = session.id_token;
       this.$store.commit("setClientId", session.id_token);
       this.userSignedIn = true;
     },
     signOut() {
       this.user = "";
-      this.id_token = "";
       this.$store.commit("setClientId", "");
       this.userSignedIn = false;
     },
