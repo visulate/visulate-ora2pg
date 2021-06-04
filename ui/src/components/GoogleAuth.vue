@@ -32,7 +32,6 @@ export default {
         if (!googleUser) {
           return null;
         }
-        console.log("googleUser", googleUser);
         this.user = googleUser.getBasicProfile().getEmail();
         this.id_token = this.$gAuth.instance.currentUser
           .get()
