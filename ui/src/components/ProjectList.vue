@@ -11,7 +11,7 @@
   </nav>
 </template>
 <script>
-import httpClient from '../assets/httpClient';
+import { httpGet } from '../assets/httpClient';
 
 export default {
   name: 'ProjectList',
@@ -37,11 +37,7 @@ export default {
   },
   methods: {
     async getProjects() {
-      const res = await httpClient('/ora2pg/projects', {
-         headers: {
-           "Authorization": `Bearer ${this.$parent.id_token}`
-         }
-      });
+      const res = await httpGet('/ora2pg/projects');
       const jsonResponse = await res.json();
       this.projectList = jsonResponse.projects;
     },

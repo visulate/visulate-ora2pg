@@ -17,6 +17,7 @@
   </div>
 </template>
 <script>
+import { httpEventSource } from '../assets/httpClient';
 export default {
   name: "RunOra2Pg",
   emits: ["close-component"],
@@ -36,7 +37,7 @@ export default {
   },
   methods: {
     setupStream() {
-      let es = new EventSource(`${process.env.VUE_APP_API_BASE}/ora2pg/project/${this.project}/exec?key=${process.env.VUE_APP_ENDPOINTS_KEY}`);
+      let es = httpEventSource(`/ora2pg/project/${this.project}/exec`);
 
       es.addEventListener(
         "message",
