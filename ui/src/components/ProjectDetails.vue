@@ -19,15 +19,18 @@
     </div>
     <ul class="mdl-list">
       <li v-for="file in fileList" class="mdl-list__item" :key="file">
-        <a :href="`${api_base}/ora2pg/project/${project}/download/${file}?key=${endpoints_key}`" class="link">{{
+        <!--<a :href="`${api_base}/ora2pg/project/${project}/download/${file}?key=${endpoints_key}`" class="link">{{
           file
-        }}</a>
+        }}</a>-->
+        <button @click="downloadFile(file)">{{ file }}</button>
       </li>
     </ul>
     <p style="padding-left: 10px">{{ fileCount }} files</p>
   </div>
 </template>
 <script>
+import { httpPost } from '../assets/httpClient';
+
 export default {
   name: 'ProjectDetails',
   data() {
@@ -51,6 +54,13 @@ export default {
     },
     closeComponent() {
       this.$emit('close-component');
+    },
+    async downloadFile(file) {
+      var url =
+        '/download/' + file + '?key=' + this.endpoints_key;
+
+      const res = await httpPost(url)
+      console.log(res)
     }
   },
   computed: {

@@ -125,7 +125,7 @@ router.get('/project/:project/exec', async (req, res) => {
 /**
  * Download file
  */
-router.get('/project/:project/download/:file', async (req, res) => {
+router.post('/project/:project/download/:file', async (req, res) => {
   const project = req.params.project;
   const file = req.params.file;
   if (await fileUtils.fileExists(`${appConfig.projectDirectory}/${project}/${file}`)) {
