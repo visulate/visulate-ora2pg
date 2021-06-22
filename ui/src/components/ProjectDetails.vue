@@ -29,7 +29,7 @@
   </div>
 </template>
 <script>
-import { httpPost } from '../assets/httpClient';
+import { httpGet } from '../assets/httpClient';
 
 export default {
   name: 'ProjectDetails',
@@ -59,7 +59,7 @@ export default {
       var url =
         '/download/' + file + '?key=' + this.endpoints_key;
 
-      const res = await httpPost(url)
+      const res = await httpGet(url)
       console.log(res)
     }
   },
