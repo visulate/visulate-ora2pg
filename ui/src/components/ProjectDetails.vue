@@ -56,11 +56,16 @@ export default {
       this.$emit('close-component');
     },
     async downloadFile(file) {
-      var url =
-        '/download/' + file + '?key=' + this.endpoints_key;
+      const url = `/ora2pg/project/${this.project}/download/${file}`;
+      const res = await httpGet(url);
 
-      const res = await httpGet(url)
-      console.log(res)
+      const blob = await res.blob();
+      const localfile = window.URL.createObjectURL(blob)
+
+      let link = document.createElement('a');
+      link.href = localfile;
+      link.download = file;
+      link.click();
     }
   },
   computed: {
