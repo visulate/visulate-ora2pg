@@ -64,7 +64,7 @@ router.get('/project/:project', async (req, res) => {
     }
     const configJson = await fileUtils.getConfigObject(project);
     const projectFiles = await fileUtils.listProjectFiles(project);
-    res.json({ config: configJson, files: projectFiles });
+    res.json({ config: configJson, files: projectFiles.files, directories: projectFiles.directories });
   } catch (err) {
     console.log(err);
     res.status(400).send('Project directory is invalid');
@@ -136,6 +136,5 @@ router.get('/project/:project/download/:file', async (req, res) => {
   }
 
 });
-
 
 module.exports = router;

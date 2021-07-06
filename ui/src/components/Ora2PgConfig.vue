@@ -144,8 +144,10 @@ export default {
   watch: {
     runType: function (newValue) {
       // Simulate data entry in OUTPUT form field
-      document.getElementById("OUTPUT").value = `${newValue}.sql`;
-      document.getElementById("OUTPUT").dispatchEvent(new CustomEvent("input"));
+      if (document.getElementById("OUTPUT")) {
+        document.getElementById("OUTPUT").value = `${newValue}.sql`;
+        document.getElementById("OUTPUT").dispatchEvent(new CustomEvent("input"));
+      }
     },
   },
   methods: {

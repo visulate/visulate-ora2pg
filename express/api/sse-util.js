@@ -90,6 +90,8 @@ async function execOra2Pg(res, project) {
     res.write('data:ora2pg complete\n\n');
     res.write("data:Removing config file\n\n");
     fileUtils.deleteConfigFile(project);
+    res.write(`data:Creating compressed file ${project}.tar.gz \n\n`);
+    fileUtils.genTarFile(project);
     res.write("event: ora2pg\n");
     res.write('data: {"status": "stopped"}\n\n');
     res.end(str);
