@@ -47,6 +47,7 @@
         ref="projectDetailsComponent"
         v-if="showDetails"
         :fileList="projectFiles"
+        :folderList="projectFolders"
         :project="project"
         @delete-project="deleteProject"
         @close-component="hideDetailsPage"
@@ -102,6 +103,7 @@ export default {
       showDetails: false,
       config: {},
       projectFiles: [],
+      projectFolders: []
     };
   },
   methods: {
@@ -127,6 +129,7 @@ export default {
       const res = await httpClient(`/ora2pg/project/${this.project}`);
       const jsonResponse = await res.json();
       this.projectFiles = jsonResponse.files;
+      this.projectFolders = jsonResponse.directories;
       this.showDetails = true;
     },
     // Close run results and project files page

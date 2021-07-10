@@ -169,6 +169,7 @@ describe("Update and Delete project tests", () => {
         res.headers['cache-control'].should.equal('no-cache');
         res.headers['transfer-encoding'].should.equal('chunked');
         expect(file(`${process.env.PROJECT_DIRECTORY}/default/package.sql`)).to.exist;
+        expect(file(`${process.env.PROJECT_DIRECTORY}/default/default.tar.gz`)).to.exist;
         expect(file(`${process.env.PROJECT_DIRECTORY}/default/config/ora2pg.conf`)).to.not.exist;
         done();
       });

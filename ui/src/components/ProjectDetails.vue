@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="action-menu">
-      <b>Project Files</b>
+      <b>Project Files and Folders</b>
       <span>
         <button
           class="mdl-button mdl-js-button mdl-button"
@@ -23,13 +23,17 @@
           file
         }}</a>
       </li>
+      <li v-for="folder in folderList" class="mdl-list__item" :key="folder">
+        {{ folder }}/
+      </li>
     </ul>
-    <p style="padding-left: 10px">{{ fileCount }} files</p>
+    <p style="padding-left: 10px">{{ fileCount }} files<span v-if="folderCount !==0">,
+      {{ folderCount }} folders (folders are included in
+      <a :href="`${api_base}/ora2pg/project/${project}/download/${project}.tar.gz?key=${endpoints_key}`" class="link">
+      {{ project }}.tar.gz</a>)</span></p>
   </div>
 </template>
 <script>
-//${process.env.VUE_APP_API_BASE}
-//?key=${process.env.VUE_APP_ENDPOINTS_KEY}
 export default {
   name: 'ProjectDetails',
   data() {
@@ -45,6 +49,9 @@ export default {
     },
     fileList: {
       type: Array
+    },
+    folderList: {
+      type: Array
     }
   },
     methods: {
@@ -58,6 +65,9 @@ export default {
   computed: {
     fileCount() {
       return this.fileList.length;
+    },
+    folderCount() {
+      return this.folderList.length;
     }
   }
 }
