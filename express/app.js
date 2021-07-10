@@ -1,11 +1,39 @@
-var express = require('express');
-var path = require('path');
-var ora2pgRouter = require('./api/ora2pg');
-var cors = require('cors');
+const express = require('express');
+const path = require('path');
+const ora2pgRouter = require('./api/ora2pg');
+const cors = require('cors');
+const httpServerConfig = require('./resources/http-config');
 
-var app = express();
+const app = express();
 
-app.use(cors());
+// Add support for cross origin requests
+// if CORS_ORIGIN_WHITELIST environment variable is set
+let corsOptions;
+const whitelist = httpServerConfig.corsOriginWhitelist.replace(/\s/g, '').split(",");
+
+if (whitelist.length === 1 && whitelist[0] === '*') {
+  console.log(`Setting Access-Control-Allow-Origin to *`);
+  corsOptions = { origin: '*' };
+} else if  (whitelist.length > 0 && whitelist[0] !== '') {
+  console.log(`Setting Access-Control-Allow-Origin to ${whitelist}`);
+  corsOptions = {
+    origin: function (origin, callback) {
+      // allow whitelisted cross origin requests + REST tools and server to server
+      if (whitelist.indexOf(origin) !== -1 || !origin) {
+        callback(null, true)
+      } else {
+        callback(new Error(`CORS error: origin server is not in ${whitelist}`))
+      }
+    }
+  };
+} else {
+  console.log(`Setting Access-Control-Allow-Origin to FALSE`);
+  corsOptions = { origin: false };
+}
+app.use(cors(corsOptions));
+
+
+// Setup routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'ui')));

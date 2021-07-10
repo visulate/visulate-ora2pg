@@ -19,6 +19,7 @@
  */
 module.exports = {
     port: process.env.HTTP_PORT || 3000 ,
+    corsOriginWhitelist: process.env.CORS_ORIGIN_WHITELIST ||'',
     projectDirectory: process.env.PROJECT_DIRECTORY||process.env.PWD + '/../project',
     resourceDirectory: process.env.RESOURCE_DIRECTORY||process.env.PWD + '/resources',
     configFileEncryptionKey: process.env.ORA2PG_SECRET||'hardCodedInsecureKey123'

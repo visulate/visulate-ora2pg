@@ -28,7 +28,9 @@
       </li>
     </ul>
     <p style="padding-left: 10px">{{ fileCount }} files<span v-if="folderCount !==0">,
-      {{ folderCount }} folders (folders are included in {{ project }}.tar.gz)</span></p>
+      {{ folderCount }} folders (folders are included in
+      <a :href="`${api_base}/ora2pg/project/${project}/download/${project}.tar.gz?key=${endpoints_key}`" class="link">
+      {{ project }}.tar.gz</a>)</span></p>
   </div>
 </template>
 <script>
