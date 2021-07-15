@@ -38,8 +38,8 @@ export default {
   name: 'ProjectDetails',
   data() {
     return {
-      api_base: process.env.VUE_APP_API_BASE,
-      endpoints_key: process.env.VUE_APP_ENDPOINTS_KEY
+      api_base: process.env.VUE_APP_API_BASE || '',
+      endpoints_key: process.env.VUE_APP_ENDPOINTS_KEY || ''
     }
   },
   emits: ['delete-project', 'close-component'],

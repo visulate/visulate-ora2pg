@@ -70,3 +70,7 @@ docs/_site/
 
 # encrypted json files
 *ora2pg-conf.json.enc
+
+# test directories and files
+/project
+default.tar.gz

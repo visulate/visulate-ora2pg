@@ -210,12 +210,14 @@ module.exports.listProjectFiles = listProjectFiles;
  */
 async function genTarFile(project) {
   const dirContents = await fs.promises.readdir(`${appConfig.projectDirectory}/${project}`);
-  tar.c(
-    {
-      gzip: true,
-      cwd: `${appConfig.projectDirectory}/${project}`,
-      file: `${appConfig.projectDirectory}/${project}/${project}.tar.gz`
-    }, dirContents.filter(filename => !(filename === 'config'||filename.endsWith('tar.gz')))
-  )
+  if (dirContents.filter(filename => !(filename === 'config'||filename.endsWith('tar.gz'))).length > 0) {
+    tar.c(
+      {
+        gzip: true,
+        cwd: `${appConfig.projectDirectory}/${project}`,
+        file: `${appConfig.projectDirectory}/${project}/${project}.tar.gz`
+      }, dirContents.filter(filename => !(filename === 'config'||filename.endsWith('tar.gz')))
+    )
+  }
 }
 module.exports.genTarFile = genTarFile;

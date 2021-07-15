@@ -19,6 +19,10 @@ describe("Create project tests", () => {
   before(async () => {
     const config = await fs.promises.readFile(`${process.env.PROJECT_DIRECTORY}/default/config/ora2pg-conf.json`);
     await fileUtils.saveConfigJson('default', JSON.parse(config));
+    const config2 = await fs.promises.readFile(`${process.env.PROJECT_DIRECTORY}/invalid_password/config/ora2pg-conf.json`);
+    await fileUtils.saveConfigJson('invalid_password', JSON.parse(config2));
+
+    await fs.promises.unlink(`${process.env.PROJECT_DIRECTORY}/default/default.tar.gz`);
   });
 
   after(async () => {
@@ -171,6 +175,21 @@ describe("Update and Delete project tests", () => {
         expect(file(`${process.env.PROJECT_DIRECTORY}/default/package.sql`)).to.exist;
         expect(file(`${process.env.PROJECT_DIRECTORY}/default/default.tar.gz`)).to.exist;
         expect(file(`${process.env.PROJECT_DIRECTORY}/default/config/ora2pg.conf`)).to.not.exist;
+        done();
+      });
+  });
+
+  it("Compressed tar file should not be created if directory is empty", (done) => {
+    // default project config converts a package body file
+    chai.request(app)
+      .get('/ora2pg/project/invalid_password/exec')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        res.headers.connection.should.equal('keep-alive');
+        res.headers['content-type'].should.equal('text/event-stream; charset=utf-8');
+        res.headers['cache-control'].should.equal('no-cache');
+        res.headers['transfer-encoding'].should.equal('chunked');
+        expect(file(`${process.env.PROJECT_DIRECTORY}/invalid_password/invalid_password.tar.gz`)).to.not.exist;
         done();
       });
   });
