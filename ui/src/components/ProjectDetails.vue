@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="action-menu">
-      <b>Project Files</b>
+      <b>Project Files and Folders</b>
       <span>
         <button
           class="mdl-button mdl-js-button mdl-button"
@@ -17,20 +17,18 @@
         </button>
       </span>
     </div>
-    <ul class="mdl-list" style="padding-top: 0; padding-bottom: 0">
-      <li v-for="file in fileList" class="mdl-list__item" :key="file"
-        style="border-bottom: 1px solid #ddd">
-      
-        <span>{{file}}</span>
-        <span class="material-icons" @click="downloadFile(file)"
-         style="margin-left: auto; cursor: pointer" >file_download</span>
+    <ul class="mdl-grid mdl-grid--no-spacing project-details-grid">
+      <li v-for="file in fileList" :key="file" @click="downloadFile(file)"
+        class="mdl-cell project-details-grid-file">
+        {{file}}
       </li>  
+      <li v-for="folder in folderList" class="mdl-cell" :key="folder">
+        {{ folder }}/
+      </li>
+
     </ul>
-    <div class="mdl-list__item" style="border-top: 1px solid #ddd">
-      <b>{{ fileCount }} files</b>
-      <div style="margin-left: auto"
-        @click="downloadFile(file)"><span class="material-icons">download_for_offline</span>
-        </div>
+    <div class="project-details-footer">
+      {{ fileCount }} files, {{ folderCount }} folders (folders are included in <a>{{ project }}.tar.gz</a>)
     </div>
   </div>
   
@@ -52,9 +50,12 @@ export default {
     },
     fileList: {
       type: Array
+    },
+    folderList: {
+      type: Array
     }
   },
-    methods: {
+  methods: {
     deleteProject() {
       this.$emit('delete-project', {project: this.project});
     },
@@ -77,6 +78,9 @@ export default {
   computed: {
     fileCount() {
       return this.fileList.length;
+    },
+    folderCount() {
+      return this.folderList.length;
     }
   }
 }

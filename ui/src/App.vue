@@ -49,6 +49,7 @@
         ref="projectDetailsComponent"
         v-if="showDetails"
         :fileList="projectFiles"
+        :folderList="projectFolders"
         :project="project"
         @delete-project="deleteProject"
         @close-component="hideDetailsPage"
@@ -107,6 +108,7 @@ export default {
       userSignedIn: false,
       config: {},
       projectFiles: [],
+      projectFolders: [],
       user: ""
     };
   },
