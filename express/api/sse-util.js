@@ -91,11 +91,49 @@ async function execOra2Pg(res, project) {
     res.write("data:Removing config file\n\n");
     fileUtils.deleteConfigFile(project);
     res.write(`data:Creating compressed file ${project}.tar.gz \n\n`);
-    fileUtils.genTarFile(project);
+    genTarFile(res, project);
+  });
+
+}
+
+// Create compressed tar file with directory contents
+async function genTarFile(res, project) {
+
+    const tar = spawn('tar',
+    ['-zcvf',
+     `${appConfig.projectDirectory}/${project}/${project}.tar.gz`,
+     `--exclude=./config`,
+     `--exclude=./${project}.tar.gz`,
+     `.`],
+    { cwd: `${appConfig.projectDirectory}/${project}` });
+
+  let str = "";
+
+  tar.stdout.on('data', function (data) {
+    str += data.toString();
+    var lines = str.split("\n");
+    for (var i in lines) {
+      if (i == lines.length - 1) {
+        str = lines[i];
+      } else {
+        res.write("data:" + lines[i] + "\n\n");
+      }
+    }
+  });
+
+  tar.stderr.on('data', function (data) {
+    res.write("data:" + data + "\n\n");
+  });
+
+  tar.on('close', function () {
+    res.write(`data:created file ${project}.tar.gz \n\n`);
     res.write("event: ora2pg\n");
     res.write('data: {"status": "stopped"}\n\n');
     res.end(str);
   });
 
 }
+
+
+
 module.exports.execOra2Pg = execOra2Pg;
