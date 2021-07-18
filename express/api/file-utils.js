@@ -15,7 +15,6 @@
  */
 const fs = require('fs');
 const path = require('path');
-const tar = require('tar');
 const handlebars = require('handlebars');
 const appConfig = require('../resources/http-config');
 
@@ -202,22 +201,3 @@ async function listProjectFiles(project) {
   }
 }
 module.exports.listProjectFiles = listProjectFiles;
-
-/**
- * Create a tar file with project contents except for the config directory
- *
- * @param {string} project
- */
-async function genTarFile(project) {
-  const dirContents = await fs.promises.readdir(`${appConfig.projectDirectory}/${project}`);
-  if (dirContents.filter(filename => !(filename === 'config'||filename.endsWith('tar.gz'))).length > 0) {
-    tar.c(
-      {
-        gzip: true,
-        cwd: `${appConfig.projectDirectory}/${project}`,
-        file: `${appConfig.projectDirectory}/${project}/${project}.tar.gz`
-      }, dirContents.filter(filename => !(filename === 'config'||filename.endsWith('tar.gz')))
-    )
-  }
-}
-module.exports.genTarFile = genTarFile;
