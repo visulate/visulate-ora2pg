@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="action-menu">
-      <b>Project Files</b>
+      <b>Project Files and Folders</b>
       <span>
         <button
           class="mdl-button mdl-js-button mdl-button"
@@ -17,20 +17,24 @@
         </button>
       </span>
     </div>
-    <ul class="mdl-list">
-      <li v-for="file in fileList" class="mdl-list__item" :key="file">
-        <!--<a :href="`${api_base}/ora2pg/project/${project}/download/${file}?key=${endpoints_key}`" class="link">{{
-          file
-        }}</a>-->
-        <button @click="downloadFile(file)">{{ file }}</button>
+    <ul class="mdl-grid mdl-grid--no-spacing project-details-grid">
+      <li v-for="file in fileList" :key="file" @click="downloadFile(file)"
+        class="mdl-cell project-details-grid-file">
+        {{file}}
+      </li>  
+      <li v-for="folder in folderList" class="mdl-cell" :key="folder">
+        {{ folder }}/
       </li>
+
     </ul>
-    <p style="padding-left: 10px">{{ fileCount }} files</p>
+    <div class="project-details-footer">
+      {{ fileCount }} files, {{ folderCount }} folders (folders are included in <a>{{ project }}.tar.gz</a>)
+    </div>
   </div>
+  
 </template>
 <script>
-import { httpGet } from '../assets/httpClient';
-
+import { httpGet } from "../assets/httpClient";
 export default {
   name: 'ProjectDetails',
   data() {
@@ -46,9 +50,12 @@ export default {
     },
     fileList: {
       type: Array
+    },
+    folderList: {
+      type: Array
     }
   },
-    methods: {
+  methods: {
     deleteProject() {
       this.$emit('delete-project', {project: this.project});
     },
@@ -71,6 +78,9 @@ export default {
   computed: {
     fileCount() {
       return this.fileList.length;
+    },
+    folderCount() {
+      return this.folderList.length;
     }
   }
 }
