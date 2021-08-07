@@ -1,0 +1,807 @@
+swagger: "2.0"
+info:
+  description: "UI and API for running Ora2Pg"
+  version: "1.1.2"
+  title: "Visulate Ora2Pg"
+  contact:
+    name: Peter Goldthorp
+    email: "peter@visulate.com"
+  license:
+    name: "Apache 2.0"
+    url: "https://github.com/visulate/visulate-ora2pg/blob/main/LICENSE"
+host: "ora2pg.endpoints.visulate-iap-endpoints.cloud.goog"
+x-google-endpoints:
+- name: "ora2pg.endpoints.visulate-iap-endpoints.cloud.goog"
+  target: "35.231.22.231"
+  # Comment/Uncomment as required
+  allowCors: True
+
+tags:
+- name: "API"
+  description: "Configure and run Ora2Pg"
+schemes:
+- "https"
+- "http"
+paths:
+  /ora2pg:
+    post:
+      tags:
+      - "API"
+      summary: "Create project"
+      description: "Create a project directory and copy the default config file to it"
+      operationId: "create_project"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Project object to be created"
+        required: true
+        schema:
+          $ref: "#/definitions/Project"
+      responses:
+        "201":
+          description: "Project created"
+        "400":
+          description: "Invalid project value"
+        "409":
+          description: "Duplicate project"
+  /ora2pg/projects:
+    get:
+      tags:
+      - "API"
+      summary: "List projects"
+      operationId: "list_projects"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            $ref: "#/definitions/ProjectList"
+
+  /ora2pg/project/{project}:
+    post:
+      tags:
+      - "API"
+      summary: "Save or update config file"
+      description: "Saves an encrypted copy of the config json file in the project directory"
+      operationId: "save_project"
+      consumes:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "project"
+        description: "Project (directory) name"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "config"
+        schema:
+          $ref: "#/definitions/Ora2pgConfig"
+      responses:
+        "201":
+          description: "Created/saved"
+        "400":
+          description: "Invalid configuration"
+    get:
+      tags:
+      - "API"
+      summary: "Retrieve project details"
+      description: "Retrieve current config and list of generated output files"
+      operationId: "retrieve_project_details"
+      parameters:
+      - in: "path"
+        name: "project"
+        description: "Project (directory) name"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Success"
+          schema:
+            $ref: "#/definitions/ProjectDetails"
+        "400":
+          description: "Project directory is invalid"
+        "404":
+          description: "Project direcory does not exist"
+    delete:
+      tags:
+      - "API"
+      summary: "Delete project directory and all of its files"
+      description: "Perform a recursive delete on the project directory"
+      operationId: "delete_project"
+      parameters:
+      - in: "path"
+        name: "project"
+        description: "Project (directory) name"
+        required: true
+        type: "string"
+      responses:
+        "204":
+          description: "Deleted"
+        "404":
+          description: "Project directory does not exist"
+        "400":
+          description: "An error occurred"
+
+  /ora2pg/project/{project}/exec:
+    get:
+      tags:
+      - "API"
+      summary: "Execute Ora2Pg"
+      description: "Runs Ora2Pg and returns its output as a server side event stream"
+      operationId: "execute_ora2pg"
+      parameters:
+      - in: "path"
+        name: "project"
+        description: "Project (directory) name"
+        required: true
+        type: "string"
+      produces:
+      - "text/event-stream"
+      # Override default timeout for Cloud Endpoints ESPv2
+      x-google-backend:
+        deadline: 3600.0
+      responses:
+        "200":
+          description: "Ora2Pg output"
+          schema:
+            $ref: "#/definitions/ServerSideEventStream"
+        "400":
+          description: "Application error"
+        "404":
+          description: "Config file not found"
+
+  /ora2pg/project/{project}/download/{file}:
+    get:
+      tags:
+      - "API"
+      summary: "Download file"
+      description: "Download file as an attachment"
+      operationId: "download_file"
+      parameters:
+      - in: "path"
+        name: "project"
+        description: "Project (directory) name"
+        required: true
+        type: "string"
+      - in: "path"
+        name: "file"
+        description: "file to download"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "File download as attachment"
+          schema:
+            type: "file"
+        "404":
+          description: "File not found"
+# This section requires all requests to any path to require an API key.
+security:
+- api_key: []
+- project_oauth2: []
+securityDefinitions:
+  # This section configures basic authentication with an API key.
+  api_key:
+    type: "apiKey"
+    name: "key"
+    in: "query"
+  # oauth2 implicit flow
+  project_oauth2:
+    authorizationUrl: ""
+    flow: "implicit"
+    type: "oauth2"
+    x-google-issuer: "https://accounts.google.com"
+    x-google-jwks_uri: "https://www.googleapis.com/oauth2/v3/certs"
+    # oauth2 client_id
+    x-google-audiences: "298820748354-qfl9ih4oh92ndvgui3e9kqobgruqha03.apps.googleusercontent.com"
+
+definitions:
+  ServerSideEventStream:
+    type: "object"
+    x-events:
+      added:
+        type: "object"
+        properties:
+          message:
+            type: "string"
+          createdAt:
+            type: "string"
+            format: "date-time"
+      updated:
+        type: "object"
+        properties:
+          previous:
+            type: "string"
+          newValue:
+            type: "string"
+          updatedAt:
+            type: "string"
+            format: "date-time"
+  Project:
+    type: "object"
+    properties:
+      project:
+        type: "string"
+  ProjectList:
+    type: "object"
+    properties:
+      projects:
+        type: "array"
+        items:
+          type: "string"
+  ProjectDetails:
+    type: "object"
+    properties:
+      config:
+        $ref: "#/definitions/Ora2pgConfig"
+      files:
+        type: "array"
+        items:
+          type: "string"
+  Ora2pgConfigVal:
+    type: "object"
+    properties:
+      value:
+        type: "string"
+        description: "The value for this configuration parameter"
+      description:
+        type: "string"
+        description: "Text to display in UI hint"
+      include:
+        type: "boolean"
+        description: "Should this property be included or commented out in the Config file"
+      class:
+        type: "string"
+        description: "Set to 'basic' to show in UI when not in Advanced mode"
+      type:
+        type: "string"
+        description: "Set to 'password' to for password fields"
+      flag:
+        type: "boolean"
+        description: "Set to true to indicate the field has valid values of 0 or 1"
+    required:
+    - value
+      description
+      include
+  Ora2pgConfig:
+    type: "object"
+    properties:
+      COMMON:
+        type: "object"
+        properties:
+          values:
+            type: "object"
+            properties:
+              title:
+                type: "string"
+              IMPORT:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      INPUT:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              INPUT_FILE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              ORACLE_HOME:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              ORACLE_DSN:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              ORACLE_USER:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              ORACLE_PWD:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              USER_GRANTS:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DEBUG:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              ORA_INITIAL_COMMAND:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      SCHEMA:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              EXPORT_SCHEMA:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              SCHEMA:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              CREATE_SCHEMA:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              COMPILE_SCHEMA:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PG_SCHEMA:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              POSTGIS_SCHEMA:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              SYSUSERS:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              LOOK_FORWARD_FUNCTION:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              NO_FUNCTION_METADATA:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      ENCODING:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              NLS_LANG:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              NLS_CHAR:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              CLIENT_ENCODING:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      EXPORT:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              TYPE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DISABLE_COMMENT:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              ALLOW:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              EXCLUDE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              VIEW_AS_TABLE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              NO_VIEW_ORDERING:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              GRANT_OBJECT:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              EXTERNAL_TO_FDW:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              TRUNCATE_TABLE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              USE_TABLESPACE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              REORDERING_COLUMNS:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              REPLACE_QUERY:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      FULL_TEXT_SEARCH:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              CONTEXT_AS_TRGM:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              FTS_INDEX_ONLY:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              FTS_CONFIG:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              USE_UNACCENT:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              USE_LOWER_UNACCENT:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      DATA_DIFF:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              DATADIFF:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DATADIFF_UPDATE_BY_PKEY:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DATADIFF_DEL_SUFFIX:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DATADIFF_UPD_SUFFIX:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DATADIFF_WORK_MEM:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DATADIFF_TEMP_BUFFERS:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DATADIFF_BEFORE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DATADIFF_AFTER:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DATADIFF_AFTER_ALL:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      CONSTRAINT:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              SKIP:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              KEEP_PKEY_NAMES:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PKEY_IN_CREATE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              FKEY_ADD_UPDATE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              FKEY_DEFERRABLE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DEFER_FKEY:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DROP_FKEY:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      TRIGGERS_AND_SEQUENCES:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              DISABLE_SEQUENCE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DISABLE_TRIGGERS:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      OBJECT_MODIFICATION:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              MODIFY_STRUCT:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              REPLACE_TABLES:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              REPLACE_COLS:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PRESERVE_CASE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              INDEXES_SUFFIX:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              INDEXES_REMAINING:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              USE_INDEX_OPCLASS:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PREFIX_PARTITION:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PREFIX_SUB_PARTITION:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DISABLE_PARTITION:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              WITH_OID:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              ORA_RESERVED_WORDS:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              USE_RESERVED_WORDS:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DISABLE_UNLOGGED:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      OUTPUT:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              PG_DSN:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PG_USER:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PG_PWD:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              OUTPUT:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              OUTPUT_DIR:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              BZIP2:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              FILE_PER_CONSTRAINT:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              FILE_PER_INDEX:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              FILE_PER_FKEYS:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              FILE_PER_TABLE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              FILE_PER_FUNCTION:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              BINMODE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              STOP_ON_ERROR:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              COPY_FREEZE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              CREATE_OR_REPLACE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PG_INIT_COMMAND:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      TYPE:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              DATA_TYPE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PG_NUMERIC_TYPE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PG_INTEGER_TYPE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DEFAULT_NUMERIC:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              ENABLE_MICROSECOND:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              REPLACE_AS_BOOLEAN:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              BOOLEAN_VALUES:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              REPLACE_ZERO_DATE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              MODIFY_TYPE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              TO_NUMBER_CONVERSION:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      GRANT:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              GEN_USER_PWD:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              FORCE_OWNER:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              FORCE_SECURITY_INVOKER:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      DATA:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              DATA_LIMIT:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              BLOB_LIMIT:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              NOESCAPE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              TRANSACTION:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              STANDARD_CONFORMING_STRINGS:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              LONGREADLEN:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              LONG_TRUNCOK:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              NO_LOB_LOCATOR:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              LOB_CHUNK_SIZE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              XML_PRETTY:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              LOG_ON_ERROR:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              TRIM_TYPE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              TRIM_CHAR:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              INTERNAL_DATE_MAX:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              FUNCTION_CHECK:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              NO_BLOB_EXPORT:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DATA_EXPORT_ORDER:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PSQL_RELATIVE_PATH:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      PERFORMANCE:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              JOBS:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              ORACLE_COPIES:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PARALLEL_TABLES:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DEFAULT_PARALLELISM_DEGREE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PARALLEL_MIN_ROWS:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DEFINED_PK:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DROP_INDEXES:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              SYNCHRONOUS_COMMIT:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      PLSQL:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              EXPORT_INVALID:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PLSQL_PGSQL:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              NULL_EQUAL_EMPTY:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              EMPTY_LOB_NULL:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PACKAGE_AS_SCHEMA:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              REWRITE_OUTER_JOIN:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              FUNCTION_STABLE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              COMMENT_COMMIT_ROLLBACK:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              STRING_CONSTANT_REGEXP:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              ALTERNATIVE_QUOTING_REGEXP:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              USE_ORAFCE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              AUTONOMOUS_TRANSACTION:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      ASSESSMENT:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              ESTIMATE_COST:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              COST_UNIT_VALUE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DUMP_AS_HTML:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              TOP_MAX:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              HUMAN_DAYS_LIMIT:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              AUDIT_USER:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              UUID_FUNCTION:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      POSTGRESQL:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              PG_VERSION:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              BITMAP_AS_GIN:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PG_BACKGROUND:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DBLINK_CONN:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              PG_SUPPORTS_SUBSTR:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      SPATIAL:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              AUTODETECT_SPATIAL_TYPE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              CONVERT_SRID:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              DEFAULT_SRID:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              GEOMETRY_EXTRACT_TYPE:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      FDW:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              FDW_SERVER:
+                $ref: "#/definitions/Ora2pgConfigVal"
+
+      MYSQL:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          class:
+            type: "string"
+          values:
+            type: "object"
+            properties:
+              MYSQL_PIPES_AS_CONCAT:
+                $ref: "#/definitions/Ora2pgConfigVal"
+              MYSQL_INTERNAL_EXTRACT_FORMAT:
+                $ref: "#/definitions/Ora2pgConfigVal"
