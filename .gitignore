@@ -68,9 +68,7 @@ docs/Gemfile.lock
 docs/_site/
 .vscode/
 
-# encrypted json files
+# ora2pg runtime
 *ora2pg-conf.json.enc
-
-# test directories and files
-/project
-default.tar.gz
+*.tar.gz
+project/
