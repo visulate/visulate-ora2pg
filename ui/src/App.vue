@@ -12,9 +12,9 @@
     </header>
 
     <!-- Project list -->
-    <div class="mdl-layout__drawer" v-if="userSignedIn">
+    <div class="mdl-layout__drawer" v-show="userSignedIn">
       <span class="mdl-layout__title">Project</span>
-      <project-list
+      <project-list v-if="userSignedIn"
         @set-project="setProject"
         @create-project="createProject"
         ref="projectsComponent"
@@ -32,7 +32,7 @@
     </div>
 
     <!-- Main body -->
-    <main class="mdl-layout__content" v-if="userSignedIn">
+    <main class="mdl-layout__content" v-show="userSignedIn">
       <home-page
         v-show="showHome"
         @create-project="createProject"
@@ -189,6 +189,7 @@ export default {
       const jsonResponse = await res.json();
       this.config = jsonResponse.config;
       this.projectFiles = jsonResponse.files;
+      this.projectFolders = jsonResponse.directories;
       this.hideHomePage();
     },
     // Save the project configuration

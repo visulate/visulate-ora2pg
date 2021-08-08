@@ -72,3 +72,4 @@ docs/_site/
 *ora2pg-conf.json.enc
 *.tar.gz
 project/
+openapi.yaml

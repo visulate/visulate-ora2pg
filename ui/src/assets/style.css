@@ -273,7 +273,7 @@ button {
 }
 
 .project-details-grid {
-  padding-top: 0; 
+  padding-top: 0;
   padding-bottom: 0;
 }
 
@@ -285,6 +285,7 @@ button {
 
 .project-details-grid-file {
   cursor: pointer;
+  font-weight: 600;
 }
 
 .project-details-grid-file:hover {

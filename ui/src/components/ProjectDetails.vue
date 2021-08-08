@@ -25,9 +25,6 @@
       <li v-for="folder in folderList" class="mdl-cell" :key="folder">
         {{ folder }}/
       </li>
-      <li v-for="folder in folderList" class="mdl-list__item" :key="folder">
-        {{ folder }}/
-      </li>
     </ul>
     <p style="padding-left: 10px">{{ fileCount }} files<span v-if="folderCount !==0">,
       {{ folderCount }} folders (folders are included in

@@ -17,7 +17,7 @@
   </div>
 </template>
 <script>
-import { httpEventSource } from '../assets/httpClient';
+// import { httpEventSource } from '../assets/httpClient';
 export default {
   name: "RunOra2Pg",
   emits: ["close-component"],
