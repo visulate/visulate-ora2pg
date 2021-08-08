@@ -271,3 +271,27 @@ button {
   display: flex;
   flex-direction: row
 }
+
+.project-details-grid {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.project-details-grid>.mdl-cell {
+  border-right: 1px solid rgb(0 0 0 / 12%);
+  border-bottom: 1px solid rgb(0 0 0 / 12%);
+  padding: 8px;
+}
+
+.project-details-grid-file {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.project-details-grid-file:hover {
+  background-color: rgb(243, 243, 243);
+}
+
+.project-details-footer {
+  padding: 5px;
+}
