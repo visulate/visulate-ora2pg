@@ -134,6 +134,12 @@
                 "value": "UTF8",
                 "description": "By default PostgreSQL client encoding is automatically set to UTF8 to avoid encoding issue. If you have changed the value of NLS_LANG you might have to change the encoding of the PostgreSQL client",
                 "include": false
+            },
+            "FORCE_PLSQL_ENCODING": {
+                "value": 0,
+                "flag": true,
+                "description": "Force utf8 encoding of exported PL/SQL code",
+                "include": true
             }
 
         },
@@ -165,6 +171,12 @@
                 "description": "Objects to exclude from export process. By default none. Value must be a list of object names, a space separated regex or % wildcard for use with the LIKE operator",
                 "include": false,
                 "class": "basic"
+            },
+            "NO_EXCLUDED_TABLE": {
+                "value": 0,
+                "flag": true,
+                "description": "Include Oracle internal tables in export to improve Ora2Pg performance",
+                "include": true
             },
             "VIEW_AS_TABLE": {
                 "value": "VIEW_NAME",
@@ -210,6 +222,12 @@
                 "value": "EMPLOYEES[SELECT e.id,e.fisrtname,lastname FROM EMPLOYEES e JOIN EMP_UPDT u ON (e.id=u.id AND u.cdate>'2014-08-01 00:00:00')]",
                 "description": "Custom query to extract data from an Oracle table. Overrides the default Ora2Pg \"SELECT * FROM table\" query to extract data. The format is TABLENAME[SQL_QUERY]. You can define multiple REPLACE_QUERY lines",
                 "include": false
+            },
+            "DROP_IF_EXISTS": {
+                "value": 0,
+                "flag": true,
+                "description": "Add a DROP <OBJECT> IF EXISTS before create object expressions",
+                "include": true
             }
         },
         "title": "Export type and filters",
@@ -457,18 +475,21 @@
             "PG_DSN": {
                 "value": "dbi:Pg:dbname=test_db;host=localhost;port=5432",
                 "description": "Send export directly to a PostgreSQL database (data exports only). This will disable file output.",
-                "include": false
+                "include": false,
+                "class": "basic"
             },
             "PG_USER": {
                 "value": "test",
                 "description": "PostgresSQL username",
-                "include": false
+                "include": false,
+                "class": "basic"
             },
             "PG_PWD": {
                 "value": "test",
                 "type": "password",
                 "description": "PostgresSQL password",
-                "include": false
+                "include": false,
+                "class": "basic"
             },
             "OUTPUT": {
                 "value": "table.sql",
@@ -603,6 +624,24 @@
                 "value": "numeric",
                 "description": "By default Oracle call to function TO_NUMBER will be translated as a cast into numeric. For example, TO_NUMBER('10.1234')  is converted into PostgreSQL call to_number('10.1234')::numeric. If you want you can cast the call to integer or bigint by changing the value of the configuration directive. If you need better control of the format, just set it as value, for example: TO_NUMBER_CONVERSION 99999999999999999999.9999999999 will convert the code above as: TO_NUMBER('10.1234', '99999999999999999999.9999999999') Any value of the directive that it is not numeric, integer or bigint willbe taken as a mask format. If set to none, no conversion will be done.",
                 "include": true
+            },
+            "VARCHAR_TO_TEXT": {
+                "value": 1,
+                "flag": true,
+                "description": "Convert varchar2 columns without a size constraint to text",
+                "include": true
+            },
+            "FORCE_IDENTITY_BIGINT": {
+                "value": 1,
+                "flag": true,
+                "description": "Force numeric id columns to be of type bigint",
+                "include": true
+            },
+            "TO_CHAR_NOTIMEZONE": {
+                "value": 1,
+                "flag": true,
+                "description": "Remove timezone part from the format of the TO_CHAR() function",
+                "include": true
             }
         },
         "title": "Type behaviors and redefinitions"
@@ -669,10 +708,10 @@
                 "description": "Enable to bypass the 'ORA-24345: A Truncation' error and truncate the extracted data to the LongReadLen value",
                 "include": false
             },
-            "NO_LOB_LOCATOR": {
-                "value": 0,
+            "USE_LOB_LOCATOR": {
+                "value": 1,
                 "flag": true,
-                "description": "Disable this if you don't want to load full content of BLOB and CLOB and use LOB locators instead. This is usefull to not having to set LONGREADLEN. Note that this will not improve speed of BLOB export as most of the time is consumed by the byte escaping and in this case export is done line by line and not by chunk of DATA_LIMIT rows. Default is enabled, it will not use LOB locators for backward compatibility.",
+                "description": "Disable this if you want to load full content of BLOB and CLOB and use LOB locators instead. This is usefull to not having to set LONGREADLEN. Note that this will not improve speed of BLOB export as most of the time is consumed by the byte escaping and in this case export is done line by line and not by chunk of DATA_LIMIT rows. Default is enabled, it will not use LOB locators for backward compatibility.",
                 "include": true
             },
             "LOB_CHUNK_SIZE": {
@@ -713,10 +752,10 @@
                 "description": "Disable this directive if you want to disable check_function_bodies. SET check_function_bodies = false; It disables validation of the function body string during CREATE FUNCTION. Default is to use the postgresql.conf setting that enable it by default",
                 "include": true
             },
-            "NO_BLOB_EXPORT": {
-                "value": 0,
+            "ENABLE_BLOB_EXPORT": {
+                "value": 1,
                 "flag": true,
-                "description": "Do not export the contents of BLOB columns",
+                "description": "Export the contents of BLOB columns",
                 "include": true
             },
             "DATA_EXPORT_ORDER": {
@@ -729,6 +768,22 @@
                 "value": 0,
                 "flag": true,
                 "description": "Use 'ir' instead of 'i' in the psql command that executes the generated SQL files",
+                "include": true
+            },
+            "DATA_VALIDATION_ROWS": {
+                "value": 10000,
+                "description": "Number of rows that must be retrieved on both side for data validation",
+                "include": true
+            },
+            "DATA_VALIDATION_ORDERING": {
+                "value": 1,
+                "flag": true,
+                "description": "Use primary key to order rows before validation",
+                "include": true
+            },
+            "DATA_VALIDATION_ERROR": {
+                "value": 10,
+                "description": "Data validation error threshold",
                 "include": true
             }
         },
@@ -832,6 +887,12 @@
                 "description": "By default calls to COMMIT/ROLLBACK are kept untouched by Ora2Pg to force the user to review the logic of the function. Once it is fixed in Oracle source code or you want to comment this calls enable the following directive",
                 "include": true
             },
+            "COMMENT_SAVEPOINT": {
+                "value": 0,
+                "flag": true,
+                "description": "Add comments to SAVEPOINT calls",
+                "include": true
+            },
             "STRING_CONSTANT_REGEXP": {
                 "value": "<placeholder value=\".*\">",
                 "description": "Replace all string constant during the pl/sql to plpgsql translation. String constants are all text included between single quotes. If you have some string placeholder used in dynamic call to queries you can set a list of regexp to be temporary replaced to not break the parser. The list of regexp must use the semi colon as separato",
@@ -903,7 +964,7 @@
     "POSTGRESQL": {
         "values": {
             "PG_VERSION": {
-                "value": 11,
+                "value": 12,
                 "description": "Set the PostgreSQL major version number of the target database",
                 "include": true
             },
@@ -964,6 +1025,17 @@
             "FDW_SERVER": {
                 "value": "orcl",
                 "description": "Set the name of the foreign data server that is used in the \"CREATE SERVER name FOREIGN DATA WRAPPER oracle_fdw ...\" command. This name will  be used in the \"CREATE FOREIGN TABLE ...\" SQL command. Default is arbitrary set to orcl. This only concerns exports of type FDW",
+                "include": true
+            },
+            "ORACLE_FDW_TRANSFORM": {
+                "value": "ERROR_LOG_SAMPLE[DBMS_TYPE:regexp_replace(\"DBMS_TYPE\",'Oracle','PostgreSQL')]",
+                "description": "Transformation to be applied to a column when exporting data",
+                "include": false
+            },
+            "DROP_FOREIGN_SCHEMA": {
+                "value": 1,
+                "flag": true,
+                "description": "Drop the temporary schema ora2pg_fdw_import",
                 "include": true
             }
         },

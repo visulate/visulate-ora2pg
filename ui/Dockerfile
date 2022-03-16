@@ -1,5 +1,6 @@
 # Build the Vue UI
 FROM node as build-stage
+ENV  NODE_OPTIONS=--openssl-legacy-provider
 COPY . /app
 WORKDIR /app
 RUN npm install

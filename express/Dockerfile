@@ -2,7 +2,9 @@
 FROM georgmoser/ora2pg:21.0 as ora2pg
 
 FROM node:current-alpine
-COPY --from=ora2pg / .
+# COPY --from=ora2pg / .
+COPY --from=ora2pg /usr/local/bin/* /usr/local/bin/
+COPY --from=ora2pg /config /config
 
 ENV ORACLE_HOME=/usr/lib/oracle/12.2/client64
 ENV TNS_ADMIN=/usr/lib/oracle/12.2/client64/network/admin
