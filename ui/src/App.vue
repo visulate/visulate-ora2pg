@@ -32,7 +32,7 @@
     <!-- Main body -->
     <main class="mdl-layout__content">
       <home-page
-        v-show="showHome"
+        v-if="showHome"
         @create-project="createProject"
         @cancel-create-project="hideHomePage"
       ></home-page>
