@@ -1,21 +1,16 @@
 # Build the Vue UI
-FROM node:current-alpine as vue-ui
-ENV  NODE_OPTIONS=--openssl-legacy-provider
 
-COPY /ui /ui
+FROM node:16-alpine as vue-ui
+COPY /ui ./ui
 WORKDIR /ui
-RUN apk add --no-cache --virtual .gyp \
-        python3 \
-        make \
-        g++ \
-    && npm install \
-    && npm run build \
-    && apk del .gyp
+RUN npm install
+RUN npm run build
 
-FROM georgmoser/ora2pg:23.0
+# Setup express server
+FROM georgmoser/ora2pg:23.1
 
 # Install Node JS
-RUN curl -sL https://deb.nodesource.com/setup_current.x | bash -
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
 RUN apt-get install -y nodejs
 
 # Create the project volume
