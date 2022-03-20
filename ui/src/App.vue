@@ -103,12 +103,8 @@ export default {
       showDetails: false,
       config: {},
       projectFiles: [],
-<<<<<<< HEAD
-      projectFolders: []
-=======
       projectFolders: [],
       user: ""
->>>>>>> f2ab77c... display files and folders in a grid
     };
   },
   methods: {

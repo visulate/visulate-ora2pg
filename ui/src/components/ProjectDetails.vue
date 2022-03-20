@@ -18,9 +18,10 @@
       </span>
     </div>
     <ul class="mdl-grid mdl-grid--no-spacing project-details-grid">
-      <li v-for="file in fileList" :key="file" @click="downloadFile(file)"
+      <li v-for="file in fileList" :key="file"
         class="mdl-cell project-details-grid-file">
-        {{file}}
+          <a :href="`${api_base}/ora2pg/project/${project}/download/${file}?key=${endpoints_key}`" class="link">
+        {{file}}</a>
       </li>
       <li v-for="folder in folderList" class="mdl-cell" :key="folder">
         {{ folder }}/
@@ -34,7 +35,6 @@
 
 </template>
 <script>
-import { httpGet } from "../assets/httpClient";
 export default {
   name: 'ProjectDetails',
   data() {
@@ -61,18 +61,6 @@ export default {
     },
     closeComponent() {
       this.$emit('close-component');
-    },
-    async downloadFile(file) {
-      const url = `/ora2pg/project/${this.project}/download/${file}`;
-      const res = await httpGet(url);
-
-      const blob = await res.blob();
-      const localfile = window.URL.createObjectURL(blob)
-
-      let link = document.createElement('a');
-      link.href = localfile;
-      link.download = file;
-      link.click();
     }
   },
   computed: {

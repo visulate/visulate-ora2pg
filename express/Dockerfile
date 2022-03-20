@@ -1,5 +1,5 @@
 # https://github.com/Guy-Incognito/ora2pg
-FROM georgmoser/ora2pg:21.0 as ora2pg
+FROM georgmoser/ora2pg:23.1 as ora2pg
 
 FROM node:current-alpine
 # COPY --from=ora2pg / .
