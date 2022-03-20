@@ -17,21 +17,22 @@
         </button>
       </span>
     </div>
-    <ul class="mdl-list">
-      <li v-for="file in fileList" class="mdl-list__item" :key="file">
-        <a :href="`${api_base}/ora2pg/project/${project}/download/${file}?key=${endpoints_key}`" class="link">{{
-          file
-        }}</a>
+    <ul class="mdl-grid mdl-grid--no-spacing project-details-grid">
+      <li v-for="file in fileList" :key="file"
+        class="mdl-cell project-details-grid-file">
+          <a :href="`${api_base}/ora2pg/project/${project}/download/${file}?key=${endpoints_key}`" class="link">
+        {{file}}</a>
       </li>
-      <li v-for="folder in folderList" class="mdl-list__item" :key="folder">
+      <li v-for="folder in folderList" class="mdl-cell" :key="folder">
         {{ folder }}/
       </li>
+
     </ul>
-    <p style="padding-left: 10px">{{ fileCount }} files<span v-if="folderCount !==0">,
-      {{ folderCount }} folders (folders are included in
-      <a :href="`${api_base}/ora2pg/project/${project}/download/${project}.tar.gz?key=${endpoints_key}`" class="link">
-      {{ project }}.tar.gz</a>)</span></p>
+    <div class="project-details-footer">
+      {{ fileCount }} files, {{ folderCount }} folders (folders are included in <a>{{ project }}.tar.gz</a>)
+    </div>
   </div>
+
 </template>
 <script>
 export default {
@@ -54,7 +55,7 @@ export default {
       type: Array
     }
   },
-    methods: {
+  methods: {
     deleteProject() {
       this.$emit('delete-project', {project: this.project});
     },

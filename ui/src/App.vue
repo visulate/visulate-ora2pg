@@ -103,7 +103,8 @@ export default {
       showDetails: false,
       config: {},
       projectFiles: [],
-      projectFolders: []
+      projectFolders: [],
+      user: ""
     };
   },
   methods: {
