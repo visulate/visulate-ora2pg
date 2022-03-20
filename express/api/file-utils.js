@@ -201,3 +201,14 @@ async function listProjectFiles(project) {
   }
 }
 module.exports.listProjectFiles = listProjectFiles;
+
+/**
+ * Count files and directories in project directory
+ *
+ * @param {string} project
+ */
+async function countProjectFiles(project){
+  const dirContents = await fs.promises.readdir(`${appConfig.projectDirectory}/${project}`);
+  return dirContents.length;
+}
+module.exports.countProjectFiles = countProjectFiles;
