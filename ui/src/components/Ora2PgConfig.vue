@@ -24,7 +24,7 @@
         <a v-show="!showAdvanced" @click="setAdvanced(true)"
           >Show advanced settings</a>
       </span>
-      <div v-for="(properties, section) in configData" :key="section">
+      <div v-for="(properties, section) in configData" :key="section" >
         <!-- Expansion panel header -->
         <h3 class="accordion active"
           :ref="section + '-h3'"
@@ -170,9 +170,9 @@ export default {
       this.showAdvanced = val;
     },
     toggleAccordion(section) {
-      let h3 = this.$refs[section + "-h3"];
+      let h3 = this.$refs[section+'-h3'][0];
       h3.classList.toggle("active");
-      let panel = this.$refs[section];
+      let panel = this.$refs[section][0];
       if (panel.style.display == "block") {
         panel.style.display = "none";
       } else {
