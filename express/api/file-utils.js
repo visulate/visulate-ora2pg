@@ -209,6 +209,6 @@ module.exports.listProjectFiles = listProjectFiles;
  */
 async function countProjectFiles(project){
   const dirContents = await fs.promises.readdir(`${appConfig.projectDirectory}/${project}`);
-  return dirContents.length;
+  return dirContents.length -1; // ignore the config directory
 }
 module.exports.countProjectFiles = countProjectFiles;
