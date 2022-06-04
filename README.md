@@ -35,6 +35,8 @@ docker run -d -p 3000:3000 -v "$(pwd)/ora2pg-projects":/project visulate/visulat
 
 Open your browser at http://localhost:3000 and follow the onscreen instructions
 
+Additional usage instructions are available in [Migrating Oracle to PostgreSQL](https://bmsinabox.com/pages/oracle2postgres.html)
+
 ## Technical Description
 
 The Dockerfile is in the project root. You can build it using:

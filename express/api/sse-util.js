@@ -1,5 +1,5 @@
 /*!
- * Copyright 2020, 2021 Visulate LLC. All Rights Reserved.
+ * Copyright 2020, 2022 Visulate LLC. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,26 +86,34 @@ async function execOra2Pg(res, project) {
   });
 
   // Cleanup
-  ora2pg.on('close', function () {
+  ora2pg.on('close', async function () {
     res.write('data:ora2pg complete\n\n');
     res.write("data:Removing config file\n\n");
     fileUtils.deleteConfigFile(project);
-    res.write(`data:Creating compressed file ${project}.tar.gz \n\n`);
-    genTarFile(res, project);
+
+    const fileCount = await fileUtils.countProjectFiles(project);
+    if (fileCount > 0) {
+      res.write(`data:Creating compressed file ${project}.tar.gz \n\n`);
+      genTarFile(res, project);
+
+    } else {
+      res.write("event: ora2pg\n");
+      res.write('data: {"status": "stopped"}\n\n');
+      res.end(str);
+    }
   });
 
 }
 
 // Create compressed tar file with directory contents
 async function genTarFile(res, project) {
-
-    const tar = spawn('tar',
-    ['-zcvf',
-     `${appConfig.projectDirectory}/${project}/${project}.tar.gz`,
-     `--exclude=./config`,
-     `--exclude=./${project}.tar.gz`,
-     `.`],
-    { cwd: `${appConfig.projectDirectory}/${project}` });
+  const tar = spawn('tar',
+  ['-zcvf',
+    `${appConfig.projectDirectory}/${project}/${project}.tar.gz`,
+    `--exclude=./config`,
+    `--exclude=./${project}.tar.gz`,
+    `.`],
+  { cwd: `${appConfig.projectDirectory}/${project}` });
 
   let str = "";
 
@@ -133,7 +141,4 @@ async function genTarFile(res, project) {
   });
 
 }
-
-
-
 module.exports.execOra2Pg = execOra2Pg;
