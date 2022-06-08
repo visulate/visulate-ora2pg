@@ -114,10 +114,9 @@ router.get('/project/:project/exec', async (req, res) => {
     res.status(404).send('Config file not found');
     return;
   }
-  // Auth header is in format "Bearer <jwt>"
-  const bearerToken = req.headers.authorization.split(' ')[1];
+  const authToken = req.params.T;
   try {
-    sseUtils.execOra2Pg(res, project, bearerToken);
+    sseUtils.execOra2Pg(res, project, authToken);
   } catch (err) {
     console.log(err);
     res.status(400).send(err);
@@ -143,6 +142,7 @@ router.get('/project/:project/download/:file', async (req, res) => {
 router.post('/project/:project/credentials', async (req, res) => {
   const jwt = await new jose.SignJWT(req.body)
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+    .setExpirationTime('5m')
     .sign(req.app.locals.encryptionKeyBuffer);
 
     res.status(200).send(jwt);

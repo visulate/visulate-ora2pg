@@ -37,9 +37,9 @@ function sendConflictMessage(res) {
   res.end();
 }
 
-async function execOra2Pg(res, project, bearerToken) {
+async function execOra2Pg(res, project, authToken) {
   // Create temporary ora2pg.conf file
-  const {payload} = await jose.jwtVerify(bearerToken, res.app.locals.encryptionKeyBuffer);
+  const {payload} = await jose.jwtVerify(authToken, res.app.locals.encryptionKeyBuffer);
   const configFileStatus = await fileUtils.createConfigFile(project, payload);
   // Validate file creation
   if (configFileStatus === 'CONFLICT') {
