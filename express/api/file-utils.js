@@ -81,11 +81,13 @@ async function getConfigObject(project, credentials) {
   const config = decrypt(encryptedConfig);
   try {
     const configObject = JSON.parse(config);
-    configObject.INPUT.values.ORACLE_USER.value = credentials.oracle_user;
-    configObject.INPUT.values.ORACLE_PWD.value = credentials.oracle_pw;
-    if (credentials.postgres_user && credentials.postgres_pw) {
-      configObject.OUTPUT.values.PG_USER.value = credentials.postgres_user;
-      configObject.OUTPUT.values.PG_PWD.value = credentials.postgres_pw;
+    if (credentials) {
+      configObject.INPUT.values.ORACLE_USER.value = credentials.oracle_user;
+      configObject.INPUT.values.ORACLE_PWD.value = credentials.oracle_pw;
+      if (credentials.postgres_user && credentials.postgres_pw) {
+        configObject.OUTPUT.values.PG_USER.value = credentials.postgres_user;
+        configObject.OUTPUT.values.PG_PWD.value = credentials.postgres_pw;
+      }
     }
     if (configObject && typeof configObject === "object") {
       return configObject;
