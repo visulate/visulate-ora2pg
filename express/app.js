@@ -55,6 +55,6 @@ app.use(function(err, req, res, next) {
 
 // Use ORA2PG_SECRET environment variable for encryption key or else generate random key
 app.locals.encryptionKeyBuffer = httpServerConfig.configFileEncryptionKey ?
-Buffer.from(httpServerConfig.configFileEncryptionKey) : crypto.randomBytes(256);
+  Buffer.from(httpServerConfig.configFileEncryptionKey) : crypto.randomBytes(256);
 
 module.exports = app;
