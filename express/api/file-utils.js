@@ -82,11 +82,11 @@ async function getConfigObject(project, credentials) {
   try {
     const configObject = JSON.parse(config);
     if (credentials) {
-      configObject.INPUT.values.ORACLE_USER.value = credentials.oracle_user;
-      configObject.INPUT.values.ORACLE_PWD.value = credentials.oracle_pw;
+      configObject.INPUT.values.ORACLE_USER.value = credentials.ORACLE_USER;
+      configObject.INPUT.values.ORACLE_PWD.value = credentials.ORACLE_PWD;
       if (credentials.postgres_user && credentials.postgres_pw) {
-        configObject.OUTPUT.values.PG_USER.value = credentials.postgres_user;
-        configObject.OUTPUT.values.PG_PWD.value = credentials.postgres_pw;
+        configObject.OUTPUT.values.PG_USER.value = credentials.PG_USER;
+        configObject.OUTPUT.values.PG_PWD.value = credentials.PG_PWD;
       }
     }
     if (configObject && typeof configObject === "object") {
