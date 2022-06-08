@@ -16,6 +16,7 @@
 const { spawn } = require('child_process');
 const fileUtils = require('./file-utils');
 const appConfig = require('../resources/http-config');
+const jose = require('jose');
 
 
 function sendConflictMessage(res) {
@@ -36,9 +37,10 @@ function sendConflictMessage(res) {
   res.end();
 }
 
-async function execOra2Pg(res, project) {
+async function execOra2Pg(res, project, bearerToken) {
   // Create temporary ora2pg.conf file
-  const configFileStatus = await fileUtils.createConfigFile(project);
+  const {payload} = await jose.jwtVerify(bearerToken, res.app.locals.encryptionKeyBuffer);
+  const configFileStatus = await fileUtils.createConfigFile(project, payload);
   // Validate file creation
   if (configFileStatus === 'CONFLICT') {
     sendConflictMessage(res);

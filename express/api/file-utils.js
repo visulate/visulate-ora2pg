@@ -71,8 +71,9 @@ module.exports.validKeys = validKeys;
  * Read the ora2pg-conf.json file and return as an object
  *
  * @param {string} project
+ * @param {object} credentials
  */
-async function getConfigObject(project) {
+async function getConfigObject(project, credentials) {
   if (! await fileExists(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json.enc`)) {
     await seedProjectConfigFile(project);
   }
@@ -80,6 +81,12 @@ async function getConfigObject(project) {
   const config = decrypt(encryptedConfig);
   try {
     const configObject = JSON.parse(config);
+    configObject.INPUT.values.ORACLE_USER.value = credentials.oracle_user;
+    configObject.INPUT.values.ORACLE_PWD.value = credentials.oracle_pw;
+    if (credentials.postgres_user && credentials.postgres_pw) {
+      configObject.OUTPUT.values.PG_USER.value = credentials.postgres_user;
+      configObject.OUTPUT.values.PG_PWD.value = credentials.postgres_pw;
+    }
     if (configObject && typeof configObject === "object") {
       return configObject;
     }
@@ -120,14 +127,15 @@ module.exports.saveConfigFile = saveConfigFile;
  * Wrapper function for saveConfigFile to prevent 2 sessions running at the same time.
  *
  * @param {string} project
+ * @param {object} credentials
  */
-async function createConfigFile(project) {
+async function createConfigFile(project, credentials) {
   if (! await fileExists(`${appConfig.projectDirectory}/${project}/config/`)) {
     return ('NOT-FOUND')
   } else if (await fileExists(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`)) {
     return ('CONFLICT');
   } else {
-    const config = await getConfigObject(project);
+    const config = await getConfigObject(project, credentials);
     await saveConfigFile(project, config);
     return ('CREATED');
   }

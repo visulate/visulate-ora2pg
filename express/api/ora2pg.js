@@ -19,6 +19,7 @@ const fs = require('fs');
 const sseUtils = require('./sse-util');
 const appConfig = require('../resources/http-config');
 const fileUtils = require('./file-utils');
+const jose = require('jose');
 
 /**
  * List projects
@@ -113,8 +114,10 @@ router.get('/project/:project/exec', async (req, res) => {
     res.status(404).send('Config file not found');
     return;
   }
+  // Auth header is in format "Bearer <jwt>"
+  const bearerToken = req.headers.authorization.split(' ')[1];
   try {
-    sseUtils.execOra2Pg(res, project);
+    sseUtils.execOra2Pg(res, project, bearerToken);
   } catch (err) {
     console.log(err);
     res.status(400).send(err);
@@ -135,6 +138,14 @@ router.get('/project/:project/download/:file', async (req, res) => {
     res.status(404).send('File not found');
   }
 
+});
+
+router.post('/project/:project/credentials', async (req, res) => {
+  const jwt = await new jose.SignJWT(req.body)
+    .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+    .sign(req.app.locals.encryptionKeyBuffer);
+
+    res.status(200).send(jwt);
 });
 
 module.exports = router;
