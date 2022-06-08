@@ -145,7 +145,7 @@ router.post('/project/:project/credentials', async (req, res) => {
     .setExpirationTime('5m')
     .sign(req.app.locals.encryptionKeyBuffer);
 
-    res.status(200).send(jwt);
+  res.status(200).send(jwt);
 });
 
 module.exports = router;
