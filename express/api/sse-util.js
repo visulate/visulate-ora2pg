@@ -16,6 +16,7 @@
 const { spawn } = require('child_process');
 const fileUtils = require('./file-utils');
 const appConfig = require('../resources/http-config');
+const jose = require('jose');
 
 
 function sendConflictMessage(res) {
@@ -36,9 +37,21 @@ function sendConflictMessage(res) {
   res.end();
 }
 
-async function execOra2Pg(res, project) {
+async function execOra2Pg(res, project, authToken) {
   // Create temporary ora2pg.conf file
-  const configFileStatus = await fileUtils.createConfigFile(project);
+  let payload;
+  try {
+    const jwtData = await jose.jwtVerify(authToken, res.app.locals.encryptionKeyBuffer);
+    payload = jwtData.payload;
+  } catch (error) {
+    if (error.name === 'JWTExpired') {
+      res.status(403).send('Expired credentials');
+    } else {
+      res.status(403).send('Invalid credentials');
+    }
+    return;
+  }
+  const configFileStatus = await fileUtils.createConfigFile(project, payload);
   // Validate file creation
   if (configFileStatus === 'CONFLICT') {
     sendConflictMessage(res);
