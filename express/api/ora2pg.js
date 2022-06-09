@@ -114,7 +114,7 @@ router.get('/project/:project/exec', async (req, res) => {
     res.status(404).send('Config file not found');
     return;
   }
-  const authToken = req.params.T;
+  const authToken = req.query.T;
   try {
     sseUtils.execOra2Pg(res, project, authToken);
   } catch (err) {
