@@ -11,6 +11,7 @@
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "hbs": "^4.1.2",
+    "jose": "^4.8.1",
     "vue": "^3.0.4"
   },
   "devDependencies": {
