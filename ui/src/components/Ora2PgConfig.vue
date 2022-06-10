@@ -85,11 +85,10 @@
                 v-model="item.value"
                 :disabled="!item.include"
                 class="mdl-textfield__input"></textarea>
-              <input :id="key"
-                v-else-if="item.type === 'password'"
-                type="password"
-                v-model="item.value"
-                :disabled="!item.include"
+              <input :id="key" disabled
+                v-else-if="authInputKeys.indexOf(key) !== -1"
+                 v-model="item.value"
+                 v-bind:type="item.type === 'password' ? 'password' : 'text'"
                 class="mdl-textfield__input"/>
               <input :id="key"
                 v-else
@@ -99,7 +98,7 @@
                 class="mdl-textfield__input" />
               <!-- Checkbox to control whether the parameter should be commented out in
             the ora2pg.conf file at runtime -->
-              <span style="float: right">
+              <span style="float: right" v-if="authInputKeys.indexOf(key) === -1">
                 <input
                   class="checkbox"
                   type="checkbox"
@@ -127,6 +126,7 @@ export default {
     return {
       configData: {},
       showAdvanced: false,
+      authInputKeys: ['ORACLE_USER', 'ORACLE_PWD', 'PG_USER', 'PG_PWD'],
     };
   },
   beforeUpdate() {
