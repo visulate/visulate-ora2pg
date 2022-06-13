@@ -17,6 +17,7 @@
   </div>
 </template>
 <script>
+import httpClient from '../assets/httpClient';
 export default {
   name: "RunOra2Pg",
   emits: ["close-component"],
@@ -24,6 +25,9 @@ export default {
     project: {
       type: String,
     },
+    config: {
+      type: Object
+    }
   },
   data() {
     return {
@@ -35,9 +39,26 @@ export default {
     this.setupStream();
   },
   methods: {
-    setupStream() {
+    async setupStream() {
+      const oracleCredentialData = JSON.parse(sessionStorage.getItem(this.config.INPUT.values.ORACLE_DSN.value));
+      const pgCredentialData = JSON.parse(sessionStorage.getItem(this.config.OUTPUT.values.PG_DSN.value));
+      const jwtResponse = await httpClient(`/ora2pg/project/${this.project}/credentials`, {
+        method: "post",
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ORACLE_USER: oracleCredentialData.user,
+          ORACLE_PWD: oracleCredentialData.pass,
+          PG_USER: pgCredentialData.user,
+          PG_PWD: pgCredentialData.pass
+        })
+      });
+      const jwt = await jwtResponse.text();
       const apiBase = process.env.VUE_APP_API_BASE || '';
-      const queryParams = process.env.VUE_APP_ENDPOINTS_KEY ? `?key=${process.env.VUE_APP_ENDPOINTS_KEY}` : '';
+      const queryParams = process.env.VUE_APP_ENDPOINTS_KEY ? 
+      `?key=${process.env.VUE_APP_ENDPOINTS_KEY}&T=${jwt}` : `?T=${jwt}`;
       let es = new EventSource(`${apiBase}/ora2pg/project/${this.project}/exec${queryParams}`);
 
       es.addEventListener(

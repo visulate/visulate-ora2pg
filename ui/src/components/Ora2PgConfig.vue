@@ -1,5 +1,32 @@
 <template>
   <div>
+    <div v-if="showCredentialsDialog" class="auth-dialog-container">
+      <div class="mdl-dialog auth-dialog" >
+        <h4 class="mdl-dialog__content">Enter database credentials</h4>
+        <div class="mdl-dialog__content">
+          <label>ORACLE_USER</label>
+         <input v-model="oracleUser"
+            type="text"
+            class="mdl-textfield__input" />
+          <label>ORACLE_PWD</label>
+         <input v-model="oraclePwd"
+            type="text"
+            class="mdl-textfield__input" />
+          <label>PG_USER</label>
+         <input v-model="pgUser"
+            type="text"
+            class="mdl-textfield__input" />
+          <label>PG_PWD</label>
+         <input v-model="pgPwd"
+            type="text"
+            class="mdl-textfield__input" />
+        </div>
+        <div class="mdl-dialog__actions">
+          <button type="button" class="mdl-button close" @click="credsDialogSubmit">Run</button>
+          <button type="button" class="mdl-button" @click="credsDialogCancel">Cancel</button>
+        </div>
+      </div>
+      </div>
     <div v-show="project && Object.keys(this.configData).length === 0">
       <p>{{ project }} project is encrypted</p>
     </div>
@@ -12,7 +39,7 @@
         <button class="mdl-button mdl-js-button mdl-button"
           @click.prevent="saveConfig()">Save</button>
         <button class="mdl-button mdl-js-button mdl-button"
-          @click.prevent="runConfig()">Run</button>
+          @click.prevent="clickRunConfig()">Run</button>
         <button class="mdl-button mdl-js-button mdl-button"
           @click.prevent="showFiles()">Review</button>
       </span>
@@ -127,6 +154,11 @@ export default {
       configData: {},
       showAdvanced: false,
       authInputKeys: ['ORACLE_USER', 'ORACLE_PWD', 'PG_USER', 'PG_PWD'],
+      showCredentialsDialog: false,
+      oracleUser: '',
+      oraclePwd: '',
+      pgUser: '',
+      pgPwd: ''
     };
   },
   beforeUpdate() {
@@ -157,6 +189,16 @@ export default {
         config: JSON.stringify(this.configData),
       });
     },
+    clickRunConfig() {
+      const oracleDsn = this.configData.INPUT.values.ORACLE_DSN;
+      const postgresDsn = this.configData.OUTPUT.values.PG_DSN;
+      if (oracleDsn.include && !sessionStorage.getItem(oracleDsn.value) ||
+        postgresDsn.include && !sessionStorage.getItem(postgresDsn.value)) {
+        this.showCredentialsDialog = true;
+      } else {
+        this.runConfig();
+      }
+    },
     runConfig() {
       this.$emit("run-config", {
         project: this.project,
@@ -179,6 +221,37 @@ export default {
         panel.style.display = "block";
       }
     },
+    credsDialogSubmit() {
+      const oracleDsn = this.configData.INPUT.values.ORACLE_DSN;
+      const postgresDsn = this.configData.OUTPUT.values.PG_DSN;
+      sessionStorage.setItem(oracleDsn.value, JSON.stringify({user: this.oracleUser, pass: this.oraclePwd}));
+      sessionStorage.setItem(postgresDsn.value, JSON.stringify({user: this.pgUser, pass: this.pgPwd}));
+      this.runConfig();
+    },
+    credsDialogCancel() {
+      this.showCredentialsDialog = false;
+    }
   },
 };
 </script>
+<style scoped>
+.auth-dialog {
+  position: fixed;
+  z-index: 1;
+  background: white;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+.auth-dialog>h4 {
+  margin: 5px 0 0;
+  padding-bottom: 10px;
+}
+.auth-dialog-container {
+  position: fixed; 
+  width: 100%; 
+  height: 100%; 
+  z-index: 1;
+  background: rgba(0, 0, 0, .5)
+}
+</style>
