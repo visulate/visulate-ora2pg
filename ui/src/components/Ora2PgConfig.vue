@@ -4,26 +4,22 @@
       <div class="mdl-dialog auth-dialog" >
         <h4 class="mdl-dialog__content">Enter database credentials</h4>
         <div class="mdl-dialog__content">
-          <label>ORACLE_USER</label>
-         <input v-model="oracleUser"
-            type="text"
-            class="mdl-textfield__input" />
-          <label>ORACLE_PWD</label>
-         <input v-model="oraclePwd"
-            type="text"
-            class="mdl-textfield__input" />
-          <label>PG_USER</label>
-         <input v-model="pgUser"
-            type="text"
-            class="mdl-textfield__input" />
-          <label>PG_PWD</label>
-         <input v-model="pgPwd"
-            type="text"
-            class="mdl-textfield__input" />
+          <label for="ORACLE_USER">ORACLE_USER</label>
+          <input v-model="oracleUser" name="ORACLE_USER"
+              type="text" class="mdl-textfield__input" />
+          <label for="ORACLE_PWD">ORACLE_PWD</label>
+          <input v-model="oraclePwd" name="ORACLE_PWD"
+              type="text" class="mdl-textfield__input" />
+          <label for="PG_USER">PG_USER</label>
+          <input v-model="pgUser" name="PG_USER"
+              type="text" class="mdl-textfield__input" />
+          <label for="PG_PWD">PG_PWD</label>
+          <input v-model="pgPwd" name="PG_PWD"
+              type="text" class="mdl-textfield__input" />
         </div>
         <div class="mdl-dialog__actions">
-          <button type="button" class="mdl-button close" @click="credsDialogSubmit">Run</button>
-          <button type="button" class="mdl-button" @click="credsDialogCancel">Cancel</button>
+          <button type="button" class="mdl-button close" @click="credentialsDialogSubmit">Run</button>
+          <button type="button" class="mdl-button" @click="credentialsDialogCancel">Cancel</button>
         </div>
       </div>
       </div>
@@ -39,7 +35,7 @@
         <button class="mdl-button mdl-js-button mdl-button"
           @click.prevent="saveConfig()">Save</button>
         <button class="mdl-button mdl-js-button mdl-button"
-          @click.prevent="clickRunConfig()">Run</button>
+          @click.prevent="clickRun()">Run</button>
         <button class="mdl-button mdl-js-button mdl-button"
           @click.prevent="showFiles()">Review</button>
       </span>
@@ -113,7 +109,7 @@
                 :disabled="!item.include"
                 class="mdl-textfield__input"></textarea>
               <input :id="key" disabled
-                v-else-if="authInputKeys.indexOf(key) !== -1"
+                 v-else-if="authInputKeys.indexOf(key) !== -1"
                  v-model="item.value"
                  v-bind:type="item.type === 'password' ? 'password' : 'text'"
                 class="mdl-textfield__input"/>
@@ -189,7 +185,7 @@ export default {
         config: JSON.stringify(this.configData),
       });
     },
-    clickRunConfig() {
+    clickRun() {
       const oracleDsn = this.configData.INPUT.values.ORACLE_DSN;
       const postgresDsn = this.configData.OUTPUT.values.PG_DSN;
       if (oracleDsn.include && !sessionStorage.getItem(oracleDsn.value) ||
@@ -221,14 +217,14 @@ export default {
         panel.style.display = "block";
       }
     },
-    credsDialogSubmit() {
+    credentialsDialogSubmit() {
       const oracleDsn = this.configData.INPUT.values.ORACLE_DSN;
       const postgresDsn = this.configData.OUTPUT.values.PG_DSN;
       sessionStorage.setItem(oracleDsn.value, JSON.stringify({user: this.oracleUser, pass: this.oraclePwd}));
       sessionStorage.setItem(postgresDsn.value, JSON.stringify({user: this.pgUser, pass: this.pgPwd}));
       this.runConfig();
     },
-    credsDialogCancel() {
+    credentialsDialogCancel() {
       this.showCredentialsDialog = false;
     }
   },
