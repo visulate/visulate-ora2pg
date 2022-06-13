@@ -57,7 +57,8 @@
         <!-- Expansion panel contents -->
         <ul class="panel" :ref="section" style="display: block">
           <li v-for="(item, key) in properties.values" :key="key"
-            v-show="item.class == 'basic' || showAdvanced" >
+            v-show="(item.class == 'basic' || showAdvanced) && 
+            item.type !== 'username' && item.type !== 'password'" >
             <!-- Ora2Pg parameter row -->
             <div class="mdl-textfield" style="width: 500px">
               <label :for="key" :class="{ disabled: !item.include }">{{ key }}
@@ -108,11 +109,6 @@
                 v-model="item.value"
                 :disabled="!item.include"
                 class="mdl-textfield__input"></textarea>
-              <input :id="key" disabled
-                 v-else-if="authInputKeys.indexOf(key) !== -1"
-                 v-model="item.value"
-                 v-bind:type="item.type === 'password' ? 'password' : 'text'"
-                class="mdl-textfield__input"/>
               <input :id="key"
                 v-else
                 type="text"
