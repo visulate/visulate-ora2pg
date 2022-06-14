@@ -42,18 +42,22 @@ export default {
     async setupStream() {
       const oracleCredentialData = JSON.parse(sessionStorage.getItem(this.config.INPUT.values.ORACLE_DSN.value));
       const pgCredentialData = JSON.parse(sessionStorage.getItem(this.config.OUTPUT.values.PG_DSN.value));
+      const body = {};
+      if (oracleCredentialData) {
+        body.ORACLE_USER = oracleCredentialData.user;
+        body.ORACLE_PWD = oracleCredentialData.pass;
+      }
+      if (pgCredentialData) {
+        body.PG_USER = pgCredentialData.user;
+        body.PG_PWD = pgCredentialData.pass;
+      }
       const jwtResponse = await httpClient(`/ora2pg/project/${this.project}/credentials`, {
         method: "post",
         headers: {
           Accept: "application/json, text/plain, */*",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ORACLE_USER: oracleCredentialData.user,
-          ORACLE_PWD: oracleCredentialData.pass,
-          PG_USER: pgCredentialData.user,
-          PG_PWD: pgCredentialData.pass
-        })
+        body: JSON.stringify(body)
       });
       const jwt = await jwtResponse.text();
       const apiBase = process.env.VUE_APP_API_BASE || '';
