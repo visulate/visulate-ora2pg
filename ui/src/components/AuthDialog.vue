@@ -141,6 +141,7 @@ export default {
                 this.showDialog = true;
             } else if (runAfter) {
                 this.runConfig();
+                this.showDialog = false;
             }
         }
     }
