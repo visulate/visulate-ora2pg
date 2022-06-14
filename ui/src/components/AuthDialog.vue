@@ -84,8 +84,9 @@
           </div>
         </div>
         <div class="mdl-dialog__actions">
-          <button type="button" class="mdl-button close" @click="credentialsDialogSubmit">Run</button>
-          <button type="button" class="mdl-button" @click="credentialsDialogCancel">Cancel</button>
+          <button v-if="runAfter" type="button" class="mdl-button" @click="saveCredentialsAndRun">Run</button>
+          <button v-else type="button" class="mdl-button" @click="saveCredentials">Save</button>
+          <button type="button" class="mdl-button" @click="cancel">Cancel</button>
         </div>
       </div>
     </div>
@@ -106,7 +107,8 @@ export default {
             oracleUser: '',
             oraclePwd: '',
             pgUser: '',
-            pgPwd: ''
+            pgPwd: '',
+            runAfter: false
         }
     },
     methods: {
@@ -116,23 +118,28 @@ export default {
                 config: JSON.stringify(this.configData),
             });
         },
-        credentialsDialogSubmit() {
+        saveCredentialsAndRun() {
+            this.saveCredentials();
+            this.runConfig();
+        },
+        saveCredentials() {
             const oracleDsn = this.configData.INPUT.values.ORACLE_DSN;
             const postgresDsn = this.configData.OUTPUT.values.PG_DSN;
             sessionStorage.setItem(oracleDsn.value, JSON.stringify({user: this.oracleUser, pass: this.oraclePwd}));
             sessionStorage.setItem(postgresDsn.value, JSON.stringify({user: this.pgUser, pass: this.pgPwd}));
-            this.runConfig();
-        },
-        credentialsDialogCancel() {
             this.showDialog = false;
         },
-        handleAuthForRun() {
+        cancel() {
+            this.showDialog = false;
+        },
+        handleAuth(runAfter) {
+            this.runAfter = runAfter;
             const oracleDsn = this.configData.INPUT.values.ORACLE_DSN;
             const postgresDsn = this.configData.OUTPUT.values.PG_DSN;
             if (oracleDsn.include && !sessionStorage.getItem(oracleDsn.value) ||
                 postgresDsn.include && !sessionStorage.getItem(postgresDsn.value)) {
                 this.showDialog = true;
-            } else {
+            } else if (runAfter) {
                 this.runConfig();
             }
         }

@@ -88,6 +88,13 @@
                 :disabled="!item.include"
                 class="mdl-textfield__input"></textarea>
               <input :id="key"
+                v-else-if="item.type === 'dsn'"
+                type="text"
+                v-model="item.value"
+                :disabled="!item.include"
+                class="mdl-textfield__input"
+                @blur="$refs.authDialog.handleAuth(false)" />
+              <input :id="key"
                 v-else
                 type="text"
                 v-model="item.value"
@@ -96,7 +103,12 @@
               <!-- Checkbox to control whether the parameter should be commented out in
             the ora2pg.conf file at runtime -->
               <span style="float: right">
-                <input
+                <input v-if="item.type !== 'dsn'"
+                  class="checkbox"
+                  type="checkbox"
+                  v-model="item.include"
+                />
+                <input v-else @change="dsnCheckboxClick(item)"
                   class="checkbox"
                   type="checkbox"
                   v-model="item.include"
@@ -156,7 +168,7 @@ export default {
       });
     },
     runConfig() {
-      this.$refs.authDialog.handleAuthForRun();
+      this.$refs.authDialog.handleAuth(true);
     },
     showFiles() {
       this.$emit("show-files", { project: this.project });
@@ -174,6 +186,11 @@ export default {
         panel.style.display = "block";
       }
     },
+    dsnCheckboxClick(item) {
+      if (item.include) {
+        this.$refs.authDialog.handleAuth(false);
+      }
+    }
   },
 };
 </script>
