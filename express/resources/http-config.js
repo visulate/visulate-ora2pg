@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const crypto = require('crypto');
+
 /**
  * Return environment variable or default value
  */

@@ -41,7 +41,7 @@ async function execOra2Pg(res, project, authToken) {
   // Create temporary ora2pg.conf file
   let payload;
   try {
-    const jwtData = await jose.jwtVerify(authToken, res.app.locals.encryptionKeyBuffer);
+    const jwtData = await jose.jwtVerify(authToken, appConfig.authKeyBuffer);
     payload = jwtData.payload;
   } catch (error) {
     if (error.name === 'JWTExpired') {
