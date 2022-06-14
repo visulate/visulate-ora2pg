@@ -3,6 +3,7 @@
       <div class="mdl-dialog auth-dialog" >
         <h4 class="mdl-dialog__content">Enter database credentials</h4>
         <div class="mdl-dialog__content">
+          <div v-for="error in errors" :key="error" class="error">{{error}}</div>
           <label for="ORACLE_DSN">ORACLE_DSN
               <span class="tooltip">
                   <i id="ORACLE_DSN-tt"
@@ -108,7 +109,8 @@ export default {
             oraclePwd: '',
             pgUser: '',
             pgPwd: '',
-            runAfter: false
+            runAfter: false,
+            errors: []
         }
     },
     methods: {
@@ -123,11 +125,32 @@ export default {
             this.runConfig();
         },
         saveCredentials() {
+            if (!this.validateForm()) {
+                return;
+            }
             const oracleDsn = this.configData.INPUT.values.ORACLE_DSN;
             const postgresDsn = this.configData.OUTPUT.values.PG_DSN;
             sessionStorage.setItem(oracleDsn.value, JSON.stringify({user: this.oracleUser, pass: this.oraclePwd}));
             sessionStorage.setItem(postgresDsn.value, JSON.stringify({user: this.pgUser, pass: this.pgPwd}));
             this.showDialog = false;
+        },
+        validateForm() {
+            this.errors.length = 0;
+            if (!this.oracleUser) {
+                this.errors.push('ORACLE_USER is required.');
+            }
+            if (!this.oraclePwd) {
+                this.errors.push('ORACLE_PWD is required.');
+            }
+            if (this.configData.OUTPUT.values.PG_DSN.include) {
+                if (!this.pgUser) {
+                    this.errors.push('PG_USER is required.');
+                }
+                if (!this.pgPwd) {
+                    this.errors.push('PG_PWD is required.');
+                }
+            }
+            return this.errors.length === 0;
         },
         cancel() {
             this.showDialog = false;
@@ -138,6 +161,7 @@ export default {
             const postgresDsn = this.configData.OUTPUT.values.PG_DSN;
             if (oracleDsn.include && !sessionStorage.getItem(oracleDsn.value) ||
                 postgresDsn.include && !sessionStorage.getItem(postgresDsn.value)) {
+                this.errors.length = 0;
                 this.showDialog = true;
             } else if (runAfter) {
                 this.runConfig();
@@ -176,5 +200,8 @@ export default {
 }
 .pg-credentials-container {
     margin-top: 20px;
+}
+.error {
+    color: red;
 }
 </style>
