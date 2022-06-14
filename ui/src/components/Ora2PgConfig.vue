@@ -1,28 +1,6 @@
 <template>
   <div>
-    <div v-if="showCredentialsDialog" class="auth-dialog-container">
-      <div class="mdl-dialog auth-dialog" >
-        <h4 class="mdl-dialog__content">Enter database credentials</h4>
-        <div class="mdl-dialog__content">
-          <label for="ORACLE_USER">ORACLE_USER</label>
-          <input v-model="oracleUser" name="ORACLE_USER"
-              type="text" class="mdl-textfield__input" />
-          <label for="ORACLE_PWD">ORACLE_PWD</label>
-          <input v-model="oraclePwd" name="ORACLE_PWD"
-              type="text" class="mdl-textfield__input" />
-          <label for="PG_USER">PG_USER</label>
-          <input v-model="pgUser" name="PG_USER"
-              type="text" class="mdl-textfield__input" />
-          <label for="PG_PWD">PG_PWD</label>
-          <input v-model="pgPwd" name="PG_PWD"
-              type="text" class="mdl-textfield__input" />
-        </div>
-        <div class="mdl-dialog__actions">
-          <button type="button" class="mdl-button close" @click="credentialsDialogSubmit">Run</button>
-          <button type="button" class="mdl-button" @click="credentialsDialogCancel">Cancel</button>
-        </div>
-      </div>
-      </div>
+    <auth-dialog ref="authDialog" :config-data="configData" :project="project" v-bind="$attrs"></auth-dialog>
     <div v-show="project && Object.keys(this.configData).length === 0">
       <p>{{ project }} project is encrypted</p>
     </div>
@@ -35,7 +13,7 @@
         <button class="mdl-button mdl-js-button mdl-button"
           @click.prevent="saveConfig()">Save</button>
         <button class="mdl-button mdl-js-button mdl-button"
-          @click.prevent="clickRun()">Run</button>
+          @click.prevent="runConfig()">Run</button>
         <button class="mdl-button mdl-js-button mdl-button"
           @click.prevent="showFiles()">Review</button>
       </span>
@@ -117,7 +95,7 @@
                 class="mdl-textfield__input" />
               <!-- Checkbox to control whether the parameter should be commented out in
             the ora2pg.conf file at runtime -->
-              <span style="float: right" v-if="authInputKeys.indexOf(key) === -1">
+              <span style="float: right">
                 <input
                   class="checkbox"
                   type="checkbox"
@@ -132,7 +110,9 @@
   </div>
 </template>
 <script>
+import AuthDialog from './AuthDialog.vue';
 export default {
+  components: { AuthDialog },
   props: {
     project: {
       type: String,
@@ -144,13 +124,7 @@ export default {
   data() {
     return {
       configData: {},
-      showAdvanced: false,
-      authInputKeys: ['ORACLE_USER', 'ORACLE_PWD', 'PG_USER', 'PG_PWD'],
-      showCredentialsDialog: false,
-      oracleUser: '',
-      oraclePwd: '',
-      pgUser: '',
-      pgPwd: ''
+      showAdvanced: false
     };
   },
   beforeUpdate() {
@@ -181,21 +155,8 @@ export default {
         config: JSON.stringify(this.configData),
       });
     },
-    clickRun() {
-      const oracleDsn = this.configData.INPUT.values.ORACLE_DSN;
-      const postgresDsn = this.configData.OUTPUT.values.PG_DSN;
-      if (oracleDsn.include && !sessionStorage.getItem(oracleDsn.value) ||
-        postgresDsn.include && !sessionStorage.getItem(postgresDsn.value)) {
-        this.showCredentialsDialog = true;
-      } else {
-        this.runConfig();
-      }
-    },
     runConfig() {
-      this.$emit("run-config", {
-        project: this.project,
-        config: JSON.stringify(this.configData),
-      });
+      this.$refs.authDialog.handleAuthForRun();
     },
     showFiles() {
       this.$emit("show-files", { project: this.project });
@@ -213,37 +174,6 @@ export default {
         panel.style.display = "block";
       }
     },
-    credentialsDialogSubmit() {
-      const oracleDsn = this.configData.INPUT.values.ORACLE_DSN;
-      const postgresDsn = this.configData.OUTPUT.values.PG_DSN;
-      sessionStorage.setItem(oracleDsn.value, JSON.stringify({user: this.oracleUser, pass: this.oraclePwd}));
-      sessionStorage.setItem(postgresDsn.value, JSON.stringify({user: this.pgUser, pass: this.pgPwd}));
-      this.runConfig();
-    },
-    credentialsDialogCancel() {
-      this.showCredentialsDialog = false;
-    }
   },
 };
 </script>
-<style scoped>
-.auth-dialog {
-  position: fixed;
-  z-index: 1;
-  background: white;
-  left: 0;
-  right: 0;
-  margin: auto;
-}
-.auth-dialog>h4 {
-  margin: 5px 0 0;
-  padding-bottom: 10px;
-}
-.auth-dialog-container {
-  position: fixed; 
-  width: 100%; 
-  height: 100%; 
-  z-index: 1;
-  background: rgba(0, 0, 0, .5)
-}
-</style>
