@@ -11,6 +11,7 @@ const file = chaiFiles.file;
 const dir = chaiFiles.dir;
 const fs = require('fs');
 const fileUtils = require('../api/file-utils');
+const appConfig = require('../resources/http-config')
 
 const testConfigObject = require('./project/default/config/ora2pg-conf.json');
 const jose = require('jose');
@@ -180,7 +181,7 @@ describe("Update and Delete project tests", () => {
     return new jose.SignJWT(creds)
       .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
       .setExpirationTime(expiration)
-      .sign(app.locals.encryptionKeyBuffer)
+      .sign(appConfig.authKeyBuffer);
   }
 
   it("Successful execution generates file output and removes temporary config file", (done) => {
@@ -371,7 +372,7 @@ describe("Credentials tests", () => {
     .send(body)
     .end(async (err, res) => {
       expect(res).to.have.status(200);
-      const {payload} = await jose.jwtVerify(res.text, app.locals.encryptionKeyBuffer);
+      const {payload} = await jose.jwtVerify(res.text, appConfig.authKeyBuffer);
       payload.ORACLE_USER.should.equal(body.ORACLE_USER);
       payload.ORACLE_PWD.should.equal(body.ORACLE_PWD);
       payload.PG_USER.should.equal(body.PG_USER);

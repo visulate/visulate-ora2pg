@@ -147,7 +147,7 @@ router.post('/project/:project/credentials', async (req, res) => {
   const jwt = await new jose.SignJWT(req.body)
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
     .setExpirationTime('5m')
-    .sign(req.app.locals.encryptionKeyBuffer);
+    .sign(appConfig.authKeyBuffer);
 
   res.status(200).send(jwt);
 });
