@@ -39,7 +39,8 @@ export default {
     this.setupStream();
   },
   methods: {
-    async setupStream() {
+    async retrieveJwt() {
+      // Read the credentials from session storage
       const oracleCredentialData = JSON.parse(sessionStorage.getItem(this.config.INPUT.values.ORACLE_DSN.value));
       const pgCredentialData = JSON.parse(sessionStorage.getItem(this.config.OUTPUT.values.PG_DSN.value));
       const body = {};
@@ -51,6 +52,7 @@ export default {
         body.PG_USER = pgCredentialData.user;
         body.PG_PWD = pgCredentialData.pass;
       }
+      // Post credentials to generate a JWT
       const jwtResponse = await httpClient(`/ora2pg/project/${this.project}/credentials`, {
         method: "post",
         headers: {
@@ -59,7 +61,10 @@ export default {
         },
         body: JSON.stringify(body)
       });
-      const jwt = await jwtResponse.text();
+      return await jwtResponse.text();
+    },
+    async setupStream() {
+      const jwt = this.retrieveJwt();
       const apiBase = process.env.VUE_APP_API_BASE || '';
       const queryParams = process.env.VUE_APP_ENDPOINTS_KEY ? 
         `?key=${process.env.VUE_APP_ENDPOINTS_KEY}&T=${jwt}` : `?T=${jwt}`;

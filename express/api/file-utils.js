@@ -117,6 +117,35 @@ async function saveConfigFile(project, configObject) {
 }
 module.exports.saveConfigFile = saveConfigFile;
 
+async function attachCredentialsToConfig(config, authToken) {
+  const requiresCredentials = 
+  config.INPUT.values.ORACLE_DSN.include || config.OUTPUT.values.PG_DSN.include;
+  if (requiresCredentials) {
+    if (authToken) {
+      let credentials;
+      try {
+        const jwtData = await jose.jwtVerify(authToken, appConfig.authKeyBuffer);
+        credentials = jwtData.payload;
+      } catch (error) {
+        if (error.name === 'JWTExpired') {
+          return ('EXPIRED-CREDENTIALS');
+        } else {
+          return ('INVALID-CREDENTIALS');
+        }
+      }
+      config.INPUT.values.ORACLE_USER.value = credentials.ORACLE_USER;
+      config.INPUT.values.ORACLE_PWD.value = credentials.ORACLE_PWD;
+      if (credentials.PG_USER && credentials.PG_PWD) {
+        config.OUTPUT.values.PG_USER.value = credentials.PG_USER;
+        config.OUTPUT.values.PG_PWD.value = credentials.PG_PWD;
+      }
+    } else {
+      return ('MISSING_CREDENTIALS');
+    }
+  }
+  return ('OK');
+}
+
 /**
  * Create an ora2pg-conf file.
  * Wrapper function for saveConfigFile to prevent 2 sessions running at the same time.
@@ -131,34 +160,13 @@ async function createConfigFile(project, authToken) {
     return ('CONFLICT');
   } else {
     const config = await getConfigObject(project);
-    const requiresCredentials = 
-      config.INPUT.values.ORACLE_DSN.include || config.OUTPUT.values.PG_DSN.include;
-    if (requiresCredentials) {
-      if (authToken) {
-        let credentials;
-        try {
-          const jwtData = await jose.jwtVerify(authToken, appConfig.authKeyBuffer);
-          credentials = jwtData.payload;
-        } catch (error) {
-          console.log(error.name)
-          if (error.name === 'JWTExpired') {
-            return ('EXPIRED-CREDENTIALS');
-          } else {
-            return ('INVALID-CREDENTIALS');
-          }
-        }
-        config.INPUT.values.ORACLE_USER.value = credentials.ORACLE_USER;
-        config.INPUT.values.ORACLE_PWD.value = credentials.ORACLE_PWD;
-        if (credentials.PG_USER && credentials.PG_PWD) {
-          config.OUTPUT.values.PG_USER.value = credentials.PG_USER;
-          config.OUTPUT.values.PG_PWD.value = credentials.PG_PWD;
-        }
-      } else {
-        return ('MISSING_CREDENTIALS');
-      }
+    const status = await attachCredentialsToConfig(config, authToken);
+    if (status === 'OK') {
+      await saveConfigFile(project, config);
+      return ('CREATED');
+    } else {
+      return status;
     }
-    await saveConfigFile(project, config);
-    return ('CREATED');
   }
 }
 module.exports.createConfigFile = createConfigFile;
