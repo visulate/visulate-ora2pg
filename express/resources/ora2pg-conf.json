@@ -25,13 +25,15 @@
                 "value": "dbi:Oracle:host=mydb.mydom.fr;sid=SIDNAME;port=1521",
                 "description": "A  DBD::Oracle Perl module database connection",
                 "include": true,
-                "class": "basic"
+                "class": "basic",
+                "type": "dsn"
             },
             "ORACLE_USER": {
                 "value": "system",
                 "description": "Ideally a user that has been granted the DBA role",
                 "include": true,
-                "class": "basic"
+                "class": "basic",
+                "type": "username"
             },
             "ORACLE_PWD": {
                 "value": "manager",
@@ -476,13 +478,15 @@
                 "value": "dbi:Pg:dbname=test_db;host=localhost;port=5432",
                 "description": "Send export directly to a PostgreSQL database (data exports only). This will disable file output.",
                 "include": false,
-                "class": "basic"
+                "class": "basic",
+                "type": "dsn"
             },
             "PG_USER": {
                 "value": "test",
                 "description": "PostgresSQL username",
                 "include": false,
-                "class": "basic"
+                "class": "basic",
+                "type": "username"
             },
             "PG_PWD": {
                 "value": "test",

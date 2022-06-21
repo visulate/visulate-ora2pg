@@ -115,10 +115,6 @@ router.get('/project/:project/exec', async (req, res) => {
     return;
   }
   const authToken = req.query.T;
-  if (!authToken) {
-    res.status(401).send('Missing credentials');
-    return;
-  }
   try {
     sseUtils.execOra2Pg(res, project, authToken);
   } catch (err) {
@@ -147,7 +143,7 @@ router.post('/project/:project/credentials', async (req, res) => {
   const jwt = await new jose.SignJWT(req.body)
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
     .setExpirationTime('5m')
-    .sign(req.app.locals.encryptionKeyBuffer);
+    .sign(appConfig.authKeyBuffer);
 
   res.status(200).send(jwt);
 });

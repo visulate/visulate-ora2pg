@@ -11,6 +11,7 @@ const file = chaiFiles.file;
 const dir = chaiFiles.dir;
 const fs = require('fs');
 const fileUtils = require('../api/file-utils');
+const appConfig = require('../resources/http-config')
 
 const testConfigObject = require('./project/default/config/ora2pg-conf.json');
 const jose = require('jose');
@@ -163,114 +164,51 @@ describe("Update and Delete project tests", () => {
     expect(file(`${process.env.PROJECT_DIRECTORY}/default/package.sql`)).to.not.exist;
   });
 
-  /**
-   * Helper method to get a JWT for authentication.
-   * 
-   * @param {string | number} expiration pass number to specify exact epoch time, 
-   *                                     string to specify time in the future
-   * @returns a promise that will resolve with a signed JWT
-   */
-  function getJwt(expiration) {
-    const creds = {
-      "ORACLE_USER": "system",
-      "ORACLE_PWD": "myPass123",
-      "PG_USER": "pgusername",
-      "PG_PWD": "password1234"
-    };
-    return new jose.SignJWT(creds)
-      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-      .setExpirationTime(expiration)
-      .sign(app.locals.encryptionKeyBuffer)
-  }
-
   it("Successful execution generates file output and removes temporary config file", (done) => {
-    getJwt('5m').then(credsJwt => {
-      // default project config converts a package body file
-      chai.request(app)
-        .get('/ora2pg/project/default/exec')
-        .query({T: credsJwt})
-        .end((err, res) => {
-          expect(res).to.have.status(200);
-          res.headers.connection.should.equal('keep-alive');
-          res.headers['content-type'].should.equal('text/event-stream; charset=utf-8');
-          res.headers['cache-control'].should.equal('no-cache');
-          res.headers['transfer-encoding'].should.equal('chunked');
-          expect(file(`${process.env.PROJECT_DIRECTORY}/default/package.sql`)).to.exist;
-          expect(file(`${process.env.PROJECT_DIRECTORY}/default/default.tar.gz`)).to.exist;
-          expect(file(`${process.env.PROJECT_DIRECTORY}/default/config/ora2pg.conf`)).to.not.exist;
-          done();
-        });
-    });
+    // default project config converts a package body file
+    chai.request(app)
+      .get('/ora2pg/project/default/exec')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        res.headers.connection.should.equal('keep-alive');
+        res.headers['content-type'].should.equal('text/event-stream; charset=utf-8');
+        res.headers['cache-control'].should.equal('no-cache');
+        res.headers['transfer-encoding'].should.equal('chunked');
+        expect(file(`${process.env.PROJECT_DIRECTORY}/default/package.sql`)).to.exist;
+        expect(file(`${process.env.PROJECT_DIRECTORY}/default/default.tar.gz`)).to.exist;
+        expect(file(`${process.env.PROJECT_DIRECTORY}/default/config/ora2pg.conf`)).to.not.exist;
+        done();
+      });
   });
 
   it("Compressed tar file should not be created if directory is empty", (done) => {
-    getJwt('5m').then(credsJwt => {
-      // default project config converts a package body file
-      chai.request(app)
-        .get('/ora2pg/project/invalid_password/exec')
-        .query({T: credsJwt})
-        .end((err, res) => {
-          expect(res).to.have.status(200);
-          res.headers.connection.should.equal('keep-alive');
-          res.headers['content-type'].should.equal('text/event-stream; charset=utf-8');
-          res.headers['cache-control'].should.equal('no-cache');
-          res.headers['transfer-encoding'].should.equal('chunked');
-          expect(file(`${process.env.PROJECT_DIRECTORY}/invalid_password/invalid_password.tar.gz`)).to.not.exist;
-          done();
-        });
-    });
+    // default project config converts a package body file
+    chai.request(app)
+      .get('/ora2pg/project/invalid_password/exec')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        res.headers.connection.should.equal('keep-alive');
+        res.headers['content-type'].should.equal('text/event-stream; charset=utf-8');
+        res.headers['cache-control'].should.equal('no-cache');
+        res.headers['transfer-encoding'].should.equal('chunked');
+        expect(file(`${process.env.PROJECT_DIRECTORY}/invalid_password/invalid_password.tar.gz`)).to.not.exist;
+        done();
+      });
   });
 
   it("Execute should not start if ora2pg is already running", (done) => {
     fs.writeFileSync(`${process.env.PROJECT_DIRECTORY}/update_test_project/config/ora2pg.conf`, 'dummy file');
-    getJwt('5m').then(credsJwt => {
-      chai.request(app)
-        .get('/ora2pg/project/update_test_project/exec')
-        .query({T: credsJwt})
-        .end((err, res) => {
-          expect(res).to.have.status(200);
-          res.headers.connection.should.equal('keep-alive');
-          res.headers['content-type'].should.equal('text/event-stream; charset=utf-8');
-          res.headers['cache-control'].should.equal('no-cache');
-          res.headers['transfer-encoding'].should.equal('chunked');
-          res.headers['warning'].should.equal('199 - ora2pg is running');
-          done();
-        });
-    });
-  });
-
-  it("Execute should fail if no credential is passed in", (done) => {
     chai.request(app)
       .get('/ora2pg/project/update_test_project/exec')
       .end((err, res) => {
-        expect(res).to.have.status(401);
-        res.text.should.equal('Missing credentials');
+        expect(res).to.have.status(200);
+        res.headers.connection.should.equal('keep-alive');
+        res.headers['content-type'].should.equal('text/event-stream; charset=utf-8');
+        res.headers['cache-control'].should.equal('no-cache');
+        res.headers['transfer-encoding'].should.equal('chunked');
+        res.headers['warning'].should.equal('199 - ora2pg is running');
         done();
       });
-  });
-
-  it("Execute should fail if invalid credential is passed in", (done) => {
-    chai.request(app)
-      .get('/ora2pg/project/update_test_project/exec')
-      .query({T: 'invalid token'})
-      .end((err, res) => {
-        expect(res).to.have.status(403);
-        res.text.should.equal('Invalid credentials');
-        done();
-      });
-  });
-
-  it("Execute should fail if expired credential token is passed in", (done) => {
-    getJwt(0).then(credsJwt => {
-      chai.request(app)
-        .get('/ora2pg/project/update_test_project/exec')
-        .query({T: credsJwt})
-        .end((err, res) => {
-          expect(res).to.have.status(403);
-          res.text.should.equal('Expired credentials');
-          done();
-        });
-    });
   });
 
   it("Executing empty project fails with 404", (done) => {
@@ -371,7 +309,7 @@ describe("Credentials tests", () => {
     .send(body)
     .end(async (err, res) => {
       expect(res).to.have.status(200);
-      const {payload} = await jose.jwtVerify(res.text, app.locals.encryptionKeyBuffer);
+      const {payload} = await jose.jwtVerify(res.text, appConfig.authKeyBuffer);
       payload.ORACLE_USER.should.equal(body.ORACLE_USER);
       payload.ORACLE_PWD.should.equal(body.ORACLE_PWD);
       payload.PG_USER.should.equal(body.PG_USER);

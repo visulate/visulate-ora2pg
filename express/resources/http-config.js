@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const crypto = require('crypto');
+
 /**
  * Return environment variable or default value
  */
@@ -22,5 +24,6 @@ module.exports = {
     corsOriginWhitelist: process.env.CORS_ORIGIN_WHITELIST ||'',
     projectDirectory: process.env.PROJECT_DIRECTORY||process.env.PWD + '/../project',
     resourceDirectory: process.env.RESOURCE_DIRECTORY||process.env.PWD + '/resources',
-    configFileEncryptionKey: process.env.ORA2PG_SECRET||'hardCodedInsecureKey123'
+    configFileEncryptionKey: process.env.ORA2PG_SECRET||'hardCodedInsecureKey123',
+    authKeyBuffer: process.env.ORA2PG_AUTH_KEY ? Buffer.from(process.env.ORA2PG_AUTH_KEY) : crypto.randomBytes(256)
   };

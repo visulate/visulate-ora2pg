@@ -17,6 +17,7 @@ const fs = require('fs');
 const path = require('path');
 const handlebars = require('handlebars');
 const appConfig = require('../resources/http-config');
+const jose = require('jose');
 
 // ora2pg-conf.json is file to prevent saving Oracle and Postgres
 // database credentials in clear text using code based on this post:
@@ -81,14 +82,6 @@ async function getConfigObject(project, credentials) {
   const config = decrypt(encryptedConfig);
   try {
     const configObject = JSON.parse(config);
-    if (credentials) {
-      configObject.INPUT.values.ORACLE_USER.value = credentials.ORACLE_USER;
-      configObject.INPUT.values.ORACLE_PWD.value = credentials.ORACLE_PWD;
-      if (credentials.PG_USER && credentials.PG_PWD) {
-        configObject.OUTPUT.values.PG_USER.value = credentials.PG_USER;
-        configObject.OUTPUT.values.PG_PWD.value = credentials.PG_PWD;
-      }
-    }
     if (configObject && typeof configObject === "object") {
       return configObject;
     }
@@ -124,22 +117,56 @@ async function saveConfigFile(project, configObject) {
 }
 module.exports.saveConfigFile = saveConfigFile;
 
+async function attachCredentialsToConfig(config, authToken) {
+  const requiresCredentials = 
+  config.INPUT.values.ORACLE_DSN.include || config.OUTPUT.values.PG_DSN.include;
+  if (requiresCredentials) {
+    if (authToken) {
+      let credentials;
+      try {
+        const jwtData = await jose.jwtVerify(authToken, appConfig.authKeyBuffer);
+        credentials = jwtData.payload;
+      } catch (error) {
+        if (error.name === 'JWTExpired') {
+          return ('EXPIRED-CREDENTIALS');
+        } else {
+          return ('INVALID-CREDENTIALS');
+        }
+      }
+      config.INPUT.values.ORACLE_USER.value = credentials.ORACLE_USER;
+      config.INPUT.values.ORACLE_PWD.value = credentials.ORACLE_PWD;
+      if (credentials.PG_USER && credentials.PG_PWD) {
+        config.OUTPUT.values.PG_USER.value = credentials.PG_USER;
+        config.OUTPUT.values.PG_PWD.value = credentials.PG_PWD;
+      }
+    } else {
+      return ('MISSING_CREDENTIALS');
+    }
+  }
+  return ('OK');
+}
+
 /**
  * Create an ora2pg-conf file.
  * Wrapper function for saveConfigFile to prevent 2 sessions running at the same time.
  *
  * @param {string} project
- * @param {object} credentials
+ * @param {object} authToken
  */
-async function createConfigFile(project, credentials) {
+async function createConfigFile(project, authToken) {
   if (! await fileExists(`${appConfig.projectDirectory}/${project}/config/`)) {
     return ('NOT-FOUND')
   } else if (await fileExists(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`)) {
     return ('CONFLICT');
   } else {
-    const config = await getConfigObject(project, credentials);
-    await saveConfigFile(project, config);
-    return ('CREATED');
+    const config = await getConfigObject(project);
+    const status = await attachCredentialsToConfig(config, authToken);
+    if (status === 'OK') {
+      await saveConfigFile(project, config);
+      return ('CREATED');
+    } else {
+      return status;
+    }
   }
 }
 module.exports.createConfigFile = createConfigFile;
