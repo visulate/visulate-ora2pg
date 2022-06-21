@@ -115,10 +115,6 @@ router.get('/project/:project/exec', async (req, res) => {
     return;
   }
   const authToken = req.query.T;
-  if (!authToken) {
-    res.status(401).send('Missing credentials');
-    return;
-  }
   try {
     sseUtils.execOra2Pg(res, project, authToken);
   } catch (err) {

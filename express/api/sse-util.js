@@ -39,25 +39,19 @@ function sendConflictMessage(res) {
 
 async function execOra2Pg(res, project, authToken) {
   // Create temporary ora2pg.conf file
-  let payload;
-  try {
-    const jwtData = await jose.jwtVerify(authToken, appConfig.authKeyBuffer);
-    payload = jwtData.payload;
-  } catch (error) {
-    if (error.name === 'JWTExpired') {
-      res.status(403).send('Expired credentials');
-    } else {
-      res.status(403).send('Invalid credentials');
-    }
-    return;
-  }
-  const configFileStatus = await fileUtils.createConfigFile(project, payload);
+  const configFileStatus = await fileUtils.createConfigFile(project, authToken);
   // Validate file creation
   if (configFileStatus === 'CONFLICT') {
     sendConflictMessage(res);
     return;
   } else if (configFileStatus === 'NOT-FOUND') {
     res.status(404).send('Not Found');
+  } else if (configFileStatus === 'MISSING-CREDENTIALS') {
+    res.status(401).send('Missing credentials');
+  } else if (configFileStatus === 'INVALID-CREDENTIALS') {
+    res.status(403).send('Invalid credentials');
+  } else if (configFileStatus === 'EXPIRED-CREDENTIALS') {
+    res.status(403).send('Expired credentials');
   }
 
   // Initiate SSE stream
