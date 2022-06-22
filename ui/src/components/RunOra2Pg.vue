@@ -64,7 +64,7 @@ export default {
       return await jwtResponse.text();
     },
     async setupStream() {
-      const jwt = this.retrieveJwt();
+      const jwt = await this.retrieveJwt();
       const apiBase = process.env.VUE_APP_API_BASE || '';
       const queryParams = process.env.VUE_APP_ENDPOINTS_KEY ? 
         `?key=${process.env.VUE_APP_ENDPOINTS_KEY}&T=${jwt}` : `?T=${jwt}`;

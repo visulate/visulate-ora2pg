@@ -46,12 +46,16 @@ async function execOra2Pg(res, project, authToken) {
     return;
   } else if (configFileStatus === 'NOT-FOUND') {
     res.status(404).send('Not Found');
+    return;
   } else if (configFileStatus === 'MISSING-CREDENTIALS') {
     res.status(401).send('Missing credentials');
+    return;
   } else if (configFileStatus === 'INVALID-CREDENTIALS') {
     res.status(403).send('Invalid credentials');
+    return;
   } else if (configFileStatus === 'EXPIRED-CREDENTIALS') {
     res.status(403).send('Expired credentials');
+    return;
   }
 
   // Initiate SSE stream
