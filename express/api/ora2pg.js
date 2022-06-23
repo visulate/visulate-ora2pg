@@ -64,8 +64,13 @@ router.get('/project/:project', async (req, res) => {
       return;
     }
     const configJson = await fileUtils.getConfigObject(project);
+    const updatedConfig = await fileUtils.handleDefaultConfigVersionUpdate(project, configJson);
+    if (updatedConfig === null) {
+      res.status(400).send('Project\'s config file version is greater than the default template\'s version');
+      return;
+    }
     const projectFiles = await fileUtils.listProjectFiles(project);
-    res.json({ config: configJson, files: projectFiles.files, directories: projectFiles.directories });
+    res.json({ config: updatedConfig, files: projectFiles.files, directories: projectFiles.directories });
   } catch (err) {
     console.log(err);
     res.status(400).send('Project directory is invalid');

@@ -249,31 +249,93 @@ async function countProjectFiles(project){
 }
 module.exports.countProjectFiles = countProjectFiles;
 
-async function handleDefaultConfigVersionUpdate() {
-  for (projectName of await listProjectDirectories()) {
-    // Get the original config to copy values from
-    const originalConfig = await getConfigObject(projectName);
-    // Rename original for backup
-    await fs.promises.rename(`${appConfig.projectDirectory}/${projectName}/config/ora2pg-conf.json.enc`,
-      `${appConfig.projectDirectory}/${projectName}/config/ora2pg-conf.json.enc.old`);
-    // Create new config file from defaults
-    await seedProjectConfigFile(projectName);
-    const newConfig = await getConfigObject(projectName);
-    // Copy values from original over to new config
-    // Top level - COMMON, INPUT, etc.
-    for (const [key, val] of Object.entries(newConfig)) {
-      // Iterate over the fields of each
-      for (const [name, field] of Object.entries(val.values)) {
-        // Iterate over the properties of each field and copy `value` and 
-        // `include` fields from original to new
-        for (const propName of Object.keys(field)) {
-          if (propName === 'value' || propName === 'include') {
-            field[propName] = originalConfig[key]['values'][name][propName];
-          }
-        }
+/**
+ * Perform the copying of 'value' and 'include' fields from an original config object into a new one.
+ * 
+ * @param {object} target original config 
+ * @param {object} source new config
+ */
+function copyUserInputValues(target, source) {
+  for (const [key, val] of Object.entries(target)) {
+    if (typeof val === 'object') {
+      if (key === 'VISULATE_VERSION') {
+        continue;
       }
+      copyUserInputValues(val, source[key]);
+    } else if (key === 'value' || key === 'include') {
+      target[key] = source[key];
     }
-    saveConfigJson(projectName, newConfig);
   }
+}
+
+/**
+ * Merge existing user-inputed values into a new config object created from the 
+ * default template then save the new config object
+ * 
+ * @param {string} projectName    name of the project
+ * @param {object} originalConfig to copy user-inputed values from
+ * @param {object} newConfig      to copy user-inputed values to
+ */
+async function updateConfigObject(projectName, originalConfig, newConfig) {
+  // Rename original for backup
+  await fs.promises.rename(`${appConfig.projectDirectory}/${projectName}/config/ora2pg-conf.json.enc`,
+  `${appConfig.projectDirectory}/${projectName}/config/ora2pg-conf.json.enc.old`);
+  // Copy values from original over to new config
+  copyUserInputValues(newConfig, originalConfig);
+  await saveConfigJson(projectName, newConfig);
+} 
+
+/**
+ * Compare version strings to determine if oldVersion is older, newer, or the same as newVersion.
+ * 
+ * @param {string} oldVersion the version in the user's project config
+ * @param {string} newVersion the version in our default config template
+ * @returns 1 if oldVersion > newVersion, -1 if oldVersion < newVersion, 0 if they are equal
+ */
+function compareVersionStrings(oldVersion, newVersion) {
+  const oldVersionArr = oldVersion.split('.');
+  const newVersionArr = newVersion.split('.');
+  const oldVersionNum = parseInt(oldVersionArr[0]);
+  const oldSubVersionNum = parseInt(oldVersionArr[1]);
+  const newVersionNum = parseInt(newVersionArr[0]);
+  const newSubVersionNum = parseInt(newVersionArr[1])
+  if (oldVersionNum > newVersionNum || 
+    oldVersionNum === newVersionNum && oldSubVersionNum > newSubVersionNum) {
+      return 1;
+  }
+  if (oldVersionNum < newVersionNum ||
+    oldVersionNum === newVersionNum && oldSubVersionNum < newSubVersionNum) {
+      return -1;
+  }
+  return 0;
+}
+
+/**
+ * Determine if the default config template has updated since this project's config
+ * was last synced with it, and if not, sync them.
+ * 
+ * @param {string} projectName          name of project
+ * @param {object} originalConfigObject current config data of project
+ * @returns 
+ */
+async function handleDefaultConfigVersionUpdate(projectName, originalConfigObject) {
+  const configTemplate = await fs.promises.readFile(`${appConfig.resourceDirectory}/ora2pg-conf.json`);
+  const configTemplateObject = JSON.parse(configTemplate);
+  if (!originalConfigObject.COMMON.values.VISULATE_VERSION) {
+    await updateConfigObject(projectName, originalConfigObject, configTemplateObject);
+    return configTemplateObject;
+  } else {
+    const compare = compareVersionStrings(originalConfigObject.COMMON.values.VISULATE_VERSION.value,
+      configTemplateObject.COMMON.values.VISULATE_VERSION.value);
+    if (compare === 1) {
+      // Reject; project config version cannot be greater than template version
+      return null;
+    }
+    if (compare === -1) {
+      await updateConfigObject(projectName, originalConfigObject, configTemplateObject);
+      return configTemplateObject;
+    }
+  }
+  return originalConfigObject;
 }
 module.exports.handleDefaultConfigVersionUpdate = handleDefaultConfigVersionUpdate;
