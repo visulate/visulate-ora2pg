@@ -72,9 +72,8 @@ module.exports.validKeys = validKeys;
  * Read the ora2pg-conf.json file and return as an object
  *
  * @param {string} project
- * @param {object} credentials
  */
-async function getConfigObject(project, credentials) {
+async function getConfigObject(project) {
   if (! await fileExists(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json.enc`)) {
     await seedProjectConfigFile(project);
   }
@@ -249,3 +248,32 @@ async function countProjectFiles(project){
   return dirContents.length -1; // ignore the config directory
 }
 module.exports.countProjectFiles = countProjectFiles;
+
+async function handleDefaultConfigVersionUpdate() {
+  for (projectName of await listProjectDirectories()) {
+    // Get the original config to copy values from
+    const originalConfig = await getConfigObject(projectName);
+    // Rename original for backup
+    await fs.promises.rename(`${appConfig.projectDirectory}/${projectName}/config/ora2pg-conf.json.enc`,
+      `${appConfig.projectDirectory}/${projectName}/config/ora2pg-conf.json.enc.old`);
+    // Create new config file from defaults
+    await seedProjectConfigFile(projectName);
+    const newConfig = await getConfigObject(projectName);
+    // Copy values from original over to new config
+    // Top level - COMMON, INPUT, etc.
+    for (const [key, val] of Object.entries(newConfig)) {
+      // Iterate over the fields of each
+      for (const [name, field] of Object.entries(val.values)) {
+        // Iterate over the properties of each field and copy `value` and 
+        // `include` fields from original to new
+        for (const propName of Object.keys(field)) {
+          if (propName === 'value' || propName === 'include') {
+            field[propName] = originalConfig[key]['values'][name][propName];
+          }
+        }
+      }
+    }
+    saveConfigJson(projectName, newConfig);
+  }
+}
+module.exports.handleDefaultConfigVersionUpdate = handleDefaultConfigVersionUpdate;
