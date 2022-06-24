@@ -286,28 +286,22 @@ async function updateConfigObject(projectName, originalConfig, newConfig) {
 } 
 
 /**
- * Compare version strings to determine if oldVersion is older, newer, or the same as newVersion.
+ * Check if one version number is newer than another.
  * 
- * @param {string} oldVersion the version in the user's project config
- * @param {string} newVersion the version in our default config template
- * @returns 1 if oldVersion > newVersion, -1 if oldVersion < newVersion, 0 if they are equal
+ * @param {string} oldVer 
+ * @param {string} newVer 
+ * @returns true if newVer is newer, false if not
  */
-function compareVersionStrings(oldVersion, newVersion) {
-  const oldVersionArr = oldVersion.split('.');
-  const newVersionArr = newVersion.split('.');
-  const oldVersionNum = parseInt(oldVersionArr[0]);
-  const oldSubVersionNum = parseInt(oldVersionArr[1]);
-  const newVersionNum = parseInt(newVersionArr[0]);
-  const newSubVersionNum = parseInt(newVersionArr[1])
-  if (oldVersionNum > newVersionNum || 
-    oldVersionNum === newVersionNum && oldSubVersionNum > newSubVersionNum) {
-      return 1;
+function isNewerVersion (oldVer, newVer) {
+  const oldParts = oldVer.split('.')
+  const newParts = newVer.split('.')
+  for (var i = 0; i < newParts.length; i++) {
+    const a = ~~newParts[i] // parse int
+    const b = ~~oldParts[i] // parse int
+    if (a > b) return true
+    if (a < b) return false
   }
-  if (oldVersionNum < newVersionNum ||
-    oldVersionNum === newVersionNum && oldSubVersionNum < newSubVersionNum) {
-      return -1;
-  }
-  return 0;
+  return false
 }
 
 /**
@@ -325,13 +319,13 @@ async function handleDefaultConfigVersionUpdate(projectName, originalConfigObjec
     await updateConfigObject(projectName, originalConfigObject, configTemplateObject);
     return configTemplateObject;
   } else {
-    const compare = compareVersionStrings(originalConfigObject.COMMON.values.VISULATE_VERSION.value,
-      configTemplateObject.COMMON.values.VISULATE_VERSION.value);
-    if (compare === 1) {
+    const currentVersion = originalConfigObject.COMMON.values.VISULATE_VERSION.value;
+    const templateVersion = configTemplateObject.COMMON.values.VISULATE_VERSION.value;
+    if (isNewerVersion(templateVersion, currentVersion)) {
       // Reject; project config version cannot be greater than template version
       return null;
     }
-    if (compare === -1) {
+    if (isNewerVersion(currentVersion, templateVersion)) {
       await updateConfigObject(projectName, originalConfigObject, configTemplateObject);
       return configTemplateObject;
     }
