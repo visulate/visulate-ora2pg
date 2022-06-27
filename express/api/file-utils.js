@@ -306,6 +306,11 @@ function isNewerVersion (oldVer, newVer) {
   return false
 }
 
+/**
+ * Read the default template used to create new projects and return it as an object.
+ * 
+ * @returns default config template
+ */
 async function getConfigTemplateObject() {
   const configTemplate = await fs.promises.readFile(`${appConfig.resourceDirectory}/ora2pg-conf.json`);
   return JSON.parse(configTemplate);
