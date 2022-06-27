@@ -119,7 +119,7 @@ module.exports.saveConfigJson = saveConfigJson;
 async function saveConfigFile(project, configObject) {
   const tpl = await fs.promises.readFile(`${appConfig.resourceDirectory}/ora2pg-config-file.hbs`, "utf8");
   const compiledTemplate = handlebars.compile(tpl);
-  const configFile = compiledTemplate({ config: configObject });
+  const configFile = compiledTemplate({ config: configObject || await getConfigObject(project) });
   await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`, configFile);
 }
 module.exports.saveConfigFile = saveConfigFile;

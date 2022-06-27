@@ -322,7 +322,7 @@ describe("Update and Delete project tests", () => {
       });
   });
 
-  it("Download valid file should fail work", (done) => {
+  it("Download valid file should work", (done) => {
     fs.writeFileSync(`${process.env.PROJECT_DIRECTORY}/update_test_project/dummy.sql`, 'dummy file');
     chai.request(app)
       .get('/ora2pg/project/update_test_project/download/dummy.sql')
@@ -376,6 +376,20 @@ describe("Credentials tests", () => {
       payload.ORACLE_PWD.should.equal(body.ORACLE_PWD);
       payload.PG_USER.should.equal(body.PG_USER);
       payload.PG_PWD.should.equal(body.PG_PWD);
+      done();
+    });
+  });
+});
+
+describe("Export tests", () => {
+  it('Download config file', (done) => {
+    chai.request(app)
+    .get('/ora2pg/project/default/export')
+    .end((err, res) => {
+      expect(res).to.have.status(200);
+      res.headers['content-disposition'].should.equal('attachment; filename="ora2pg.conf"');
+      // Clean up generated file
+      fs.unlinkSync(`${process.env.PROJECT_DIRECTORY}/default/config/ora2pg.conf`);
       done();
     });
   });

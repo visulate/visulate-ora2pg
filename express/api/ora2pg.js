@@ -143,6 +143,9 @@ router.get('/project/:project/download/:file', async (req, res) => {
 
 });
 
+/**
+ * Sign the submitted credentials as a JWT and return JWT to client for future requests.
+ */
 router.post('/project/:project/credentials', async (req, res) => {
   const jwt = await new jose.SignJWT(req.body)
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
@@ -150,6 +153,15 @@ router.post('/project/:project/credentials', async (req, res) => {
     .sign(req.app.locals.encryptionKeyBuffer);
 
   res.status(200).send(jwt);
+});
+
+/**
+ * Save the config file for this project then download it to the browser.
+ */
+router.get('/project/:project/export', async (req, res) => {
+  const project = req.params.project;
+  await fileUtils.saveConfigFile(project);
+  res.download(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`);
 });
 
 module.exports = router;
