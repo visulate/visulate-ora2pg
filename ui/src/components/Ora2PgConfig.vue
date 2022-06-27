@@ -1,5 +1,6 @@
 <template>
   <div>
+    <auth-dialog ref="authDialog" :config-data="configData" :project="project" v-bind="$attrs"></auth-dialog>
     <div v-show="project && Object.keys(this.configData).length === 0">
       <p>{{ project }} project is encrypted</p>
     </div>
@@ -34,7 +35,8 @@
         <!-- Expansion panel contents -->
         <ul class="panel" :ref="section" style="display: block">
           <li v-for="(item, key) in properties.values" :key="key"
-            v-show="item.class == 'basic' || showAdvanced" >
+            v-show="(item.class == 'basic' || showAdvanced) && 
+            item.type !== 'username' && item.type !== 'password'" >
             <!-- Ora2Pg parameter row -->
             <div class="mdl-textfield" style="width: 500px">
               <label :for="key" :class="{ disabled: !item.include }">{{ key }}
@@ -86,11 +88,12 @@
                 :disabled="!item.include"
                 class="mdl-textfield__input"></textarea>
               <input :id="key"
-                v-else-if="item.type === 'password'"
-                type="password"
+                v-else-if="item.type === 'dsn'"
+                type="text"
                 v-model="item.value"
                 :disabled="!item.include"
-                class="mdl-textfield__input"/>
+                class="mdl-textfield__input"
+                @blur="$refs.authDialog.handleAuth(false)" />
               <input :id="key"
                 v-else
                 type="text"
@@ -99,8 +102,13 @@
                 class="mdl-textfield__input" />
               <!-- Checkbox to control whether the parameter should be commented out in
             the ora2pg.conf file at runtime -->
-              <span style="float: right">
-                <input
+              <span style="float: right" v-if="item.type !== 'internal'">
+                <input v-if="item.type !== 'dsn'"
+                  class="checkbox"
+                  type="checkbox"
+                  v-model="item.include"
+                />
+                <input v-else @change="dsnCheckboxClick(item)"
                   class="checkbox"
                   type="checkbox"
                   v-model="item.include"
@@ -114,7 +122,9 @@
   </div>
 </template>
 <script>
+import AuthDialog from './AuthDialog.vue';
 export default {
+  components: { AuthDialog },
   props: {
     project: {
       type: String,
@@ -126,7 +136,7 @@ export default {
   data() {
     return {
       configData: {},
-      showAdvanced: false,
+      showAdvanced: false
     };
   },
   beforeUpdate() {
@@ -158,10 +168,7 @@ export default {
       });
     },
     runConfig() {
-      this.$emit("run-config", {
-        project: this.project,
-        config: JSON.stringify(this.configData),
-      });
+      this.$refs.authDialog.handleAuth(true);
     },
     showFiles() {
       this.$emit("show-files", { project: this.project });
@@ -179,6 +186,11 @@ export default {
         panel.style.display = "block";
       }
     },
+    dsnCheckboxClick(item) {
+      if (item.include) {
+        this.$refs.authDialog.handleAuth(false);
+      }
+    }
   },
 };
 </script>

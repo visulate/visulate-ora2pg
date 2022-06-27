@@ -40,6 +40,7 @@
       <run-ora2pg
         v-if="showRun"
         :project="project"
+        :config="config"
         @close-component="hideDetailsPage"
       ></run-ora2pg>
 

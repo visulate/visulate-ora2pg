@@ -64,8 +64,13 @@ router.get('/project/:project', async (req, res) => {
       return;
     }
     const configJson = await fileUtils.getConfigObject(project);
+    const updatedConfig = await fileUtils.handleDefaultConfigVersionUpdate(project, configJson);
+    if (updatedConfig === null) {
+      res.status(400).send('Project\'s config file version is greater than the default template\'s version');
+      return;
+    }
     const projectFiles = await fileUtils.listProjectFiles(project);
-    res.json({ config: configJson, files: projectFiles.files, directories: projectFiles.directories });
+    res.json({ config: updatedConfig, files: projectFiles.files, directories: projectFiles.directories });
   } catch (err) {
     console.log(err);
     res.status(400).send('Project directory is invalid');
@@ -115,10 +120,6 @@ router.get('/project/:project/exec', async (req, res) => {
     return;
   }
   const authToken = req.query.T;
-  if (!authToken) {
-    res.status(401).send('Missing credentials');
-    return;
-  }
   try {
     sseUtils.execOra2Pg(res, project, authToken);
   } catch (err) {
@@ -150,7 +151,7 @@ router.post('/project/:project/credentials', async (req, res) => {
   const jwt = await new jose.SignJWT(req.body)
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
     .setExpirationTime('5m')
-    .sign(req.app.locals.encryptionKeyBuffer);
+    .sign(appConfig.authKeyBuffer);
 
   res.status(200).send(jwt);
 });
