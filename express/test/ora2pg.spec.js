@@ -326,8 +326,7 @@ describe("Export tests", () => {
     .end((err, res) => {
       expect(res).to.have.status(200);
       res.headers['content-disposition'].should.equal('attachment; filename="ora2pg.conf"');
-      // Clean up generated file
-      fs.unlinkSync(`${process.env.PROJECT_DIRECTORY}/default/config/ora2pg.conf`);
+      expect(file(`${process.env.PROJECT_DIRECTORY}/default/config/ora2pg.conf`)).not.to.exist;
       done();
     });
   });

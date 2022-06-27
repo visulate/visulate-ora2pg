@@ -162,7 +162,9 @@ router.post('/project/:project/credentials', async (req, res) => {
 router.get('/project/:project/export', async (req, res) => {
   const project = req.params.project;
   await fileUtils.saveConfigFile(project);
-  res.download(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`);
+  res.download(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`, () => {
+    fs.promises.unlink(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`);
+  });
 });
 
 module.exports = router;
