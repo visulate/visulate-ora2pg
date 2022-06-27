@@ -125,7 +125,7 @@ describe("Retrieve projects tests", () => {
       .end((err, res) => {
         res.should.have.status(200);
         res.body.config.COMMON.title.should.equal("Include a common config file");
-        // console.log(JSON.stringify(res.body.config.COMMON.title, null, 2));
+        res.body.config.COMMON.values.VISULATE_VERSION.value.should.equal(appConfig.configTemplateVersion);
         done();
       });
   });
