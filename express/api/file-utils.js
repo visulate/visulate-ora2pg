@@ -258,7 +258,7 @@ module.exports.countProjectFiles = countProjectFiles;
 function copyUserInputValues(target, source) {
   for (const [key, val] of Object.entries(target)) {
     if (typeof val === 'object') {
-      if (key === 'VISULATE_VERSION') {
+      if (key === 'VISULATE_VERSION' || !val || !source[key]) {
         continue;
       }
       copyUserInputValues(val, source[key]);
@@ -276,13 +276,15 @@ function copyUserInputValues(target, source) {
  * @param {object} originalConfig to copy user-inputed values from
  * @param {object} newConfig      to copy user-inputed values to
  */
-async function updateConfigObject(projectName, originalConfig, newConfig) {
+async function updateConfigObject(projectName, originalConfig) {
   // Rename original for backup
   await fs.promises.rename(`${appConfig.projectDirectory}/${projectName}/config/ora2pg-conf.json.enc`,
   `${appConfig.projectDirectory}/${projectName}/config/ora2pg-conf.json.enc.old`);
   // Copy values from original over to new config
+  const newConfig = await getConfigTemplateObject();
   copyUserInputValues(newConfig, originalConfig);
   await saveConfigJson(projectName, newConfig);
+  return newConfig;
 } 
 
 /**
@@ -304,6 +306,11 @@ function isNewerVersion (oldVer, newVer) {
   return false
 }
 
+async function getConfigTemplateObject() {
+  const configTemplate = await fs.promises.readFile(`${appConfig.resourceDirectory}/ora2pg-conf.json`);
+  return JSON.parse(configTemplate);
+}
+
 /**
  * Determine if the default config template has updated since this project's config
  * was last synced with it, and if not, sync them.
@@ -313,21 +320,16 @@ function isNewerVersion (oldVer, newVer) {
  * @returns 
  */
 async function handleDefaultConfigVersionUpdate(projectName, originalConfigObject) {
-  const configTemplate = await fs.promises.readFile(`${appConfig.resourceDirectory}/ora2pg-conf.json`);
-  const configTemplateObject = JSON.parse(configTemplate);
   if (!originalConfigObject.COMMON.values.VISULATE_VERSION) {
-    await updateConfigObject(projectName, originalConfigObject, configTemplateObject);
-    return configTemplateObject;
+    return await updateConfigObject(projectName, originalConfigObject);
   } else {
     const currentVersion = originalConfigObject.COMMON.values.VISULATE_VERSION.value;
-    const templateVersion = configTemplateObject.COMMON.values.VISULATE_VERSION.value;
-    if (isNewerVersion(templateVersion, currentVersion)) {
+    if (isNewerVersion(appConfig.configTemplateVersion, currentVersion)) {
       // Reject; project config version cannot be greater than template version
       return null;
     }
-    if (isNewerVersion(currentVersion, templateVersion)) {
-      await updateConfigObject(projectName, originalConfigObject, configTemplateObject);
-      return configTemplateObject;
+    if (isNewerVersion(currentVersion, appConfig.configTemplateVersion)) {
+      return await updateConfigObject(projectName, originalConfigObject);
     }
   }
   return originalConfigObject;
