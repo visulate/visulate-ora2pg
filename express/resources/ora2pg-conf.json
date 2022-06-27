@@ -1,6 +1,12 @@
 {
     "COMMON":{
         "values": {
+            "VISULATE_VERSION": {
+                "value": "1.2",
+                "description": "The current version of Visulate Ora2Pg",
+                "include": false,
+                "type": "internal"
+            },
             "IMPORT": {
                 "value": "common.conf",
                 "description": "A config file that may contain any of the following configuration directives",

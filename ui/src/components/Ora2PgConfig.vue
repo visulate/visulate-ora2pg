@@ -102,7 +102,7 @@
                 class="mdl-textfield__input" />
               <!-- Checkbox to control whether the parameter should be commented out in
             the ora2pg.conf file at runtime -->
-              <span style="float: right">
+              <span style="float: right" v-if="item.type !== 'internal'">
                 <input v-if="item.type !== 'dsn'"
                   class="checkbox"
                   type="checkbox"

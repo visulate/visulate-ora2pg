@@ -15,6 +15,11 @@
  */
 
 const crypto = require('crypto');
+const fs = require('fs');
+
+const resourceDirectory = process.env.RESOURCE_DIRECTORY||process.env.PWD + '/resources'
+const configTemplate = fs.readFileSync(`${resourceDirectory}/ora2pg-conf.json`);
+const configTemplateObject = JSON.parse(configTemplate);
 
 /**
  * Return environment variable or default value
@@ -23,7 +28,8 @@ module.exports = {
     port: process.env.HTTP_PORT || 3000 ,
     corsOriginWhitelist: process.env.CORS_ORIGIN_WHITELIST ||'',
     projectDirectory: process.env.PROJECT_DIRECTORY||process.env.PWD + '/../project',
-    resourceDirectory: process.env.RESOURCE_DIRECTORY||process.env.PWD + '/resources',
+    resourceDirectory: resourceDirectory,
     configFileEncryptionKey: process.env.ORA2PG_SECRET||'hardCodedInsecureKey123',
-    authKeyBuffer: process.env.ORA2PG_AUTH_KEY ? Buffer.from(process.env.ORA2PG_AUTH_KEY) : crypto.randomBytes(256)
+    authKeyBuffer: process.env.ORA2PG_AUTH_KEY ? Buffer.from(process.env.ORA2PG_AUTH_KEY) : crypto.randomBytes(256),
+    configTemplateVersion: configTemplateObject.COMMON.values.VISULATE_VERSION.value
   };
