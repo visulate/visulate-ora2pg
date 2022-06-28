@@ -12,11 +12,11 @@ Some users may be using the application on a shared server and need to avoid exp
 
 ## Requirements
 
-### 	Functional Requirements
+### Functional Requirements
 
 1. Customer Requirements
 
-    ​To be able to run Visulate Ora2Pg on a shared server without potentially exposing users' credentials to other users			
+    ​To be able to run Visulate Ora2Pg on a shared server without potentially exposing users' credentials to other users.		
 
 2. Use Cases
 
