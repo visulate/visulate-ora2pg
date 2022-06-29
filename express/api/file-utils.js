@@ -133,10 +133,14 @@ async function attachCredentialsToConfig(config, authToken) {
         }
       }
       config.INPUT.values.ORACLE_USER.value = credentials.ORACLE_USER;
+      config.INPUT.values.ORACLE_USER.include = true;
       config.INPUT.values.ORACLE_PWD.value = credentials.ORACLE_PWD;
+      config.INPUT.values.ORACLE_PWD.include = true;
       if (credentials.PG_USER && credentials.PG_PWD) {
         config.OUTPUT.values.PG_USER.value = credentials.PG_USER;
+        config.OUTPUT.values.PG_USER.include = true;
         config.OUTPUT.values.PG_PWD.value = credentials.PG_PWD;
+        config.OUTPUT.values.PG_PWD.include = true;
       }
     } else {
       return ('MISSING_CREDENTIALS');
