@@ -16,6 +16,8 @@
           @click.prevent="runConfig()">Run</button>
         <button class="mdl-button mdl-js-button mdl-button"
           @click.prevent="showFiles()">Review</button>
+        <a class="mdl-button mdl-js-button mdl-button"
+          :href="`${api_base}/ora2pg/project/${project}/export`">Export</a>
       </span>
     </div>
     <form v-show="Object.keys(this.configData).length > 0">
@@ -136,7 +138,8 @@ export default {
   data() {
     return {
       configData: {},
-      showAdvanced: false
+      showAdvanced: false,
+      api_base: process.env.VUE_APP_API_BASE || '',
     };
   },
   beforeUpdate() {

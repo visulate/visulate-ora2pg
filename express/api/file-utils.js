@@ -111,7 +111,7 @@ module.exports.saveConfigJson = saveConfigJson;
 async function saveConfigFile(project, configObject) {
   const tpl = await fs.promises.readFile(`${appConfig.resourceDirectory}/ora2pg-config-file.hbs`, "utf8");
   const compiledTemplate = handlebars.compile(tpl);
-  const configFile = compiledTemplate({ config: configObject });
+  const configFile = compiledTemplate({ config: configObject || await getConfigObject(project) });
   await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`, configFile);
 }
 module.exports.saveConfigFile = saveConfigFile;
@@ -133,10 +133,14 @@ async function attachCredentialsToConfig(config, authToken) {
         }
       }
       config.INPUT.values.ORACLE_USER.value = credentials.ORACLE_USER;
+      config.INPUT.values.ORACLE_USER.include = true;
       config.INPUT.values.ORACLE_PWD.value = credentials.ORACLE_PWD;
+      config.INPUT.values.ORACLE_PWD.include = true;
       if (credentials.PG_USER && credentials.PG_PWD) {
         config.OUTPUT.values.PG_USER.value = credentials.PG_USER;
+        config.OUTPUT.values.PG_USER.include = true;
         config.OUTPUT.values.PG_PWD.value = credentials.PG_PWD;
+        config.OUTPUT.values.PG_PWD.include = true;
       }
     } else {
       return ('MISSING_CREDENTIALS');
