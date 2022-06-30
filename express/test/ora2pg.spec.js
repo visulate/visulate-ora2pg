@@ -24,7 +24,9 @@ describe("Create project tests", () => {
     const config2 = await fs.promises.readFile(`${process.env.PROJECT_DIRECTORY}/invalid_password/config/ora2pg-conf.json`);
     await fileUtils.saveConfigJson('invalid_password', JSON.parse(config2));
 
-    await fs.promises.unlink(`${process.env.PROJECT_DIRECTORY}/default/default.tar.gz`);
+    if (fs.existsSync(`${process.env.PROJECT_DIRECTORY}/default/default.tar.gz`)) {
+      await fs.promises.unlink(`${process.env.PROJECT_DIRECTORY}/default/default.tar.gz`);
+    }
   });
 
   after(async () => {
