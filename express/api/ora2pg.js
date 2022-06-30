@@ -19,6 +19,7 @@ const fs = require('fs');
 const sseUtils = require('./sse-util');
 const appConfig = require('../resources/http-config');
 const fileUtils = require('./file-utils');
+const perlUtils = require('./perl-utils');
 const jose = require('jose');
 
 /**
@@ -165,6 +166,29 @@ router.get('/project/:project/export', async (req, res) => {
   res.download(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`, () => {
     fs.promises.unlink(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`);
   });
+});
+
+/**
+ * Test the submitted credentials against Oracle and/or Postgres databases.
+ */
+router.post('/project/:project/test_credentials', async (req, res) => {
+  const response = {};
+
+  if (req.body.oracle) {
+    const oraDsn = req.body.oracle.dsn;
+    const oraUser = req.body.oracle.username;
+    const oraPwd = req.body.oracle.password;
+    response.oracle = await perlUtils.testConnection(oraDsn, oraUser, oraPwd);
+  }
+
+  if (req.body.postgres) {
+    const pgDsn = req.body.postgres.dsn;
+    const pgUser = req.body.postgres.username;
+    const pgPwd = req.body.oracle.password;
+    response.postgres = await perlUtils.testConnection(pgDsn, pgUser, pgPwd);
+  }
+
+  res.status(200).json(response)
 });
 
 module.exports = router;
