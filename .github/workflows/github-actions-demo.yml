@@ -10,6 +10,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 12
-        # - run: npm ci
-        working-directory: ./express
+          # - run: npm ci
+          working-directory: ./express
       - run: npm test
