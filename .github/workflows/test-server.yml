@@ -38,7 +38,7 @@ jobs:
     #       --health-timeout 5s
     #       --health-retries 10
     services:
-      image: visulate-ora2pg
+      image: visulate/visulate-ora2pg
       # ports:
       #   - 5432:5432
       #   options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
