@@ -6,10 +6,10 @@ defaults:
     working-directory: express
 
 env:
-  ORACLE_HOME: /usr/lib/oracle/12.2/client64
-  TNS_ADMIN: /usr/lib/oracle/12.2/client64/network/admin
-  LD_LIBRARY_PATH: /usr/lib/oracle/12.2/client64/lib
-  PATH: $PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/oracle/12.2/client64/bin
+  ORACLE_HOME: /u01/app/oracle/diag/rdbms/xe/XE
+  TNS_ADMIN: /u01/app/oracle/diag/rdbms/xe/XE/network/admin
+  LD_LIBRARY_PATH: /u01/app/oracle/diag/rdbms/xe/XE/lib
+  PATH: $PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/u01/app/oracle/diag/rdbms/xe/XE/bin
 
 jobs:
   tests:
@@ -52,7 +52,7 @@ jobs:
       - run: cpan install Bundle::Compress::Zlib
       - run: cpan install DBD::Oracle
       - run:
-          curl -L -o /tmp/ora2pg.zip https://github.com/darold/ora2pg/archive/v$ORA2PG_VERSION.zip &&\
+          curl -L -o /tmp/ora2pg.zip https://github.com/darold/ora2pg/archive/v$23.1.zip &&\
           (cd /tmp && unzip ora2pg.zip && rm -f ora2pg.zip) &&\
           mv /tmp/ora2pg* /tmp/ora2pg &&\
           (cd /tmp/ora2pg && perl Makefile.PL && make && make install)
