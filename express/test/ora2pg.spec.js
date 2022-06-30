@@ -27,7 +27,6 @@ describe("Create project tests", () => {
     if (fs.existsSync(`${process.env.PROJECT_DIRECTORY}/default/default.tar.gz`)) {
       await fs.promises.unlink(`${process.env.PROJECT_DIRECTORY}/default/default.tar.gz`);
     }
-    await fs.promises.mkdir(`${process.env.PROJECT_DIRECTORY}/empty`);
   });
 
   after(async () => {
