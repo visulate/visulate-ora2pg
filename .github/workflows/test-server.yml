@@ -25,7 +25,7 @@ jobs:
         env:
           ORACLE_RANDOM_PASSWORD: true
           APP_USER: my_user
-          APP_USER_PASSWORD: my_password_which_I_really_should_change
+          APP_USER_PASSWORD: differentPass123
 
         # Forward Oracle port
         ports:
