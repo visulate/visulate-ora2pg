@@ -42,6 +42,7 @@
           </label>
           <input v-model="oraclePwd" name="ORACLE_PWD"
               type="password" class="mdl-textfield__input" />
+          <p class="error" v-if="oracleCredsError">{{oracleCredsError}}</p>
           
           <div class="pg-credentials-container" v-if="configData.OUTPUT.values.PG_DSN.include">
             <label for="PG_DSN">PG_DSN
@@ -82,17 +83,24 @@
             </label>
             <input v-model="pgPwd" name="PG_PWD"
                 type="password" class="mdl-textfield__input" />
+            <p class="error" v-if="postgresCredsError">{{postgresCredsError}}</p>
           </div>
         </div>
         <div class="mdl-dialog__actions">
-          <button v-if="runAfter" type="button" class="mdl-button" @click="saveCredentialsAndRun">Run</button>
-          <button v-else type="button" class="mdl-button" @click="saveCredentials">Save</button>
+          <div v-if="showSubmit">
+            <button v-if="runAfter" type="button" class="mdl-button" @click="saveCredentialsAndRun">Run</button>
+            <button v-else type="button" class="mdl-button" @click="saveCredentials">Save</button>
+          </div>
+          <div v-else>
+              <button class="mdl-button" disabled>Testing credentials...</button>
+          </div>
           <button type="button" class="mdl-button" @click="cancel">Cancel</button>
         </div>
       </div>
     </div>
 </template>
 <script>
+import httpClient from '../assets/httpClient';
 export default {
     props: {
         project: {
@@ -110,7 +118,10 @@ export default {
             pgUser: '',
             pgPwd: '',
             runAfter: false,
-            errors: []
+            errors: [],
+            oracleCredsError: '',
+            postgresCredsError: '',
+            showSubmit: true
         }
     },
     methods: {
@@ -120,19 +131,65 @@ export default {
                 config: JSON.stringify(this.configData),
             });
         },
-        saveCredentialsAndRun() {
-            this.saveCredentials();
-            this.runConfig();
+        async saveCredentialsAndRun() {
+            const doRun = await this.saveCredentials();
+            if (doRun) {
+                this.runConfig();
+            }
         },
-        saveCredentials() {
+        async saveCredentials() {
             if (!this.validateForm()) {
-                return;
+                return false;
             }
             const oracleDsn = this.configData.INPUT.values.ORACLE_DSN;
             const postgresDsn = this.configData.OUTPUT.values.PG_DSN;
+            const testCreds = await this.testCredentials(oracleDsn, postgresDsn);
+            if (oracleDsn.include && testCreds.oracle !== 'OK' ||
+                postgresDsn.include && testCreds.postgres !== 'OK') {
+                    console.log(testCreds.oracle !== 'OK')
+                if (testCreds.oracle !== 'OK') {
+                    this.oracleCredsError = testCreds.oracle;
+                }
+                if (testCreds.postgres !== 'OK') {
+                    this.postgresCredsError = testCreds.postgres;
+                }
+                return false;
+            } 
             sessionStorage.setItem(oracleDsn.value, JSON.stringify({user: this.oracleUser, pass: this.oraclePwd}));
-            sessionStorage.setItem(postgresDsn.value, JSON.stringify({user: this.pgUser, pass: this.pgPwd}));
+            if (postgresDsn.include) {
+                sessionStorage.setItem(postgresDsn.value, JSON.stringify({user: this.pgUser, pass: this.pgPwd}));
+            }
             this.showDialog = false;
+            return true;
+        },
+        async testCredentials(oracleDsn, postgresDsn) {
+            this.showSubmit = false;
+            const body = {};
+            if (oracleDsn.include) {
+                body.oracle = {
+                    dsn: oracleDsn.value,
+                    username: this.oracleUser,
+                    password: this.oraclePwd
+                }
+            }
+            if (postgresDsn.include) {
+                body.postgres = {
+                    dsn: postgresDsn.value,
+                    username: this.pgUser,
+                    password: this.pgPwd
+                }
+            }
+            const project = this.project;
+            const res = await httpClient(`/ora2pg/project/${project}/test_credentials`, {
+                    method: "post",
+                    headers: {
+                        Accept: "application/json, text/plain, */*",
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(body)
+                });
+            this.showSubmit = true;
+            return JSON.parse(await res.text());
         },
         validateForm() {
             this.errors.length = 0;
@@ -162,6 +219,8 @@ export default {
             if (oracleDsn.include && !sessionStorage.getItem(oracleDsn.value) ||
                 postgresDsn.include && !sessionStorage.getItem(postgresDsn.value)) {
                 this.errors.length = 0;
+                this.oracleCredsError = '';
+                this.postgresCredsError = '';
                 this.showDialog = true;
             } else if (runAfter) {
                 this.runConfig();

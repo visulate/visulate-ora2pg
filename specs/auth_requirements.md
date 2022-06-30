@@ -35,11 +35,18 @@ Some users may be using the application on a shared server and need to avoid exp
     - **Action**: User clicks Run in using an input file rather than a database (`ORACLE_DSN` is disabled).
     **Expected result**: Ora2Pg will run without asking for credentials.
 
+    **Action**: User clicks the Test Connection button(s) in the authentication dialog after entering their credentials correctly.
+    **Expected result**: After confirming the connection the Test Connection button will turn into a message saying Connection OK
+
+    **Action** User clicks the Test Connection button(s) in the authentication dialog after entering their credentials incorrectly.
+    **Expected result**: After failing to connect a message will appear saying connection failed and the Test Connection button will still appear
+
 3. Functionality and Feature Description
 
     **​Current behavior**: The configuration for a project is stored in a file called ora2pg-conf.json. This includes the username(s) and password(s) to Oracle and PostgreSQL databases. It is encrypted when stored on the server, but gets decrypted and sent to the client when a project is selected in Visulate Ora2Pg. This exposes a security risk for users on a shared server, as anyone with access to the server could gain credentials for projects other than their own.
 
     **​New functionality**: The user will be prompted for their credentials via a dialog and these will be stored in session storage and only sent to the server when needed for running Ora2Pg. To avoid exposing the credentials in a URL (since `/exec` is a `GET` request) the credentials will be `POST`ed to a separate endpoint `/credentials` which will return a JWT containing the credentials. The JWT is then included in the URL for the `/exec` request.
+    Test Connection buttons should appear under the credentials inputs for Oracle and Postgres in the auth dialog. Clicking these buttons will use a perl module to test the connections to Oracle and Postgres.
 
     **​New concepts**: JWTs are used to encode the credentials for submitting to the `/exec` request.
 
