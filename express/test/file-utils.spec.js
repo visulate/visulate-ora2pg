@@ -10,6 +10,11 @@ const fileUtils = require('../api/file-utils');
 const appConfig = require('../resources/http-config');
 
 describe("File Utils tests", () => {
+    before(async () => {
+      const config = await fs.promises.readFile(`${process.env.PROJECT_DIRECTORY}/default/config/ora2pg-conf.json`);
+      await fileUtils.saveConfigJson('default', JSON.parse(config));
+    });
+
     it("Test handleDefaultConfigVersionUpdate - same version", async () => {
         // GIVEN
         const configObject = {
