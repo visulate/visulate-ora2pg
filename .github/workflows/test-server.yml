@@ -15,6 +15,28 @@ jobs:
   tests:
     name: run tests
     runs-on: ubuntu-latest
+    services:
+      # Oracle service (label used to access the service container)
+      oracle:
+        # Docker Hub image (feel free to change the tag "latest" to any other available one)
+        image: gvenzl/oracle-xe:latest
+
+        # Provide passwords and other environment variables to container
+        env:
+          ORACLE_RANDOM_PASSWORD: true
+          APP_USER: my_user
+          APP_USER_PASSWORD: my_password_which_I_really_should_change
+
+        # Forward Oracle port
+        ports:
+          - 1521:1521
+
+        # Provide healthcheck script options for startup
+        options: >-
+          --health-cmd healthcheck.sh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
