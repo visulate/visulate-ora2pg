@@ -5,6 +5,12 @@ defaults:
   run:
     working-directory: express
 
+env:
+  ORACLE_HOME: /usr/lib/oracle/12.2/client64
+  TNS_ADMIN: /usr/lib/oracle/12.2/client64/network/admin
+  LD_LIBRARY_PATH: /usr/lib/oracle/12.2/client64/lib
+  PATH: $PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/oracle/12.2/client64/bin
+
 jobs:
   tests:
     name: run tests
@@ -12,7 +18,22 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
+      - uses: shogo82148/actions-setup-perl@v1
         with:
           node-version: 12
+          perl-version: "5.34"
+      # Set up Ora2Pg
+      - run: cpan install Test::NoWarnings
+      - run: cpan install DBI
+      - run: cpan install DBD::Pg
+      - run: cpan install Bundle::Compress::Zlib
+      - run: cpanm install DBD::Oracle@1.82
+      - run:
+          curl -L -o /tmp/ora2pg.zip https://github.com/darold/ora2pg/archive/v$ORA2PG_VERSION.zip &&\
+          (cd /tmp && unzip ora2pg.zip && rm -f ora2pg.zip) &&\
+          mv /tmp/ora2pg* /tmp/ora2pg &&\
+          (cd /tmp/ora2pg && perl Makefile.PL && make && make install)
+      # Install node dependencies
       - run: npm install
+      # Run tests
       - run: npm test
