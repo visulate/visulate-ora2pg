@@ -18,9 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
-      - uses: shogo82148/actions-setup-perl@v1
         with:
           node-version: 12
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
           perl-version: "5.34"
       # Set up Ora2Pg
       - run: cpan install Test::NoWarnings
