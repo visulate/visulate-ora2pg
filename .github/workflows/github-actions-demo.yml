@@ -8,8 +8,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
-        working-directory: ./express
         with:
           node-version: 12
-      # - run: npm ci
+        # - run: npm ci
+        working-directory: ./express
       - run: npm test
