@@ -27,7 +27,7 @@ jobs:
       - run: cpan install DBI
       - run: cpan install DBD::Pg
       - run: cpan install Bundle::Compress::Zlib
-      - run: cpanm install DBD::Oracle@1.82
+      - run: cpan install DBD::Oracle
       - run:
           curl -L -o /tmp/ora2pg.zip https://github.com/darold/ora2pg/archive/v$ORA2PG_VERSION.zip &&\
           (cd /tmp && unzip ora2pg.zip && rm -f ora2pg.zip) &&\
