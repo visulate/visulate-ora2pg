@@ -15,4 +15,4 @@ jobs:
         with:
           node-version: 12
       - run: npm install
-      - run: sudo npm test
+      - run: npm test
