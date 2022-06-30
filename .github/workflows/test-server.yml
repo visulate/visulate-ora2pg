@@ -23,9 +23,9 @@ jobs:
 
         # Provide passwords and other environment variables to container
         env:
-          ORACLE_RANDOM_PASSWORD: true
-          APP_USER: my_user
-          APP_USER_PASSWORD: my_password_which_I_really_should_change
+          ORACLE_PASSWORD: pass1234
+          APP_USER: system
+          APP_USER_PASSWORD: pass1234
 
         # Forward Oracle port
         ports:
