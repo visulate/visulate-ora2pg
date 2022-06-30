@@ -146,7 +146,6 @@ export default {
             const testCreds = await this.testCredentials(oracleDsn, postgresDsn);
             if (oracleDsn.include && testCreds.oracle !== 'OK' ||
                 postgresDsn.include && testCreds.postgres !== 'OK') {
-                    console.log(testCreds.oracle !== 'OK')
                 if (testCreds.oracle !== 'OK') {
                     this.oracleCredsError = testCreds.oracle;
                 }
