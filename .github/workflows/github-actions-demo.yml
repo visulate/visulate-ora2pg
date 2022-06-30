@@ -1,6 +1,10 @@
 name: GitHub Actions Demo
 on: [push]
 
+defaults:
+  run:
+    working-directory: express
+
 jobs:
   tests:
     name: run tests
@@ -10,6 +14,4 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 12
-          # - run: npm ci
-          working-directory: ./express
       - run: npm test
