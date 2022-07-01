@@ -19,6 +19,7 @@ jobs:
         run: echo "::set-output name=container-id::$(docker run -d -p 3000:3000 -v "$(pwd)/ora2pg-projects":/project visulate-ora2pg:ci)"
       # - run: docker exec -it ${{ steps.start_docker_container.outputs.container-id }} bash
       # Install node dependencies
+      - run: docker exec ${{ steps.start_docker_container.outputs.container-id }} which ora2pg
       - run: docker exec ${{ steps.start_docker_container.outputs.container-id }} npm install
       # Run tests
       - run: docker exec ${{ steps.start_docker_container.outputs.container-id }} npm test
