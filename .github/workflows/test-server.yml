@@ -5,12 +5,6 @@ defaults:
   run:
     working-directory: express
 
-env:
-  ORACLE_HOME: /u01/app/oracle/diag/rdbms/xe/XE
-  TNS_ADMIN: /u01/app/oracle/diag/rdbms/xe/XE/network/admin
-  LD_LIBRARY_PATH: /u01/app/oracle/diag/rdbms/xe/XE/lib
-  PATH: $PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/u01/app/oracle/diag/rdbms/xe/XE/bin
-
 jobs:
   tests:
     name: run tests
