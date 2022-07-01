@@ -15,54 +15,17 @@ jobs:
   tests:
     name: run tests
     runs-on: ubuntu-latest
-    # services:
-    #   # Oracle service (label used to access the service container)
-    #   oracle:
-    #     # Docker Hub image (feel free to change the tag "latest" to any other available one)
-    #     image: gvenzl/oracle-xe:11-slim
-
-    #     # Provide passwords and other environment variables to container
-    #     env:
-    #       ORACLE_RANDOM_PASSWORD: true
-    #       APP_USER: my_user
-    #       APP_USER_PASSWORD: differentPass123
-
-    #     # Forward Oracle port
-    #     ports:
-    #       - 1521:1521
-
-    #     # Provide healthcheck script options for startup
-    #     options: >-
-    #       --health-cmd healthcheck.sh
-    #       --health-interval 10s
-    #       --health-timeout 5s
-    #       --health-retries 10
-    services:
-      image: visulate/visulate-ora2pg:latest
-      options: "--entrypoint /bin/bash"
-      # ports:
-      #   - 5432:5432
-      #   options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 12
-
-      # - uses: shogo82148/actions-setup-perl@v1
-      #   with:
-      #     perl-version: "5.34"
-      # # Set up Ora2Pg
-      # - run: cpan install Test::NoWarnings
-      # - run: cpan install DBI
-      # - run: cpan install DBD::Pg
-      # - run: cpan install Bundle::Compress::Zlib
-      # - run: cpan install DBD::Oracle
-      # - run:
-      #     curl -L -o /tmp/ora2pg.zip https://github.com/darold/ora2pg/archive/v$23.1.zip &&\
-      #     (cd /tmp && unzip ora2pg.zip && rm -f ora2pg.zip) &&\
-      #     mv /tmp/ora2pg* /tmp/ora2pg &&\
-      #     (cd /tmp/ora2pg && perl Makefile.PL && make && make install)
+      - run: docker build -t visulate-ora2pg:ci .
+      - uses: mathiasvr/command-output@v1
+        id: start_docker_container
+        with:
+          run: docker run -d -p 3000:3000 -v "$(pwd)/ora2pg-projects":/project visulate-ora2pg:ci
+      - run: docker exec -it ${{ steps.start_docker_container.stdout }}
       # Install node dependencies
       - run: npm install
       # Run tests
