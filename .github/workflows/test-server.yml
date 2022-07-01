@@ -20,11 +20,11 @@ jobs:
         with:
           run: docker run -d -p 3000:3000 -v "$(pwd)/ora2pg-projects":/project visulate-ora2pg:ci
       - uses: bhowell2/github-substring-action
-        id: CONTAINER_ID
+        id: container_id
         with:
-          value: ${{ steps.start_docker_container.outputs.stdout }}
+          value: "${{ steps.start_docker_container.outputs.stdout }}"
           length_from_start: 20
-      - run: docker exec -it ${{ steps.CONTAINER_ID.outputs.substring }} bash
+      - run: docker exec -it ${{ steps.container_id.outputs.substring }} bash
       # Install node dependencies
       - run: npm install
       # Run tests
