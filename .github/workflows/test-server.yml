@@ -15,16 +15,13 @@ jobs:
         with:
           node-version: 12
       - run: docker build -t visulate-ora2pg:ci .
-      - uses: mathiasvr/command-output@v1
+      - uses: spenserblack/actions-set-output@v1
         id: start_docker_container
         with:
-          run: docker run -d -p 3000:3000 -v "$(pwd)/ora2pg-projects":/project visulate-ora2pg:ci
-      - uses: bhowell2/github-substring-action
-        id: container_id
-        with:
-          value: "${{ steps.start_docker_container.outputs.stdout }}"
-          length_from_start: 20
-      - run: docker exec -it ${{ steps.container_id.outputs.substring }} bash
+          variables: |
+            CONTAINER_ID=$(docker run -d -p 3000:3000 -v "$(pwd)/ora2pg-projects":/project visulate-ora2pg:ci)
+
+      - run: docker exec -it ${{ steps.start_docker_container.outputs.CONTAINER_ID }} bash
       # Install node dependencies
       - run: npm install
       # Run tests
