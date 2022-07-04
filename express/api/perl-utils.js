@@ -8,7 +8,14 @@ function testConnection(dsn, username, password) {
     return new Promise(resolve => {
         exec(`perl db_connection_check.pl "${dsn}" "${username}" "${password}"`, {cwd},
           (err, stdout) => {
-            resolve(stdout);
+            if (err) {
+                let errorMessage = err.message.replace('perl db_connection_check.pl ', '');
+                errorMessage = errorMessage.replace(new RegExp(password, 'g'), "*****");
+                const errMessageStartIdx = errorMessage.lastIndexOf('failed: ') + 'failed: '.length;
+                resolve(errorMessage.substring(errMessageStartIdx, errMessageStartIdx + 80) + '...')
+            } else {
+                resolve(stdout);
+            }
           });
     });
 }
