@@ -1,0 +1,32 @@
+version: "3.3"
+services:
+  reverseproxy:
+    build: ./reverseproxy
+    ports:
+      - 80:80
+      - 443:443
+  ora2pg:
+    hostname: ora2pg
+    depends_on:
+      - reverseproxy
+    build: .
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./project:/project
+  visapi:
+    hostname: visapi
+    depends_on:
+      - reverseproxy
+    image: "gcr.io/visulate-llc-public/visulate-for-oracle:1.1"
+    ports:
+      - "3002:3000"
+    volumes:
+      - /home/pgoldtho/config:/visulate-server/config
+  visui:
+    hostname: visui
+    depends_on:
+      - reverseproxy
+    image: "gcr.io/visulate-llc-public/visulate-for-oracle/ui:1.1"
+    ports:
+      - "8080:80"
