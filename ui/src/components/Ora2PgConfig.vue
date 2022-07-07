@@ -8,7 +8,7 @@
   <div v-else>
     <auth-dialog ref="authDialog" :config-data="configData" :project="project" v-bind="$attrs" @run-config="doRun"></auth-dialog>
     <div v-show="project && Object.keys(this.configData).length === 0">
-      <p>{{ project }} project is encrypted</p>
+      <p>{{ project }} project data is unavailable</p>
     </div>
     <div
       v-show="project && Object.keys(this.configData).length > 0"
@@ -133,6 +133,7 @@
 import AuthDialog from './AuthDialog.vue';
 import RunOra2Pg from './RunOra2Pg.vue';
 import httpClient from '../assets/httpClient';
+import { router } from '../router';
 export default {
   components: { AuthDialog, RunOra2Pg },
   props: {
@@ -168,6 +169,10 @@ export default {
   },
   async mounted() {
       const res = await httpClient(`/ora2pg/project/${this.project}`);
+      if (res.status === 404) {
+        alert(`Could not find a project named ${this.project}`);
+        router.push('/');
+      }
       const jsonResponse = await res.json();
     
       this.configData = jsonResponse.config;

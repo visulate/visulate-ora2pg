@@ -8,6 +8,10 @@ export const router = createRouter({
             component: () => import('../components/HomePage.vue')
         },
         {
+            path: '/projects',
+            redirect: '/'
+        },
+        {
             path: '/projects/:project',
             component: () => import('../components/Ora2PgConfig.vue'),
             props: true
