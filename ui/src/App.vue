@@ -34,7 +34,8 @@
        Without this, the UI doesn't update when the only thing changing in the 
        path is a path param, e.g. switching projects -->
       <router-view :key="$route.fullPath" @create-project="createProject" 
-      @run-started="setOra2PgRunning(true)" @run-complete="setOra2PgRunning(false)"/>
+      @run-started="setOra2PgRunning(true)" @run-complete="setOra2PgRunning(false)"
+      @delete-project="onDeleteProject"/>
     </main>
 
     <!-- Notifications snackbar -->
@@ -105,6 +106,9 @@ export default {
       } else if (response.status === 409) {
         UIUtils.showMessage("Supply a unique project name");
       }
+    },
+    onDeleteProject() {
+        this.$refs.projectsComponent.getProjects();
     },
     // Set the current project
     setProject(project) {

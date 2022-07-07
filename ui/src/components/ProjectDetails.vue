@@ -75,6 +75,7 @@ export default {
             ? `${this.project} deleted`
             : `Delete failed with ${response.status} HTTP repsonse`;
         UIUtils.showMessage(messageText);
+        this.$emit('delete-project')
         router.push('/');
       }
     },
