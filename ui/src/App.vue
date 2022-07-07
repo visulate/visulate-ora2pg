@@ -109,6 +109,7 @@ export default {
     // Set the current project
     setProject(project) {
       this.project = project;
+      this.$refs.projectsComponent.setCurrentProjectName(project);
     },
     isHomePage() {
       return this.$route.fullPath === '/'
