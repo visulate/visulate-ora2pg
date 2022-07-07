@@ -101,7 +101,7 @@ export default {
         this.showHome = false;
         this.$refs.projectsComponent.getProjects();
         this.$refs.projectsComponent.setCurrentProjectName(projectName);
-        router.push(`/${projectName}`);
+        router.push(`/projects/${projectName}`);
       } else if (response.status === 409) {
         UIUtils.showMessage("Supply a unique project name");
       }

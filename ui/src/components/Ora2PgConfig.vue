@@ -21,7 +21,7 @@
         <button class="mdl-button mdl-js-button mdl-button"
           @click.prevent="runConfig()">Run</button>
         <router-link class="mdl-button mdl-js-button mdl-button"
-          :to="`/${project}/details`">Review</router-link>
+          :to="`/projects/${project}/details`">Review</router-link>
         <a class="mdl-button mdl-js-button mdl-button"
           :href="`${api_base}/ora2pg/project/${project}/export`">Export</a>
       </span>

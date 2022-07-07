@@ -11,7 +11,7 @@
         </button>
         <router-link
           class="mdl-button mdl-js-button mdl-button"
-          :to="`/${project}`"
+          :to="`/projects/${project}`"
         >
           Close
         </router-link>
@@ -36,7 +36,7 @@
 </template>
 <script>
 import httpClient from '../assets/httpClient';
-import router from '../router';
+import { router } from '../router';
 import { UIUtils } from '../utils/ui-utils';
 
 export default {
@@ -75,11 +75,11 @@ export default {
             ? `${this.project} deleted`
             : `Delete failed with ${response.status} HTTP repsonse`;
         UIUtils.showMessage(messageText);
-        router.push('/')
+        router.push('/');
       }
     },
     closeComponent() {
-      router.push(`/${this.project}`)
+      router.push(`/projects/${this.project}`)
     }
   },
   computed: {

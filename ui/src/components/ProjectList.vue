@@ -2,7 +2,7 @@
   <nav class="mdl-navigation">
     <router-link
       v-for="(project) in projectList"
-      :to="`/${project}`"
+      :to="`/projects/${project}`"
       :key="project"
       class="mdl-navigation__link"
       :class="{ selected: project === currentProject }"

@@ -1,19 +1,19 @@
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 
 export const router = createRouter({
-    history: createWebHashHistory(),
+    history: createWebHistory(),
     routes: [
         {
             path: '/',
             component: () => import('../components/HomePage.vue')
         },
         {
-            path: '/:project',
+            path: '/projects/:project',
             component: () => import('../components/Ora2PgConfig.vue'),
             props: true
         },
         {
-            path: '/:project/details',
+            path: '/projects/:project/details',
             component: () => import('../components/ProjectDetails.vue'),
             props: true
         }
