@@ -1,13 +1,12 @@
 <template>
   <nav class="mdl-navigation">
-    <a
-      v-for="(project, index) in projectList"
+    <router-link
+      v-for="(project) in projectList"
+      :to="`/${project}`"
       :key="project"
-      @click="setCurrentProject(index)"
       class="mdl-navigation__link"
       :class="{ selected: project === currentProject }"
-      >{{ project }}</a
-    >
+      >{{ project }}</router-link>
   </nav>
 </template>
 <script>

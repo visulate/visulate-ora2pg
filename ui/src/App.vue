@@ -18,51 +18,23 @@
         ref="projectsComponent"
       ></project-list>
       <div style="display: flex; justify-content: flex-end">
-        <button
+        <router-link
           class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab"
           style="margin: 0 20px 0 0"
-          @click="showHomePage"
-          v-show="!showHome && !showRun"
+          to="/" v-show="!isHomePage()"
         >
           <i class="material-icons">add</i>
-        </button>
+        </router-link>
       </div>
     </div>
 
     <!-- Main body -->
     <main class="mdl-layout__content">
-      <home-page
-        v-if="showHome"
-        @create-project="createProject"
-        @cancel-create-project="hideHomePage"
-      ></home-page>
-
-      <run-ora2pg
-        v-if="showRun"
-        :project="project"
-        :config="config"
-        @close-component="hideDetailsPage"
-      ></run-ora2pg>
-
-      <project-details
-        ref="projectDetailsComponent"
-        v-if="showDetails"
-        :fileList="projectFiles"
-        :folderList="projectFolders"
-        :project="project"
-        @delete-project="deleteProject"
-        @close-component="hideDetailsPage"
-      ></project-details>
-
-      <ora2pg-config
-        ref="configComponent"
-        :project="project"
-        :config="config"
-        @save-config="saveConfig"
-        @run-config="runConfig"
-        @show-files="showDetailsPage"
-        v-show="!showHome && !showRun && !showDetails"
-      ></ora2pg-config>
+      <!-- :key="$route.fullPath" makes the UI update every time the route changes.
+       Without this, the UI doesn't update when the only thing changing in the 
+       path is a path param, e.g. switching projects -->
+      <router-view :key="$route.fullPath" @create-project="createProject" 
+      @run-started="setOra2PgRunning(true)" @run-complete="setOra2PgRunning(false)"/>
     </main>
 
     <!-- Notifications snackbar -->
@@ -79,28 +51,22 @@
 </template>
 
 <script>
-import Ora2pgConfig from './components/Ora2PgConfig';
-import ProjectDetails from './components/ProjectDetails';
 import ProjectList from './components/ProjectList';
-import RunOra2pg from './components/RunOra2Pg';
-import HomePage from './components/HomePage';
 import httpClient from './assets/httpClient';
+import { UIUtils } from './utils/ui-utils';
+import { router } from './router';
 
 export default {
   name: "AppContainer",
   components: {
-    Ora2pgConfig,
-    ProjectDetails,
     ProjectList,
-    RunOra2pg,
-    HomePage
   },
   data() {
     return {
       project: null,
       showHome: true,
       showForm: false,
-      showRun: false,
+      ora2PgRunning: false,
       showDetails: false,
       config: {},
       projectFiles: [],
@@ -108,37 +74,17 @@ export default {
       user: ""
     };
   },
+  mounted() {
+    router.beforeEach((to, from, next) => {
+      if (this.ora2PgRunning) {
+        UIUtils.showMessage("Navigation is disabled while Ora2Pg is running")
+      } else {
+        this.setProject(to.params.project);
+        next();
+      }
+    })
+  },
   methods: {
-    // Display notifications (e.g 'Saved') at bottom of screen
-    showMessage(messageText) {
-      const notification = document.querySelector(".mdl-js-snackbar");
-      notification.MaterialSnackbar.showSnackbar({
-        message: messageText,
-      });
-    },
-    // Show the home/create project page
-    showHomePage() {
-      this.project = null;
-      this.showHome = true;
-      this.showDetails = false;
-    },
-    // Hide the home page
-    hideHomePage() {
-      this.showHome = false;
-    },
-    // Show project files page
-    async showDetailsPage() {
-      const res = await httpClient(`/ora2pg/project/${this.project}`);
-      const jsonResponse = await res.json();
-      this.projectFiles = jsonResponse.files;
-      this.projectFolders = jsonResponse.directories;
-      this.showDetails = true;
-    },
-    // Close run results and project files page
-    hideDetailsPage() {
-      this.showRun = false;
-      this.showDetails = false;
-    },
     // Create a new project
     async createProject(project) {
       const projectName = project.project;
@@ -155,80 +101,28 @@ export default {
         this.showHome = false;
         this.$refs.projectsComponent.getProjects();
         this.$refs.projectsComponent.setCurrentProjectName(projectName);
-        await this.setProject(projectName);
+        router.push(`/${projectName}`);
       } else if (response.status === 409) {
-        this.showMessage("Supply a unique project name");
+        UIUtils.showMessage("Supply a unique project name");
       }
     },
     // Set the current project
-    async setProject(project) {
-      if (this.showRun) {
-        this.showMessage(
-          "Project selection disabled while Ora2Pg run page is open"
-        );
-        return;
-      }
-      if (this.project === project) {
-        return;
-      }
+    setProject(project) {
       this.project = project;
-      const res = await httpClient(`/ora2pg/project/${project}`);
-      const jsonResponse = await res.json();
-      this.config = jsonResponse.config;
-      this.projectFiles = jsonResponse.files;
-      this.hideHomePage();
     },
-    // Save the project configuration
-    async saveConfig(configObj) {
-      const project = configObj.project;
-      const configJson = JSON.parse(configObj.config);
-      const postBody = JSON.stringify(configJson);
-      const rawResponse = await httpClient(`/ora2pg/project/${project}`, {
-        method: "post",
-        headers: {
-          Accept: "application/json, text/plain, */*",
-          "Content-Type": "application/json",
-        },
-        body: postBody,
-      });
-      const response = await rawResponse;
-      const messageText =
-        response.status == 201
-          ? "Saved"
-          : `Save failed with ${response.status} HTTP repsonse`;
-      this.showMessage(messageText);
+    isHomePage() {
+      return this.$route.fullPath === '/'
     },
-    // Execute ora2pg using the current project configuration
-    async runConfig(configObj) {
-      await this.saveConfig(configObj);
-      this.showRun = true;
-    },
-    // Delete a project
-    async deleteProject(projObject) {
-      const project = projObject.project;
-      if (
-        confirm(`This will delete project '${project}' and all of its files.`)
-      ) {
-        const rawResponse = await httpClient(`/ora2pg/project/${project}`, {
-          method: "delete",
-        });
-        const response = await rawResponse;
-        const messageText =
-          response.status == 204
-            ? `${project} deleted`
-            : `Delete failed with ${response.status} HTTP repsonse`;
-        this.showMessage(messageText);
-        this.project = null;
-
-        this.$refs.projectsComponent.getProjects();
-        this.$refs.projectsComponent.setCurrentProjectName();
-        this.showHomePage();
-      }
-    },
+    setOra2PgRunning(ora2PgRunning) {
+      this.ora2PgRunning = ora2PgRunning;
+    }
   },
 };
 </script>
 
 <style>
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+body, #app {
+  height: 100%
+}
 </style>
