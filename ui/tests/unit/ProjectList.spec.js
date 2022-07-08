@@ -21,16 +21,11 @@ describe('ProjectList.vue',() => {
   test('ProjectList populated', (done) => {
     const wrapper = mount(ProjectList)
     setTimeout(() => {
-      expect(wrapper.findAll('a').length).toBe(3)
-      done()
-    });
-  });
-
-  test('Select project from list', (done) => {
-    const wrapper = mount(ProjectList)
-    setTimeout(() => {
-      wrapper.find('a').trigger('click')
-      expect(wrapper.emitted()).toHaveProperty('set-project')
+      const projectLinks = wrapper.findAll('router-link');
+      expect(projectLinks.length).toBe(3);
+      expect(projectLinks.map(l => l.attributes().to)).toContain('/projects/default');
+      expect(projectLinks.map(l => l.attributes().to)).toContain('/projects/project1');
+      expect(projectLinks.map(l => l.attributes().to)).toContain('/projects/project2');
       done()
     });
   });

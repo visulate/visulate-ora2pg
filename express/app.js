@@ -41,6 +41,7 @@ app.use(express.static(path.join(__dirname, 'ui')));
 app.use('/ora2pg', ora2pgRouter);
 app.use('/vue', express.static(path.join(__dirname, 'node_modules/vue/dist')));
 app.use('/', express.static(path.join(__dirname, 'ui/dist')));
+app.use('/projects/*', express.static(path.join(__dirname, 'ui/dist')));
 
 // error handler
 app.use(function(err, req, res, next) {
