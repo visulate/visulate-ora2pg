@@ -128,6 +128,36 @@ export default {
 <style>
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 body, #app {
-  height: 100%
+  height: 100%;
+}
+
+.dialog {
+  position: fixed;
+  z-index: 1;
+  background: white;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 400px !important;
+}
+.dialog > h4 {
+  margin: 5px 0 0;
+  padding-bottom: 10px;
+}
+.dialog h6 {
+    border-bottom: 1px solid rgba(0,0,0,.12);
+}
+.dialog input {
+    margin-bottom: 7px;
+}
+.dialog-container {
+  position: fixed; 
+  width: 100%; 
+  height: 100%; 
+  z-index: 1;
+  background: rgba(0, 0, 0, .5)
+}
+.danger {
+  color: red;
 }
 </style>

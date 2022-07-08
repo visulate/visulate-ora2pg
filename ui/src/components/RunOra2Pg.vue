@@ -13,7 +13,7 @@
         </button>
       </span>
     </div>
-    <pre><code>{{outputText}}</code></pre>
+    <pre><code v-html="outputText"></code></pre>
   </div>
 </template>
 <script>

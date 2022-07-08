@@ -191,4 +191,26 @@ router.post('/project/:project/test_credentials', async (req, res) => {
   res.status(200).json(response)
 });
 
+/**
+ * Delete the ora2pg.conf file for the specified project.
+ */
+router.delete('/project/:project/config', async (req, res) => {
+  const project = req.params.project;
+  if (! await fileUtils.fileExists(`${appConfig.projectDirectory}/${project}`)) {
+    res.status(404).send('Project not found');
+    return;
+  }
+  fileUtils.deleteConfigFile(req.params.project, (err) => {
+    if (err) {
+      if (err.code === 'ENOENT') {
+        res.status(409).send('Config not found');
+      } else {
+        res.status(400).send('Unknown error while deleting');
+      }
+    } else {
+      res.status(204).send('Deleted');
+    }
+  });
+})
+
 module.exports = router;
