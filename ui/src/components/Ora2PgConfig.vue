@@ -1,8 +1,14 @@
 <template>
-  <div>
-    <auth-dialog ref="authDialog" :config-data="configData" :project="project" v-bind="$attrs"></auth-dialog>
+  <run-ora2-pg
+        v-if="showRun"
+        :project="project"
+        :config="configData"
+        @close-component="hideDetailsPage"
+      ></run-ora2-pg>
+  <div v-else>
+    <auth-dialog ref="authDialog" :config-data="configData" :project="project" v-bind="$attrs" @run-config="doRun"></auth-dialog>
     <div v-show="project && Object.keys(this.configData).length === 0">
-      <p>{{ project }} project is encrypted</p>
+      <p>{{ project }} project data is unavailable</p>
     </div>
     <div
       v-show="project && Object.keys(this.configData).length > 0"
@@ -14,8 +20,8 @@
           @click.prevent="saveConfig()">Save</button>
         <button class="mdl-button mdl-js-button mdl-button"
           @click.prevent="runConfig()">Run</button>
-        <button class="mdl-button mdl-js-button mdl-button"
-          @click.prevent="showFiles()">Review</button>
+        <router-link class="mdl-button mdl-js-button mdl-button"
+          :to="`/projects/${project}/details`">Review</router-link>
         <a class="mdl-button mdl-js-button mdl-button"
           :href="`${api_base}/ora2pg/project/${project}/export`">Export</a>
       </span>
@@ -125,25 +131,23 @@
 </template>
 <script>
 import AuthDialog from './AuthDialog.vue';
+import RunOra2Pg from './RunOra2Pg.vue';
+import httpClient from '../assets/httpClient';
+import { router } from '../router';
 export default {
-  components: { AuthDialog },
+  components: { AuthDialog, RunOra2Pg },
   props: {
     project: {
       type: String,
-    },
-    config: {
-      type: Object,
-    },
+    }
   },
   data() {
     return {
       configData: {},
       showAdvanced: false,
       api_base: process.env.VUE_APP_API_BASE || '',
+      showRun: false
     };
-  },
-  beforeUpdate() {
-    this.configData = { ...this.config };
   },
   // populate the OUTPUT filename with a default value when the EXPORT type changes
   computed: {
@@ -163,15 +167,53 @@ export default {
       }
     },
   },
+  async mounted() {
+      const res = await httpClient(`/ora2pg/project/${this.project}`);
+      if (res.status === 404) {
+        alert(`Could not find a project named ${this.project}`);
+        router.push('/');
+      }
+      const jsonResponse = await res.json();
+    
+      this.configData = jsonResponse.config;
+  },
   methods: {
-    saveConfig() {
-      this.$emit("save-config", {
-        project: this.project,
-        config: JSON.stringify(this.configData),
+    // Display notifications (e.g 'Saved') at bottom of screen
+    showMessage(messageText) {
+      const notification = document.querySelector(".mdl-js-snackbar");
+      notification.MaterialSnackbar.showSnackbar({
+        message: messageText,
       });
     },
+    async saveConfig() {
+      const postBody = JSON.stringify(this.configData);
+      const response = await httpClient(`/ora2pg/project/${this.project}`, {
+        method: "post",
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json",
+        },
+        body: postBody,
+      });
+      const messageText =
+        response.status == 201
+          ? "Saved"
+          : `Save failed with ${response.status} HTTP repsonse`;
+      this.showMessage(messageText);
+    },
     runConfig() {
-      this.$refs.authDialog.handleAuth(true);
+      this.$refs.authDialog.handleAuth(() => {
+        this.doRun();
+      });
+    },
+    doRun() {
+        this.saveConfig();
+        this.showRun = true;
+    },
+    // Close run results and project files page
+    hideDetailsPage() {
+      this.showRun = false;
+      this.showDetails = false;
     },
     showFiles() {
       this.$emit("show-files", { project: this.project });

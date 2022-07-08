@@ -211,8 +211,8 @@ export default {
         cancel() {
             this.showDialog = false;
         },
-        handleAuth(runAfter) {
-            this.runAfter = runAfter;
+        handleAuth(callback) {
+            this.runAfter = !!callback;
             const oracleDsn = this.configData.INPUT.values.ORACLE_DSN;
             const postgresDsn = this.configData.OUTPUT.values.PG_DSN;
             if (oracleDsn.include && !sessionStorage.getItem(oracleDsn.value) ||
@@ -221,8 +221,8 @@ export default {
                 this.oracleCredsError = '';
                 this.postgresCredsError = '';
                 this.showDialog = true;
-            } else if (runAfter) {
-                this.runConfig();
+            } else if (callback) {
+                callback();
                 this.showDialog = false;
             }
         }

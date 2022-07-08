@@ -9,12 +9,12 @@
         >
           Delete
         </button>
-        <button
+        <router-link
           class="mdl-button mdl-js-button mdl-button"
-          @click.prevent="closeComponent()"
+          :to="`/projects/${project}`"
         >
           Close
-        </button>
+        </router-link>
       </span>
     </div>
     <ul class="mdl-grid mdl-grid--no-spacing project-details-grid">
@@ -35,32 +35,52 @@
 
 </template>
 <script>
+import httpClient from '../assets/httpClient';
+import { router } from '../router';
+import { UIUtils } from '../utils/ui-utils';
+
 export default {
   name: 'ProjectDetails',
   data() {
     return {
       api_base: process.env.VUE_APP_API_BASE || '',
-      endpoints_key: process.env.VUE_APP_ENDPOINTS_KEY || ''
+      endpoints_key: process.env.VUE_APP_ENDPOINTS_KEY || '',
+      fileList: [],
+      folderList: []
     }
   },
   emits: ['delete-project', 'close-component'],
   props: {
     project: {
       type: String
-    },
-    fileList: {
-      type: Array
-    },
-    folderList: {
-      type: Array
     }
   },
+  async mounted() {
+    const res = await httpClient(`/ora2pg/project/${this.project}`);
+    const jsonResponse = await res.json();
+    this.fileList = jsonResponse.files;
+    this.folderList = jsonResponse.directories;
+  },
   methods: {
-    deleteProject() {
-      this.$emit('delete-project', {project: this.project});
+    async deleteProject() {
+      if (
+        confirm(`This will delete project '${this.project}' and all of its files.`)
+      ) {
+        const rawResponse = await httpClient(`/ora2pg/project/${this.project}`, {
+          method: "delete",
+        });
+        const response = await rawResponse;
+        const messageText =
+          response.status == 204
+            ? `${this.project} deleted`
+            : `Delete failed with ${response.status} HTTP repsonse`;
+        UIUtils.showMessage(messageText);
+        this.$emit('delete-project')
+        router.push('/');
+      }
     },
     closeComponent() {
-      this.$emit('close-component');
+      router.push(`/projects/${this.project}`)
     }
   },
   computed: {
