@@ -96,7 +96,6 @@ export default {
     async deleteConfig() {
       const response = await httpClient(`/ora2pg/project/${this.project}/config`,{
         method: "delete"
-        
       });
       let messageText;
       if (response.status == 204) {
