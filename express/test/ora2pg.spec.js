@@ -331,3 +331,40 @@ describe("Export tests", () => {
     });
   });
 });
+
+describe("Delete config tests", () => {
+  it("Delete config file - success", async () => {
+    // GIVEN
+    const config = await fs.promises.readFile(`${process.env.PROJECT_DIRECTORY}/default/config/ora2pg-conf.json`);
+    await fileUtils.saveConfigFile('default', config);
+
+    // WHEN
+    chai.request(app)
+    .delete('/ora2pg/project/default/config')
+    .end((err, res) => {
+      // THEN
+      expect(res).to.have.status(204);
+      expect(file(`${process.env.PROJECT_DIRECTORY}/default/config/ora2pg.conf`)).not.to.exist;
+    });
+  });
+
+  it("Delete config file - config file doesn't exist", async () => {
+    // WHEN
+    chai.request(app)
+    .delete('/ora2pg/project/default/config')
+    .end((err, res) => {
+      // THEN
+      expect(res).to.have.status(409);
+    });
+  });
+
+  it("Delete config file - project doesn't exist", async () => {
+    // WHEN
+    chai.request(app)
+    .delete('/ora2pg/project/invalid_project_name/config')
+    .end((err, res) => {
+      // THEN
+      expect(res).to.have.status(404);
+    });
+  });
+});
