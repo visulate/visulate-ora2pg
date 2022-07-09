@@ -18,12 +18,12 @@
       <span v-show="project">
         <button class="mdl-button mdl-js-button mdl-button"
           @click.prevent="saveConfig()">Save</button>
+        <a class="mdl-button mdl-js-button mdl-button"
+          :href="`${api_base}/ora2pg/project/${project}/export`">Export</a>
         <button class="mdl-button mdl-js-button mdl-button"
           @click.prevent="runConfig()">Run</button>
         <router-link class="mdl-button mdl-js-button mdl-button"
           :to="`/projects/${project}/details`">Review</router-link>
-        <a class="mdl-button mdl-js-button mdl-button"
-          :href="`${api_base}/ora2pg/project/${project}/export`">Export</a>
       </span>
     </div>
     <form v-show="Object.keys(this.configData).length > 0">
@@ -43,7 +43,7 @@
         <!-- Expansion panel contents -->
         <ul class="panel" :ref="section" style="display: block">
           <li v-for="(item, key) in properties.values" :key="key"
-            v-show="(item.class == 'basic' || showAdvanced) && 
+            v-show="(item.class == 'basic' || showAdvanced) &&
             item.type !== 'username' && item.type !== 'password'" >
             <!-- Ora2Pg parameter row -->
             <div class="mdl-textfield" style="width: 500px">
@@ -174,7 +174,7 @@ export default {
         router.push('/');
       }
       const jsonResponse = await res.json();
-    
+
       this.configData = jsonResponse.config;
   },
   methods: {
