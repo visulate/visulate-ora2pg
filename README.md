@@ -75,11 +75,9 @@ Project directories are created as subdirectories in the /project volume of the 
 
 ## Security Considerations
 
-THIS IS ONLY INTENDED FOR USE ON A LOCAL HOST. It should not be hosted on a shared server. Any Oracle and PostgreSQL credentials saved as project parameters are returned in clear text to the browser.
+Measures should be taken to prevent unauthorized access to the project directory. Ora2Pg accepts a plain text configuration file as input. This file may include sensitive information like the SYSTEM password of the source database. This plain text file is accessible for the duration of the run and may persist after it if the run fails.
 
-In addition, measures should be taken to prevent unauthorized access to the project directory. Ora2Pg accepts a plain text configuration file as input. This file may include sensitive information like the SYSTEM password of the source database. Visulate Ora2Pg saves this information in an encrypted file. It decrypts this file into a plain text configuration file each time Ora2Pg is run. The configuration file is deleted at the end of the run. This plain text file is accessible for the duration of the run and may persist after it if the run fails.
-
-The encryption key used to encrypt the configuration file can be changed by setting the ORA2PG_SECRET environment variable or editing its default value in the `resources/http-config.js` file
+The file is created at runtime using credentials supplied from the UI. The process it uses is described in the [auth design doc](specs/auth_requirements.md). The configuration file is deleted at the end of the run.
 
 ## Tests
 
