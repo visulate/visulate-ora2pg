@@ -34,7 +34,7 @@ function sendConflictMessage(res, project) {
   res.write("data:ora2pg.conf is a temporary file which gets created at the start of the run and deleted on completion.\n\n");
   res.write("data:If the file exists it means an ora2pg session is already running (or failed without cleaning up).\n\n");
   res.write("data:Wait for the other run to complete before resubmitting\n\n");
-  res.write(`data:If you know that the existing ora2pg.conf is from a failed run, you may delete it by clicking the delete button <a href="/projects/${project}/details">here</a>.\n\n`)
+  res.write(`data:If you know that the existing ora2pg.conf is from a failed run, you may delete it by clicking the delete button <a href="/projects/${project}/details">here</a>.\n\n`);
   res.end();
 }
 

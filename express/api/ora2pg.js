@@ -87,8 +87,16 @@ router.post('/project/:project', async (req, res) => {
   if (! fileUtils.validKeys(configObject)){
     res.status(400).send('Invalid configuration object');
   } else {
-    await fileUtils.saveConfigJson(project, configObject);
-    res.status(201).send('Created');
+    try {
+      await fileUtils.saveConfigJson(project, configObject);
+      res.status(201).send('Created');
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        res.status(404).send('Not found');
+      } else {
+        res.status(400).send('Unknown error');
+      }
+    }
   }
 });
 
