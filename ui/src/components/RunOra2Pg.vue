@@ -13,14 +13,14 @@
         </button>
       </span>
     </div>
-    <pre><code>{{outputText}}</code></pre>
+    <pre><code v-html="outputText"></code></pre>
   </div>
 </template>
 <script>
 import httpClient from '../assets/httpClient';
 export default {
   name: "RunOra2Pg",
-  emits: ["close-component"],
+  emits: ["close-component", "run-started", "run-complete"],
   props: {
     project: {
       type: String,
@@ -37,6 +37,7 @@ export default {
   },
   created() {
     this.setupStream();
+    this.$emit('run-started');
   },
   methods: {
     async retrieveJwt() {
@@ -83,6 +84,9 @@ export default {
         (event) => {
           const eventData = JSON.parse(event.data);
           this.ora2pgRunning = eventData.status === "running" ? true : false;
+          if (!this.ora2pgRunning) {
+            this.$emit('run-complete');
+          }
         },
         false
       );

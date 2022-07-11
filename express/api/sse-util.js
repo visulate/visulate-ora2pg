@@ -19,7 +19,7 @@ const appConfig = require('../resources/http-config');
 const jose = require('jose');
 
 
-function sendConflictMessage(res) {
+function sendConflictMessage(res, project) {
   res.writeHead(200, {
     "Content-Type": "text/event-stream; charset=utf-8",
     "Cache-control": "no-cache",
@@ -34,6 +34,7 @@ function sendConflictMessage(res) {
   res.write("data:ora2pg.conf is a temporary file which gets created at the start of the run and deleted on completion.\n\n");
   res.write("data:If the file exists it means an ora2pg session is already running (or failed without cleaning up).\n\n");
   res.write("data:Wait for the other run to complete before resubmitting\n\n");
+  res.write(`data:If you know that the existing ora2pg.conf is from a failed run, you may delete it by clicking the delete button <a href="/projects/${project}/details">here</a>.\n\n`)
   res.end();
 }
 
@@ -42,7 +43,7 @@ async function execOra2Pg(res, project, authToken) {
   const configFileStatus = await fileUtils.createConfigFile(project, authToken);
   // Validate file creation
   if (configFileStatus === 'CONFLICT') {
-    sendConflictMessage(res);
+    sendConflictMessage(res, project);
     return;
   } else if (configFileStatus === 'NOT-FOUND') {
     res.status(404).send('Not Found');

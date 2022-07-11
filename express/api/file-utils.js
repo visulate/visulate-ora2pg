@@ -177,9 +177,11 @@ module.exports.createConfigFile = createConfigFile;
 /**
  * Delete the project's ora2pg.conf file
  * @param {string} project
+ * @param {function} callback (optional)
  */
-function deleteConfigFile(project) {
-  fs.unlink(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`, (err) => {
+function deleteConfigFile(project, callback) {
+  fs.unlink(`${appConfig.projectDirectory}/${project}/config/ora2pg.conf`, 
+  typeof callback === 'function' ? callback : (err) => {
     if (err) console.error(err);
   });
 }

@@ -1,6 +1,6 @@
 <template>
-    <div v-if="showDialog" class="auth-dialog-container" @test-event="test">
-      <div class="mdl-dialog auth-dialog" >
+    <div v-if="showDialog" class="dialog-container" @test-event="test">
+      <div class="mdl-dialog dialog" >
         <h4 class="mdl-dialog__content">Enter database credentials</h4>
         <div class="mdl-dialog__content">
           <div v-for="error in errors" :key="error" class="error">{{error}}</div>
@@ -211,8 +211,8 @@ export default {
         cancel() {
             this.showDialog = false;
         },
-        handleAuth(runAfter) {
-            this.runAfter = runAfter;
+        handleAuth(callback) {
+            this.runAfter = !!callback;
             const oracleDsn = this.configData.INPUT.values.ORACLE_DSN;
             const postgresDsn = this.configData.OUTPUT.values.PG_DSN;
             if (oracleDsn.include && !sessionStorage.getItem(oracleDsn.value) ||
@@ -221,8 +221,8 @@ export default {
                 this.oracleCredsError = '';
                 this.postgresCredsError = '';
                 this.showDialog = true;
-            } else if (runAfter) {
-                this.runConfig();
+            } else if (callback) {
+                callback();
                 this.showDialog = false;
             }
         }
@@ -230,36 +230,7 @@ export default {
 }
 </script>
 <style scoped>
-.auth-dialog {
-  position: fixed;
-  z-index: 1;
-  background: white;
-  left: 0;
-  right: 0;
-  margin: auto;
-  width: 400px;
-}
-.auth-dialog > h4 {
-  margin: 5px 0 0;
-  padding-bottom: 10px;
-}
-.auth-dialog h6 {
-    border-bottom: 1px solid rgba(0,0,0,.12);
-}
-.auth-dialog input {
-    margin-bottom: 7px;
-}
-.auth-dialog-container {
-  position: fixed; 
-  width: 100%; 
-  height: 100%; 
-  z-index: 1;
-  background: rgba(0, 0, 0, .5)
-}
 .pg-credentials-container {
     margin-top: 20px;
-}
-.error {
-    color: red;
 }
 </style>
