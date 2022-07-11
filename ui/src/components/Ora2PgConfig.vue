@@ -200,6 +200,7 @@ export default {
           ? "Saved"
           : `Save failed with ${response.status} HTTP repsonse`;
       this.showMessage(messageText);
+      return response.status == 201;
     },
     runConfig() {
       this.$refs.authDialog.handleAuth(() => {
@@ -207,8 +208,10 @@ export default {
       });
     },
     async doRun() {
-        await this.saveConfig();
-        this.showRun = true;
+        const success = await this.saveConfig();
+        if (success) {
+          this.showRun = true;
+        }
     },
     // Close run results and project files page
     hideDetailsPage() {

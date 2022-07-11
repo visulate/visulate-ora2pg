@@ -294,6 +294,15 @@ describe("Update and Delete project tests", () => {
     });
   });
 
+  it("Save project that does not exist should fail with 404", (done) => {
+    chai.request(app)
+    .post('/ora2pg/project/fake_project')
+    .send(testConfigObject)
+    .end((err, res) => {
+      expect(res).to.have.status(404);
+      done();
+    })
+  })
 });
 
 describe("Credentials tests", () => {
