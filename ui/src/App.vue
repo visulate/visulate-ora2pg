@@ -158,6 +158,6 @@ body, #app {
   background: rgba(0, 0, 0, .5)
 }
 .danger {
-  color: red;
+  color: red !important;
 }
 </style>
