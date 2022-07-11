@@ -1,44 +1,12 @@
 version: "3.3"
 services:
-  reverseproxy:
-    build: ./reverseproxy
-    ports:
-      - 80:80
-      # - 3001:3001
   ora2pg:
     hostname: ora2pg
-    # depends_on:
-    #   - reverseproxy
     build: .
     ports:
       - "3000:3000"
     volumes:
       - ./project:/project
-  visapi:
-    hostname: visapi
-    depends_on:
-      - reverseproxy
-    image: "gcr.io/visulate-llc-public/visulate-for-oracle:1.1"
-    expose:
-      - "3000"
-    volumes:
-      - /home/pgoldtho/config:/visulate-server/config
-  visui:
-    hostname: visui
-    depends_on:
-      - reverseproxy
-    image: "gcr.io/visulate-for-oracle/visulate-for-oracle/ui:11.30.0"
-    expose:
-      - "80"
-  vissql:
-    hostname: vissql
-    depends_on:
-      - reverseproxy
-    image: "gcr.io/visulate-llc-public/visulate-for-oracle/sql:1.1"
-    expose:
-      - "5000"
-    volumes:
-      - /home/pgoldtho/config:/query-engine/sql2csv/config
   testdb:
     image: wnameless/oracle-xe-11g-r2
     ports:
