@@ -206,8 +206,8 @@ export default {
         this.doRun();
       });
     },
-    doRun() {
-        this.saveConfig();
+    async doRun() {
+        await this.saveConfig();
         this.showRun = true;
     },
     // Close run results and project files page
