@@ -42,6 +42,7 @@ describe('Ora2Pg Config Tests', () => {
         expect(interception.response.body).to.contain('ora2pg complete');
         expect(interception.response.body).to.contain('Removing config file');
         expect(interception.response.body).to.contain('Creating compressed file default.tar.gz');
+        expect(interception.response.body).to.contain('created file default.tar.gz');
       });
 
       // CLEANUP
