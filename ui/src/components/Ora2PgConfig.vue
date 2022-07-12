@@ -23,7 +23,7 @@
         <button class="mdl-button mdl-js-button mdl-button"
           @click.prevent="runConfig()">Run</button>
         <router-link class="mdl-button mdl-js-button mdl-button"
-          :to="`/projects/${project}/details`">Review</router-link>
+          :to="`/projects/${project}/details`" data-cy="review">Review</router-link>
       </span>
     </div>
     <form v-show="Object.keys(this.configData).length > 0">

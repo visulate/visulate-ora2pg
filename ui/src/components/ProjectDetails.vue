@@ -7,7 +7,7 @@
         Would you like to delete {{project}} and all its files or just the configuration file?
       </div>
       <div class="mdl-dialog__actions">
-          <button type="button" class="mdl-button danger" @click="deleteProject">Delete everything</button>
+          <button type="button" class="mdl-button danger" @click="deleteProject" data-cy="delete_project">Delete everything</button>
           <button type="button" class="mdl-button" @click="deleteConfig">Delete config</button>
           <button type="button" class="mdl-button" @click="cancelDelete">Cancel</button>
         </div>
@@ -19,7 +19,7 @@
         <button
           class="mdl-button mdl-js-button mdl-button"
           @click.prevent="clickDelete()"
-        >
+          data-cy="delete">
           Delete
         </button>
         <router-link
