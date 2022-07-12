@@ -23,11 +23,22 @@ describe('Ora2Pg Config Tests', () => {
       cy.get('[data-cy="auth_oracle_pwd"]').type('oracle');
       cy.get('[data-cy="submit_auth"]').click();
 
+      cy.intercept('/ora2pg/project/default/exec*').as('runOra2Pg');
+
       // WHEN
       cy.get('[data-cy="run_ora2pg"]').click();
 
       // THEN
       cy.get('[data-cy="run_page"]').should('be.visible');
+      cy.wait('@runOra2Pg').then(interception => {
+        expect(interception.response).not.to.be.undefined;
+        expect(interception.response.body).to.contain('Created config file');
+        expect(interception.response.body).to.contain('Starting ora2pg');
+        expect(interception.response.body).to.contain('ora2pg complete');
+        expect(interception.response.body).to.contain('Removing config file');
+        expect(interception.response.body).to.contain('Creating compressed file default.tar.gz');
+
+      })
 
       // CLEANUP
       sessionStorage.setItem('dbi:Oracle:host=testdb;sid=XE;port=1521', '');
