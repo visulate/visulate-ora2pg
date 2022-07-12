@@ -9,7 +9,7 @@ describe('Ora2Pg Config Tests', () => {
       // GIVEN
       cy.get('[data-cy="run_page"]').should('not.exist');
     
-      // Enter default project
+      // Navigate to default project
       cy.get('.mdl-layout__drawer-button').click();
       cy.get('[data-cy="project_list"]').children().first().click();
       cy.get('.mdl-layout__obfuscator').click();

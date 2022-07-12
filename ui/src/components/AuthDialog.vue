@@ -1,9 +1,9 @@
 <template>
-    <div v-if="showDialog" class="dialog-container" @test-event="test">
+    <div v-if="showDialog" class="dialog-container" @test-event="test" data-cy="auth_dialog">
       <div class="mdl-dialog dialog" >
         <h4 class="mdl-dialog__content">Enter database credentials</h4>
         <div class="mdl-dialog__content">
-          <div v-for="error in errors" :key="error" class="error">{{error}}</div>
+          <div v-for="error in errors" :key="error" class="error" data-cy="auth_validation_error">{{error}}</div>
           <label for="ORACLE_DSN">ORACLE_DSN
               <span class="tooltip">
                   <i id="ORACLE_DSN-tt"
@@ -42,7 +42,7 @@
           </label>
           <input v-model="oraclePwd" name="ORACLE_PWD"
               type="password" class="mdl-textfield__input" data-cy="auth_oracle_pwd" />
-          <p class="error" v-if="oracleCredsError">{{oracleCredsError}}</p>
+          <p class="error" v-if="oracleCredsError" data-cy="oracle_credentials_error">{{oracleCredsError}}</p>
           
           <div class="pg-credentials-container" v-if="configData.OUTPUT.values.PG_DSN.include">
             <label for="PG_DSN">PG_DSN
