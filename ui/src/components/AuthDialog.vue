@@ -28,7 +28,7 @@
                 </span>
           </label>
           <input v-model="oracleUser" name="ORACLE_USER"
-              type="text" class="mdl-textfield__input" />
+              type="text" class="mdl-textfield__input" data-cy="auth_oracle_user" />
 
           <label for="ORACLE_PWD">ORACLE_PWD
                 <span class="tooltip">
@@ -41,7 +41,7 @@
                 </span>
           </label>
           <input v-model="oraclePwd" name="ORACLE_PWD"
-              type="password" class="mdl-textfield__input" />
+              type="password" class="mdl-textfield__input" data-cy="auth_oracle_pwd" />
           <p class="error" v-if="oracleCredsError">{{oracleCredsError}}</p>
           
           <div class="pg-credentials-container" v-if="configData.OUTPUT.values.PG_DSN.include">
@@ -89,12 +89,12 @@
         <div class="mdl-dialog__actions">
           <div v-if="showSubmit">
             <button v-if="runAfter" type="button" class="mdl-button" @click="saveCredentialsAndRun">Run</button>
-            <button v-else type="button" class="mdl-button" @click="saveCredentials">Save</button>
+            <button v-else type="button" class="mdl-button" @click="saveCredentials" data-cy="submit_auth">Save</button>
           </div>
           <div v-else>
               <button class="mdl-button" disabled>Testing credentials...</button>
           </div>
-          <button type="button" class="mdl-button" @click="cancel">Cancel</button>
+          <button type="button" class="mdl-button" @click="cancel" data-cy="cancel_auth">Cancel</button>
         </div>
       </div>
     </div>
