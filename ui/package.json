@@ -6,11 +6,11 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build --mode production",
     "test:unit": "vue-cli-service test:unit",
+    "test:e2e": "npx cypress run --config video=false",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "core-js": "^3.6.5",
-    "cypress": "^10.3.0",
     "material-design-lite": "^1.3.0",
     "vue": "^3.2.37",
     "vue-router": "^4.1.1"
@@ -24,6 +24,7 @@
     "@vue/compiler-sfc": "^3.0.0",
     "@vue/test-utils": "^2.0.0-rc.18",
     "@vue/vue3-jest": "^27.0.0-alpha.4",
+    "cypress": "^10.3.0",
     "eslint": "^8.11.0",
     "eslint-plugin-vue": "^7.0.0",
     "typescript": "~3.9.3",
