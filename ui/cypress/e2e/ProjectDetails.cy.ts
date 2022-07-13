@@ -12,10 +12,7 @@ describe('Project Details Tests', () => {
 
       cy.get('.mdl-layout__drawer-button').click();
       let projects = cy.get('[data-cy="project_list"]').children();
-      projects.should('have.length', 4);
-      projects.first().should('have.text', 'default');
-      projects.next().should('have.text', 'empty');
-      projects.next().should('have.text', 'invalid_password');
+      projects.should('have.length', 2);
       const newProject = projects.next();
       newProject.should('have.text', 'test');
 
@@ -33,6 +30,6 @@ describe('Project Details Tests', () => {
       // THEN
       cy.url().should('eq', 'http://localhost:3000/');
       projects = cy.get('[data-cy="project_list"]').children();
-      projects.should('have.length', 3);
+      projects.should('have.length', 1);
     });
 });

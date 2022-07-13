@@ -6,7 +6,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./express/test/project:/project
+      - ./ui/cypress/fixtures/project:/project
   testdb:
     image: wnameless/oracle-xe-11g-r2
     ports:

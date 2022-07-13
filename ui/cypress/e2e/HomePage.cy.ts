@@ -8,11 +8,9 @@ describe('Home Tests', () => {
   it('Test create project', () => {
     // GIVEN
     let projects = cy.get('[data-cy="project_list"]').children();
-    projects.should('have.length', 3);
+    projects.should('have.length', 1);
     
     projects.first().should('have.text', 'default');
-    projects.next().should('have.text', 'empty');
-    projects.next().should('have.text', 'invalid_password');
 
     // WHEN
     cy.get('[data-cy="project_name"]').type('test');
@@ -20,10 +18,8 @@ describe('Home Tests', () => {
 
     // THEN
     projects = cy.get('[data-cy="project_list"]').children();
-    projects.should('have.length', 4);
+    projects.should('have.length', 2);
     projects.first().should('have.text', 'default');
-    projects.next().should('have.text', 'empty');
-    projects.next().should('have.text', 'invalid_password');
     const newProject = projects.next();
     newProject.should('have.text', 'test');
 
@@ -36,7 +32,7 @@ describe('Home Tests', () => {
     cy.get('[data-cy="delete_project"]').click();
     cy.url().should('eq', 'http://localhost:3000/');
     projects = cy.get('[data-cy="project_list"]').children();
-    projects.should('have.length', 3);
+    projects.should('have.length', 1);
   });
 
   it('Test cancel create project', () => {
