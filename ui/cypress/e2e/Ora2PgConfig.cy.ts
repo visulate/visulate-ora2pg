@@ -35,7 +35,7 @@ describe('Ora2Pg Config Tests', () => {
 
       // THEN
       cy.get('[data-cy="run_page"]').should('be.visible');
-      cy.wait('@runOra2Pg').then(interception => {
+      cy.wait('@runOra2Pg', {timeout: 300000}).then(interception => {
         expect(interception.response).not.to.be.undefined;
         expect(interception.response.body).to.contain('Created config file');
         expect(interception.response.body).to.contain('Starting ora2pg');
