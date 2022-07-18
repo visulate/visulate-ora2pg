@@ -6,6 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build --mode production",
     "test:unit": "vue-cli-service test:unit",
+    "test:e2e": "sudo docker-compose up --build -d; sleep 3; npx cypress run --config video=false; sudo docker-compose down",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
     "@vue/compiler-sfc": "^3.0.0",
     "@vue/test-utils": "^2.0.0-rc.18",
     "@vue/vue3-jest": "^27.0.0-alpha.4",
+    "cypress": "^10.3.0",
     "eslint": "^8.11.0",
     "eslint-plugin-vue": "^7.0.0",
     "typescript": "~3.9.3",

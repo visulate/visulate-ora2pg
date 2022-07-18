@@ -24,7 +24,7 @@
             v-model="project"
             class="mdl-textfield__input"
             placeholder="project_name"
-          />
+            data-cy="project_name"/>
           <p v-show="errorMessage" class="error">{{ errorMessage }}</p>
           Enter a project name then press CREATE
         </div>
@@ -32,12 +32,14 @@
         <div class="mdl-card__actions mdl-card--border">
           <a id="hp-create"
             class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
-            @click.prevent="onSubmit" >
+            @click.prevent="onSubmit"
+            data-cy="create_project" >
             Create
           </a>
           <a id="hp-cancel"
             class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
-            @click.prevent="onCancel" >
+            @click.prevent="onCancel"
+            data-cy="cancel_create" >
             Cancel
           </a>
         </div>

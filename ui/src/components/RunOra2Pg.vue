@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div data-cy="run_page">
     <div class="action-menu">
       <b>Output</b>
       <span>

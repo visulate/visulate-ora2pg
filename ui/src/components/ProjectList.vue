@@ -1,5 +1,5 @@
 <template>
-  <nav class="mdl-navigation">
+  <nav class="mdl-navigation" data-cy="project_list">
     <router-link
       v-for="(project) in projectList"
       :to="`/projects/${project}`"
