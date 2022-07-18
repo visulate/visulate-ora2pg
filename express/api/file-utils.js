@@ -18,6 +18,7 @@ const path = require('path');
 const handlebars = require('handlebars');
 const appConfig = require('../resources/http-config');
 const jose = require('jose');
+const utils = require('./misc-utils');
 
 // ora2pg-conf.json is file to prevent saving Oracle and Postgres
 // database credentials in clear text using code based on this post:
@@ -96,9 +97,28 @@ module.exports.getConfigObject = getConfigObject;
  * @param {object} configObject
  */
 async function saveConfigJson(project, configObject) {
+  try {
+    const config = decrypt(await fs.promises.readFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json.enc`));
+    const saved = JSON.parse(config);
+    if (saved.COMMON.values.LAST_MODIFIED) {
+      if (!configObject.COMMON.values.LAST_MODIFIED ||
+        configObject.COMMON.values.LAST_MODIFIED.value != saved.COMMON.values.LAST_MODIFIED.value) {
+          return false;
+        }
+    }
+  } catch (err) {
+    // Config file doesn't exist
+  }
+  configObject.COMMON.values.LAST_MODIFIED = {
+    description: 'Timestamp of the last time the configuration for this project was updated.',
+    include: false,
+    type: 'timestamp',
+    value: utils.getCurrentTimestamp()
+  }
   const configStrBuffer = Buffer.from(JSON.stringify(configObject));
   const encryptedConfig = encrypt(configStrBuffer);
   await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json.enc`, encryptedConfig);
+  return true;
 }
 module.exports.saveConfigJson = saveConfigJson;
 

@@ -1,4 +1,5 @@
 process.env.PROJECT_DIRECTORY = process.env.PWD + '/test/project';
+process.env.TIMESTAMP_OVERRIDE = 123456789;
 
 const app = require('../app');
 const chai = require('chai'), chaiHttp = require('chai-http'), chaiFiles = require('chai-files');
@@ -246,6 +247,17 @@ describe("Update and Delete project tests", () => {
       .send(testConfigObject)
       .end((err, res) => {
         expect(res).to.have.status(201);
+        done();
+      });
+  });
+
+  it("POST stale JSON file return 409", (done) =>  {
+    testConfigObject.COMMON.values.LAST_MODIFIED.value = 0;
+    chai.request(app)
+      .post('/ora2pg/project/update_test_project')
+      .send(testConfigObject)
+      .end((err, res) => {
+        expect(res).to.have.status(409);
         done();
       });
   });
