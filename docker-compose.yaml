@@ -1,0 +1,15 @@
+version: "3.3"
+services:
+  ora2pg:
+    hostname: ora2pg
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./ui/cypress/fixtures/project:/project
+  testdb:
+    image: wnameless/oracle-xe-11g-r2
+    ports:
+      - "1521:1521"
+    environment:
+      - ORACLE_ALLOW_REMOTE=true
