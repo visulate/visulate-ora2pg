@@ -26,7 +26,8 @@ var server;
 if (process.env.ORA2PG_TLS_CERT_DIRECTORY) {
   const options = {
     key: fs.readFileSync(`${process.env.ORA2PG_TLS_CERT_DIRECTORY}/ora2pg-key.pem`),
-    cert: fs.readFileSync(`${process.env.ORA2PG_TLS_CERT_DIRECTORY}/ora2pg-cert.pem`)
+    cert: fs.readFileSync(`${process.env.ORA2PG_TLS_CERT_DIRECTORY}/ora2pg-cert.pem`),
+    passphrase: process.env.ORA2PG_TLS_CERT_PASSPHRASE
   };
   
   server = https.createServer(options, app);
