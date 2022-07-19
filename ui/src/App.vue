@@ -22,7 +22,7 @@
           class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab"
           style="margin: 0 20px 0 0"
           to="/" v-show="!isHomePage()"
-        >
+          data-cy="add_project">
           <i class="material-icons">add</i>
         </router-link>
       </div>

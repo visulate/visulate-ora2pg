@@ -21,9 +21,9 @@
         <a class="mdl-button mdl-js-button mdl-button"
           :href="`${api_base}/ora2pg/project/${project}/export`">Export</a>
         <button class="mdl-button mdl-js-button mdl-button"
-          @click.prevent="runConfig()">Run</button>
+          @click.prevent="runConfig()" data-cy="run_ora2pg">Run</button>
         <router-link class="mdl-button mdl-js-button mdl-button"
-          :to="`/projects/${project}/details`">Review</router-link>
+          :to="`/projects/${project}/details`" data-cy="review">Review</router-link>
       </span>
     </div>
     <form v-show="Object.keys(this.configData).length > 0">
@@ -101,7 +101,8 @@
                 v-model="item.value"
                 :disabled="!item.include"
                 class="mdl-textfield__input"
-                @blur="$refs.authDialog.handleAuth(false)" />
+                @blur="$refs.authDialog.handleAuth(false)" 
+                :data-cy="`dsn_${key}`"/>
               <input :id="key"
                 v-else
                 type="text"
@@ -120,7 +121,7 @@
                   class="checkbox"
                   type="checkbox"
                   v-model="item.include"
-                />
+                  :data-cy="`dsn_enabled_${key}`"/>
               </span>
             </div>
           </li>
