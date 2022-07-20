@@ -7,6 +7,8 @@
 var app = require('../app');
 var debug = require('debug')('express:server');
 var http = require('http');
+var https = require('https');
+var fs = require('fs');
 var appConfig = require('../resources/http-config');
 
 
@@ -20,8 +22,18 @@ app.set('port', port);
 /**
  * Create HTTP server.
  */
-
-var server = http.createServer(app);
+var server;
+if (process.env.ORA2PG_TLS_CERT_DIRECTORY) {
+  const options = {
+    key: fs.readFileSync(`${process.env.ORA2PG_TLS_CERT_DIRECTORY}/ora2pg-key.pem`),
+    cert: fs.readFileSync(`${process.env.ORA2PG_TLS_CERT_DIRECTORY}/ora2pg-cert.pem`),
+    passphrase: process.env.ORA2PG_TLS_CERT_PASSPHRASE
+  };
+  
+  server = https.createServer(options, app);
+} else {
+  server = http.createServer(app);
+}
 
 /**
  * Listen on provided port, on all network interfaces.
