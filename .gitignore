@@ -76,3 +76,5 @@ docs/_site/
 default.tar.gz
 
 /express/tls
+ora2pg-key.pem
+ora2pg-cert.pem
