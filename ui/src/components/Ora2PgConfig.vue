@@ -104,6 +104,12 @@
                 @blur="$refs.authDialog.handleAuth(false)" 
                 :data-cy="`dsn_${key}`"/>
               <input :id="key"
+                v-else-if="item.type === 'timestamp'"
+                type="text"
+                :value="formatDate(item.value)"
+                :disabled="!item.include"
+                class="mdl-textfield__input" />
+              <input :id="key"
                 v-else
                 type="text"
                 v-model="item.value"
@@ -111,7 +117,7 @@
                 class="mdl-textfield__input" />
               <!-- Checkbox to control whether the parameter should be commented out in
             the ora2pg.conf file at runtime -->
-              <span style="float: right" v-if="item.type !== 'internal'">
+              <span style="float: right" v-if="item.type !== 'internal' && item.type !== 'timestamp'">
                 <input v-if="item.type !== 'dsn'"
                   class="checkbox"
                   type="checkbox"
@@ -239,6 +245,10 @@ export default {
       if (item.include) {
         this.$refs.authDialog.handleAuth(false);
       }
+    },
+    formatDate(timestamp) {
+      const date = new Date(timestamp);
+      return date.toString();
     }
   },
 };

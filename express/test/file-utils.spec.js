@@ -142,7 +142,7 @@ describe("File Utils tests", () => {
         expect(file(`${process.env.PROJECT_DIRECTORY}/default/config/ora2pg-conf.json.enc.old`)).to.exist;
     });
 
-    it("Test handleDefaultConfigVersionUpdate - update (minot) version", async () => {
+    it("Test handleDefaultConfigVersionUpdate - update (minor) version", async () => {
         // GIVEN
         const versionArr = appConfig.configTemplateVersion.split('.')
         // Parse the first digit of the template version as an int
