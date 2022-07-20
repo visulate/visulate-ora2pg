@@ -17,6 +17,10 @@ RUN apt-get install -y nodejs
 RUN mkdir /project
 VOLUME /project
 
+# Create the certs volume
+RUN mkdir /certs
+VOLUME /certs
+
 # Install express code
 COPY /express /express
 
