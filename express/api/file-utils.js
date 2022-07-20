@@ -96,9 +96,28 @@ module.exports.getConfigObject = getConfigObject;
  * @param {object} configObject
  */
 async function saveConfigJson(project, configObject) {
+  try {
+    const config = decrypt(await fs.promises.readFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json.enc`));
+    const saved = JSON.parse(config);
+    if (saved.COMMON.values.LAST_MODIFIED &&
+        (!configObject.COMMON.values.LAST_MODIFIED ||
+        Number(configObject.COMMON.values.LAST_MODIFIED.value) !==
+        Number(saved.COMMON.values.LAST_MODIFIED.value))) {
+        return false;
+    }
+  } catch (err) {
+    // Config file doesn't exist
+  }
+  configObject.COMMON.values.LAST_MODIFIED = {
+    description: 'Timestamp of the last time the configuration for this project was updated.',
+    include: false,
+    type: 'timestamp',
+    value: getCurrentTimestamp()
+  }
   const configStrBuffer = Buffer.from(JSON.stringify(configObject));
   const encryptedConfig = encrypt(configStrBuffer);
   await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json.enc`, encryptedConfig);
+  return true;
 }
 module.exports.saveConfigJson = saveConfigJson;
 
@@ -346,3 +365,13 @@ async function handleDefaultConfigVersionUpdate(projectName, originalConfigObjec
   return originalConfigObject;
 }
 module.exports.handleDefaultConfigVersionUpdate = handleDefaultConfigVersionUpdate;
+
+/**
+ * Wrapper for Date.now() to allow overriding via an environment 
+ * variable for test purposes.
+ * 
+ * @returns timestamp millis
+ */
+function getCurrentTimestamp() {
+  return process.env.TIMESTAMP_OVERRIDE || Date.now();
+}

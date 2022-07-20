@@ -88,8 +88,12 @@ router.post('/project/:project', async (req, res) => {
     res.status(400).send('Invalid configuration object');
   } else {
     try {
-      await fileUtils.saveConfigJson(project, configObject);
-      res.status(201).send('Created');
+      const success = await fileUtils.saveConfigJson(project, configObject);
+      if (success) {
+        res.status(201).send('Created');
+      } else {
+        res.status(409).send('Conflict');
+      }
     } catch (err) {
       if (err.code === 'ENOENT') {
         res.status(404).send('Not found');
