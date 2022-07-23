@@ -10,6 +10,7 @@ var http = require('http');
 var https = require('https');
 var fs = require('fs');
 var appConfig = require('../resources/http-config');
+var ORA2PG_TLS_CERT_DIRECTORY = '/certs';
 
 
 /**
@@ -23,13 +24,13 @@ app.set('port', port);
  * Create HTTP server.
  */
 var server;
-if (process.env.ORA2PG_TLS_CERT_DIRECTORY) {
+if (process.env.ORA2PG_TLS_CERT_PASSPHRASE) {
   const options = {
-    key: fs.readFileSync(`${process.env.ORA2PG_TLS_CERT_DIRECTORY}/ora2pg-key.pem`),
-    cert: fs.readFileSync(`${process.env.ORA2PG_TLS_CERT_DIRECTORY}/ora2pg-cert.pem`),
+    key: fs.readFileSync(`${ORA2PG_TLS_CERT_DIRECTORY}/ora2pg-key.pem`),
+    cert: fs.readFileSync(`${ORA2PG_TLS_CERT_DIRECTORY}/ora2pg-cert.pem`),
     passphrase: process.env.ORA2PG_TLS_CERT_PASSPHRASE
   };
-  
+
   server = https.createServer(options, app);
 } else {
   server = http.createServer(app);
