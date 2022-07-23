@@ -39,13 +39,17 @@ Additional usage instructions are available in [Migrating Oracle to PostgreSQL](
 
 ## Technical Description
 
+
 The Dockerfile is in the project root. You can build it using:
 
 ```
-docker build -t visulate-ora2pg:latest .
+docker build -t visulate-ora2pg:local .
 ```
+This builds an image that includes Ora2Pg and the UI which can be run using:
 
-This builds an image that includes Ora2Pg and the UI.
+```
+docker run -d -p 3000:3000 -v "$(pwd)/ora2pg-projects":/project visulate-ora2pg:local
+```
 
 The UI is implemented using a combination of Node/Express API and a Vue UI. The API handles interaction with the Ora2Pg CLI. The Vue UI handles presentation to the user.
 
@@ -78,6 +82,51 @@ Project directories are created as subdirectories in the /project volume of the 
 Measures should be taken to prevent unauthorized access to the project directory. Ora2Pg accepts a plain text configuration file as input. This file may include sensitive information like the SYSTEM password of the source database. This plain text file is accessible for the duration of the run and may persist after it if the run fails.
 
 The file is created at runtime using credentials supplied from the UI. The process it uses is described in the [auth design doc](specs/auth_requirements.md). The configuration file is deleted at the end of the run.
+
+## HTTPS support
+
+Visulate Ora2Pg can be configured to use self signed X.509 certificates. The docker container exposes a certs volume that can be mapped to a directory with a certificate and key file. On startup the express server checks for an environment variable called `ORA2PG_TLS_CERT_PASSPHRASE` to determine whether to start an http or https server. If the variable is set an https server is started:
+
+```
+docker run -d -p 3000:3000 \
+-v "$(pwd)/ora2pg-projects":/project \
+-v "$(pwd)/ora2pg-certs":/certs \
+-e ORA2PG_TLS_CERT_PASSPHRASE='my-passphrase' \
+visulate-ora2pg:local
+```
+
+The code looks for a certificate file called `ora2pg-cert.pem` and keyfile called `ora2pg-key.pem`. These can be generated using openssl as shown in the example below.
+
+```
+mkdir ora2pg-certs
+cd ora2pg-certs/
+openssl req -x509 -newkey rsa:4096 -keyout ora2pg-key.pem -out ora2pg-cert.pem -sha256 -days 365
+
+
+Generating a RSA private key
+.++++
+.....................................................................................................................................................................++++
+writing new private key to 'ora2pg-key.pem'
+Enter PEM pass phrase:
+Verifying - Enter PEM pass phrase:
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:US
+State or Province Name (full name) [Some-State]:Florida
+Locality Name (eg, city) []:Orlando
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:Visulate
+Organizational Unit Name (eg, section) []:Ora2Pg
+Common Name (e.g. server FQDN or YOUR name) []:ora2pg.us-east1-b.c.my-gcp-project.internal
+Email Address []:
+```
+
+
 
 ## Tests
 
