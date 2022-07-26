@@ -45,6 +45,22 @@ describe('Ora2Pg Config Tests', () => {
         expect(interception.response.body).to.contain('created file default.tar.gz');
       });
 
+      // WHEN run it again to ensure we don't get a 409 response on save
+      cy.get('[data-cy="close_run"').click();
+      cy.get('[data-cy="run_ora2pg"]').click();
+
+      // THEN
+      cy.get('[data-cy="run_page"]').should('be.visible');
+      cy.wait('@runOra2Pg', {timeout: 300000}).then(interception => {
+        expect(interception.response).not.to.be.undefined;
+        expect(interception.response.body).to.contain('Created config file');
+        expect(interception.response.body).to.contain('Starting ora2pg');
+        expect(interception.response.body).to.contain('ora2pg complete');
+        expect(interception.response.body).to.contain('Removing config file');
+        expect(interception.response.body).to.contain('Creating compressed file default.tar.gz');
+        expect(interception.response.body).to.contain('created file default.tar.gz');
+      });
+
       // CLEANUP
       sessionStorage.setItem('dbi:Oracle:host=testdb;sid=XE;port=1521', '');
     });
