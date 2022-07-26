@@ -8,7 +8,7 @@
           class="mdl-button mdl-js-button mdl-button"
           v-show="!ora2pgRunning"
           @click.prevent="closeComponent()"
-        >
+          data-cy="close_run">
           Close
         </button>
       </span>

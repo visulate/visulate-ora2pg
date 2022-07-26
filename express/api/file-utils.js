@@ -103,21 +103,22 @@ async function saveConfigJson(project, configObject) {
         (!configObject.COMMON.values.LAST_MODIFIED ||
         Number(configObject.COMMON.values.LAST_MODIFIED.value) !==
         Number(saved.COMMON.values.LAST_MODIFIED.value))) {
-        return false;
+        return null;
     }
   } catch (err) {
     // Config file doesn't exist
   }
+  const timestamp = getCurrentTimestamp();
   configObject.COMMON.values.LAST_MODIFIED = {
     description: 'Timestamp of the last time the configuration for this project was updated.',
     include: false,
     type: 'timestamp',
-    value: getCurrentTimestamp()
+    value: timestamp
   }
   const configStrBuffer = Buffer.from(JSON.stringify(configObject));
   const encryptedConfig = encrypt(configStrBuffer);
   await fs.promises.writeFile(`${appConfig.projectDirectory}/${project}/config/ora2pg-conf.json.enc`, encryptedConfig);
-  return true;
+  return timestamp;
 }
 module.exports.saveConfigJson = saveConfigJson;
 
