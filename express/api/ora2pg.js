@@ -88,9 +88,9 @@ router.post('/project/:project', async (req, res) => {
     res.status(400).send('Invalid configuration object');
   } else {
     try {
-      const success = await fileUtils.saveConfigJson(project, configObject);
-      if (success) {
-        res.status(201).send('Created');
+      const timestamp = await fileUtils.saveConfigJson(project, configObject);
+      if (timestamp) {
+        res.status(201).send(timestamp.toString());
       } else {
         res.status(409).send('Conflict');
       }
