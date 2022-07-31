@@ -206,13 +206,17 @@ export default {
         response.status == 201
           ? "Saved"
           : `Save failed with ${response.status} HTTP repsonse`;
-      this.showMessage(messageText);
-      if (response.status === 201) {
-        this.configData.COMMON.values.LAST_MODIFIED = {
-          description: 'Timestamp of the last time the configuration for this project was updated.',
-          include: false,
-          type: 'timestamp',
-          value: await response.text()
+      if (response.status === 409) {
+        alert('Save failed because this project was updated by another user. Please refresh the page and try again.');
+      } else {
+        this.showMessage(messageText);
+        if (response.status === 201) {
+          this.configData.COMMON.values.LAST_MODIFIED = {
+            description: 'Timestamp of the last time the configuration for this project was updated.',
+            include: false,
+            type: 'timestamp',
+            value: await response.text()
+          }
         }
       }
       return response.status == 201;
