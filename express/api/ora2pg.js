@@ -196,7 +196,7 @@ router.post('/project/:project/test_credentials', async (req, res) => {
   if (req.body.postgres) {
     const pgDsn = req.body.postgres.dsn;
     const pgUser = req.body.postgres.username;
-    const pgPwd = req.body.oracle.password;
+    const pgPwd = req.body.postgres.password;
     response.postgres = await perlUtils.testConnection(pgDsn, pgUser, pgPwd);
   }
 
