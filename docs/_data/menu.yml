@@ -1,16 +1,16 @@
 ---
 sections:
-  - name: Visulate for Oracle
+  - name: Visulate Ora2Pg
     items:
       - title: "Product Overview"
         href: "/"
-        description: "Visulate Ora2Pg "
-  - name: How-to guides
-    items:
-  - name: Concepts
-    items:
-  - name: Setup
-    items:
-      - title: "API Security"
-        href: "/pages/security.html"
-        description: "How-to instructions for protecting Visulate Ora2Pg API server with Google Cloud Endpoints"
+        description: "Visulate Ora2Pg supports Oracle database migrations to PostgreSQL on Google Cloud Platform"
+      - title: "Setup Instructions"
+        href: "/pages/setup.html"
+        description: "How to setup Visulate Ora2Pg on Google Cloud"
+      - title: "Visulate Ora2Pg"
+        href: "/pages/ora2pg.html"
+        description: "Visulate Ora2Pg is a single page web application for Ora2Pg"
+      - title: "Visulate for Oracle"
+        href: "/pages/visulate.html"
+        description: "Visulate for Oracle helps data engineers understand the structure and dependencies in Oracle databases"
