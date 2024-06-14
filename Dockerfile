@@ -7,7 +7,7 @@ RUN npm install
 RUN npm run build
 
 # Setup express server
-FROM georgmoser/ora2pg:23.2
+FROM georgmoser/ora2pg:24.3
 
 # Install Node JS
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
