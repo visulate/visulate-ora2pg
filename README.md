@@ -37,6 +37,17 @@ Open your browser at http://localhost:3000 and follow the onscreen instructions
 
 Additional usage instructions are available in [Migrating Oracle to PostgreSQL](https://bmsinabox.com/pages/oracle2postgres.html)
 
+### Apple Silicon
+
+To run on Apple silicon, you will need to specify the platform using the `--platform=linux/amd64` flag. E.g:
+
+```
+docker run -d --platform=linux/amd64 -v "$(pwd)/ora2pg-projects":/project visulate/visulate-ora2pg:latest
+```
+
+or set the `DOCKER_DEFAULT_PLATFORM=linux/amd64` environment variable before running `docker-compose up`
+
+
 ## Technical Description
 
 
